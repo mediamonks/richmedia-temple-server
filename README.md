@@ -1,38 +1,34 @@
-# Temple
+# Richmedia Temple Server
 
-This is the Richmedia Temple, used for creating richmedia units for various vendors.
+Richmedia Temple Server is used as a tool to build and develop richmedia units
 
-[![Travis](https://img.shields.io/travis/mediamonks/temple.svg?maxAge=2592000)](https://travis-ci.org/mediamonks/temple)
-[![npm](https://img.shields.io/npm/v/temple.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/temple)
-[![npm](https://img.shields.io/npm/dm/temple.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/temple)
+[![Travis](https://img.shields.io/travis/mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://travis-ci.org/mediamonks/richmedia-temple-server)
+[![npm](https://img.shields.io/npm/v/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)
+[![npm](https://img.shields.io/npm/dm/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)
 <!-- [![Code Climate](https://img.shields.io/codeclimate/github/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://codeclimate.com/github/mediamonks/seng-boilerplate) -->
 <!-- [![Coveralls](https://img.shields.io/coveralls/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://coveralls.io/github/mediamonks/seng-boilerplate?branch=master) -->
 
 ## Installation
 
 ```sh
-yarn add @mediamonks/temple
+yarn add @mediamonks/richmedia-temple-server
 ```
 
 ```sh
-npm i -S @mediamonks/temple
+npm i -S @mediamonks/richmedia-temple-server
 ```
 
 
 ## Basic Usage
 
 ```ts
-import Entity from '@mediamonks/temple/Entity';
 
-class Banner extends Entity {
-
-}
 ```
 
 
 ## Documentation
 
-View the [generated documentation](http://mediamonks.github.io/temple/).
+View the [documentation](http://mediamonks.github.io/richmedia-temple-server/).
 
 
 ## Building
@@ -42,12 +38,12 @@ and [Node.js](http://nodejs.org/) installed.
 
 Clone a copy of the repo:
 ```sh
-git clone https://github.com/mediamonks/temple.git
+git clone https://github.com/mediamonks/richmedia-temple-server.git
 ```
 
 Change to the seng-boilerplate directory:
 ```sh
-cd seng-boilerplate
+cd richmedia-temple-server
 ```
 
 Install dev dependencies:
