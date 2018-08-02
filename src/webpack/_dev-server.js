@@ -1,22 +1,7 @@
-const program = require('commander');
-const inquirer = require('inquirer');
-const fs = require('fs-extra');
-const path = require('path');
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackHotMiddleware = require('webpack-hot-middleware');
-const express = require('express');
-const Handlebars = require('handlebars');
-
-program
-  .version('0.0.1')
-  .option('-t, --target [globPath]', 'set target default empty (all, dir_name, etc.....)')
-  .parse(process.argv);
-
-const findJSONConfigs = require('./library/node/webpack/util/findJSONConfigs');
-const factoryWebpackConfigGenerator = require('./library/node/webpack/config/factoryWebpackConfigGenerator');
-
+const findJSONConfigs = require('./util/findJSONConfigs');
+const factoryWebpackConfigGenerator = require('./config/ConfigGeneratorByRichmediarcList');
 const allConfigsSelector = '**/.richmediarc';
+
 const templatePromise = Promise.resolve(true).then(() => {
   return new Promise((resolve, reject) => {
     fs.readFile('./library/node/template.hbs', { encoding: 'utf-8' }, (err, data) => {
@@ -28,6 +13,7 @@ const templatePromise = Promise.resolve(true).then(() => {
     });
   });
 });
+
 
 findJSONConfigs(allConfigsSelector, ['settings.entry.js', 'settings.entry.html']).then(configs => {
   const questions = [];
@@ -54,7 +40,7 @@ findJSONConfigs(allConfigsSelector, ['settings.entry.js', 'settings.entry.html']
   }
 });
 
-const startExpress = function(location, configs) {
+module.exports = function(location, configs) {
   const app = express();
 
   templatePromise.then(value => Handlebars.compile(value)).then(template => {
@@ -82,7 +68,7 @@ const startExpress = function(location, configs) {
         res.send(template(templateConfig));
       });
 
-      app.listen(3000, () => console.log('Example app listening on port 3000!'));
+      app.listen(3000, () => console.log('Example app listening on http://localhost:3000'));
 
       process.on('uncaughtException', () => app.close());
       process.on('SIGTERM', () => app.close());

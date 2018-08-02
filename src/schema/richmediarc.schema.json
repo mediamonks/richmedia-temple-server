@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+
+  "type": "object",
+  "definitions": {
+    "text": {
+      "description": "text content",
+      "properties": {
+        "type": {
+          "enum": ["text"]
+        },
+        "id": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "required": ["type", "id", "text"]
+    },
+    "image": {
+      "description": "image content",
+      "properties": {
+        "type": { "enum": ["image"] },
+        "id": { "type": "string" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "url": { "type": "string" }
+      },
+      "required": ["type", "id", "url", "width", "height"]
+    },
+    "bool": {
+      "description": "boolean content",
+      "properties": {
+        "type": { "enum": ["bool"] },
+        "id": { "type": "string" },
+        "value": { "type": "boolean" }
+      },
+      "required": ["type", "id", "value"]
+    },
+    "url": {
+      "properties": {
+        "type": { "enum": ["url"] },
+        "id": { "type": "string" },
+        "url": {
+          "format": "uri-reference",
+          "type": "string" }
+      },
+      "required": ["type", "id", "url"]
+    },
+    "video": {
+      "properties": {
+        "type": { "enum": ["video"] },
+        "id": { "type": "string" },
+        "videoType": { "type": "string" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "duration": { "type": "number" },
+        "url": {
+          "format": "uri-reference",
+          "type": "string"
+        }
+      },
+      "required": ["type", "id", "videoType", "width", "height", "duration", "url"]
+    }
+  },
+  "properties": {
+    "content": {
+      "patternProperties": {
+        "^\\w+$": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/text"
+            },
+            {
+              "$ref": "#/definitions/image"
+            },
+            {
+              "$ref": "#/definitions/bool"
+            },
+            {
+              "$ref": "#/definitions/url"
+            },
+            {
+              "$ref": "#/definitions/video"
+            }
+          ],
+          "required": ["type", "id"]
+        }
+      }
+    },
+
+    "settings": {
+      "properties": {
+        "entry": {
+          "description": "When entry is not specified the build script will ignore the config as a build point.",
+          "properties": {
+            "js": {
+              "description": "Relative path from this config to the js file. Like ../../src/main.js",
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "html": {
+              "description": "Relative path from this config to the html file. Like ./index.html",
+              "type": "string",
+              "format": "uri-reference"
+            }
+          },
+          "required": ["js", "html"]
+        },
+        "size": {
+          "properties": {
+            "width": {
+              "description": "Width of the richmedia unit.",
+              "type": "integer",
+              "minimum": 10
+            },
+            "height": {
+              "description": "Height of the richmedia unit.",
+              "type": "integer",
+              "minimum": 10
+            }
+          }
+        },
+        "expandable": {
+          "properties": {
+            "autoCollapse": {
+              "description": "Expandable will auto collapse when finished.",
+              "default": false,
+              "type": "boolean"
+            },
+            "fullscreen": {
+              "default": false,
+              "type": "boolean"
+            },
+            "direction": {
+              "default": "right",
+              "type": "string",
+              "enum": ["left", "top", "right", "bottom", "bottomRight", "bottomLeft", "topLeft", "topRight"]
+            },
+            "width": {
+              "description": "Width of the richmedia unit.",
+              "type": "integer",
+              "minimum": 20
+            },
+            "height": {
+              "description": "Height of the richmedia unit.",
+              "type": "integer",
+              "minimum": 20
+            }
+          },
+          "required": ["width", "height"]
+        }
+      }
+    },
+    "monet": {
+      "properties": {
+        "creative": { "type": "string" },
+        "agency": { "type": "string" }
+      },
+      "required": ["creative", "agency"]
+    }
+
+  },
+
+  "additionalProperties": false,
+  "required": []
+}

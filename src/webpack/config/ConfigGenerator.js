@@ -9,7 +9,7 @@ const Visualizer = require('webpack-visualizer-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 
-module.exports = function factoryWebpackConfig({
+module.exports = function ConfigGenerator({
   mainJSFilepath,
   mainHTMLFilepath,
   outputPath,
@@ -21,6 +21,8 @@ module.exports = function factoryWebpackConfig({
   if (mode === 'production') {
     devtool = false;
   }
+
+  console.log('mode', mode);
 
   return {
     mode,

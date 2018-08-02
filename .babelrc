@@ -10,8 +10,7 @@
         "loose": true,
         "useBuiltIns": false
       }
-    ],
-    "@babel/preset-stage-3"
+    ]
   ],
   "plugins": [
     [

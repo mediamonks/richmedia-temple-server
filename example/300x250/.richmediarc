@@ -1,0 +1,12 @@
+{
+  "settings":{
+    "entry": {
+      "js": "./main.js",
+      "html": "./index.html"
+    },
+    "size": {
+      "width": 300,
+      "height": 250
+    }
+  }
+}

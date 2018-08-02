@@ -2,8 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const SingleEntryPlugin = require('webpack/lib/SingleEntryPlugin');
 const md5File = require('md5-file');
-const isExternalURL = require('../util/isExternalURL');
-const getRichmediaRC = require('../util/getJSONConfig');
+const isExternalURL = require('../../util/isExternalURL');
+const getRichmediaRC = require('../../util/getJSONConfig');
 
 class MonetJSONPlugin {
   constructor(options, ...rest) {

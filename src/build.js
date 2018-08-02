@@ -1,10 +1,15 @@
-const factoryWebpackConfigGenerator = require('./library/node/webpack/config/factoryWebpackConfigGenerator');
+const ConfigGeneratorByRichmediarcList = require('./webpack/config/ConfigGeneratorByRichmediarcList');
+const findJSONConfigs = require('./util/findJSONConfigs');
+const webpack = require('webpack');
 
 module.exports = (env) => {
-  console.log('env', env);
-  return factoryWebpackConfigGenerator({ mode: 'production', location: '**/.richmediarc'}).then(webpackConfigs => {
-    return webpackConfigs;
-  }).catch(e => {
-    console.log(e);
+
+  findJSONConfigs('./**/.richmediarc', ['data.settings.entry.js', 'data.settings.entry.html']).then(rcDtoList => {
+
+    webpack(ConfigGeneratorByRichmediarcList(rcDtoList, 'production').catch(e => {
+      console.log(e);
+    }))
   });
+
+
 };
