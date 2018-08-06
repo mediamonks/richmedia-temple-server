@@ -18,9 +18,33 @@ module.exports = function(){
       name: 'build',
       message: 'Please choose the current build to start.',
       choices: ['ALL', ...configs.map(({ location }) => location)],
-    });
+    },
+      {
+        type: 'list',
+        name: 'buildTarget',
+        message: 'Please choose build location',
+        choices: ['./build', 'other location'],
+      });
 
     inquirer.prompt(questions).then(answers => {
+      if(answers.buildTarget === 'other location'){
+        return inquirer.prompt([{
+          type: 'input',
+          name: 'buildTarget',
+          message: 'Please type in build location',
+          default: './build',
+        }]).then(result => {
+          console.log(result);
+          return {
+            ...answers,
+            ...result
+          }
+        })
+      }
+
+      return answers;
+
+    }).then(answers => {
 
 
       let configsResult = null;

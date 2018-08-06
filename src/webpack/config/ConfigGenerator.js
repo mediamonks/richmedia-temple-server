@@ -9,6 +9,8 @@ const Visualizer = require('webpack-visualizer-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 
+console.log('ZipPlugin', ZipPlugin);
+
 module.exports = function ConfigGenerator({
   mainJSFilepath,
   mainHTMLFilepath,
@@ -205,8 +207,8 @@ module.exports = function ConfigGenerator({
         filename: './statistics.html',
       }),
 
-      ...(mode !== 'production'
-        ? []
+      mode !== 'production'
+        ? null
         : new ZipPlugin({
             // OPTIONAL: defaults to the Webpack output path (above)
             // can be relative (to Webpack output path) or absolute
@@ -256,7 +258,7 @@ module.exports = function ConfigGenerator({
             zipOptions: {
               forceZip64Format: false,
             },
-          })),
+          }),
     ],
     stats: {
       colors: true,

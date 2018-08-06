@@ -3,10 +3,13 @@
   "version": "0.0.1",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "bin": {
-    "rts": "bin/server",
-    "rts-dev": "bin/server-dev"
+    "rts": "src/bin/server",
+    "rts-dev": "src/bin/server-dev",
+    "rts-build": "src/bin/server-build"
   },
-  "scripts": {},
+  "scripts": {
+    "build": ""
+  },
   "lint-staged": {
     "linters": {
       "src/**/*.{js,json}": [

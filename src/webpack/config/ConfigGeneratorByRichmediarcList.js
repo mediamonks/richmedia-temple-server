@@ -22,7 +22,6 @@ const schemaValidate = ajv.compile(schema);
 function ConfigGeneratorByRichmediarcList(richmediarcList, mode) {
   return new Promise(resolve => {
     const promiseList = richmediarcList.map(({ location, data }) => {
-
       console.log(location, data);
       const potentialWebpackConfigPath = `${path.dirname(location)}/webpack.config.js`;
 
@@ -76,11 +75,7 @@ function ConfigGeneratorByRichmediarcList(richmediarcList, mode) {
 
     Promise.all(promiseList).then(webpackConfigs => {
       webpackConfigs = webpackConfigs.filter(config => !!config);
-      if (webpackConfigs.length === 1) {
-        resolve(webpackConfigs[0]);
-      } else {
-        resolve(webpackConfigs);
-      }
+      resolve(webpackConfigs);
     });
   });
 }
