@@ -8,7 +8,7 @@
     "rts-build": "src/bin/server-build"
   },
   "scripts": {
-    "build": ""
+    "build": "node ./setup-for-npm.js"
   },
   "lint-staged": {
     "linters": {
