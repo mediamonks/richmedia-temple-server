@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/webpack/config/_factoryWebpackConfigGenerator.js | @mediamonks/richmedia-temple-server</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@mediamonks/richmedia-temple-server"><meta property="twitter:description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/mediamonks/temple"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/_factoryWebpackConfigGenerator.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const formatErrorMessage = require(&apos;../util/formatErrorMessage&apos;);
+
+const glob = require(&apos;glob&apos;);
+const path = require(&apos;path&apos;);
+const fs = require(&apos;fs-extra&apos;);
+const getJSONConfig = require(&apos;../util/getJSONConfig&apos;);
+const factoryWebpackConfig = require(&apos;./ConfigGenerator&apos;);
+const Ajv = require(&apos;ajv&apos;);
+const draft06 = require(&apos;ajv/lib/refs/json-schema-draft-06.json&apos;);
+const schema = require(&apos;../../../schema/richmediarc.schema&apos;);
+
+const ajv = new Ajv();
+ajv.addMetaSchema(draft06);
+
+const schemaValidate = ajv.compile(schema);
+
+/**
+ *
+ * @param mode
+ * @param location
+ * @return {Promise&lt;any&gt;}
+ */
+function factoryWebpackConfigGenerator({ mode = &apos;production&apos;, location = &apos;**/.richmediarc&apos; }) {
+  return new Promise(resolve =&gt; {
+    glob(location, {}, (err, files) =&gt; {
+      const promiseList = files.map(file =&gt; {
+        const potentialWebpackConfigPath = `${path.dirname(file)}/webpack.config.js`;
+
+        return fs.readJson(file).then(json =&gt; {
+          return fs.pathExists(potentialWebpackConfigPath).then(exists =&gt; {
+            if (exists) {
+              return require(potentialWebpackConfigPath);
+            } else {
+              // validate schema
+              const valid = schemaValidate(json);
+
+              if (!valid) {
+                schemaValidate.errors.forEach(error =&gt; {
+                  console.error(JSON.stringify(error));
+                });
+
+                throw new Error(formatErrorMessage(schemaValidate.errors[0]));
+              }
+
+              if (json &amp;&amp; json.settings &amp;&amp; json.settings.entry) {
+                if (!json.settings.entry.js || !json.settings.entry.html) {
+                  throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(file)}`);
+                }
+
+                // get .richmediarc
+                return getJSONConfig(file, &apos;./&apos;).then(json =&gt; {
+                  const list = path.dirname(file).split(path.sep);
+                  let outputPath = path.resolve(path.join(&apos;./build/&apos;, list[list.length - 1]));
+
+                  let mainHTMLFilepath = path.resolve(path.join(path.dirname(file), json.settings.entry.html));
+                  let mainJSFilepath = path.resolve(path.join(path.dirname(file), json.settings.entry.js));
+                  let richmediarcFilepath = path.resolve(file);
+
+                  return factoryWebpackConfig({
+                    mainHTMLFilepath,
+                    mainJSFilepath,
+                    richmediarcFilepath,
+                    outputPath,
+                    mode,
+                  });
+                });
+              }
+            }
+          });
+        });
+      });
+
+      Promise.all(promiseList).then(webpackConfigs =&gt; {
+        webpackConfigs = webpackConfigs.filter(config =&gt; !!config);
+        if (webpackConfigs.length === 1) {
+          resolve(webpackConfigs[0]);
+        } else {
+          resolve(webpackConfigs);
+        }
+      });
+    });
+  });
+}
+
+module.exports = factoryWebpackConfigGenerator;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

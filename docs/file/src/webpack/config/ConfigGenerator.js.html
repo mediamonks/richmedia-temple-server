@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/webpack/config/ConfigGenerator.js | @mediamonks/richmedia-temple-server</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@mediamonks/richmedia-temple-server"><meta property="twitter:description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/mediamonks/temple"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/ConfigGenerator.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const webpack = require(&apos;webpack&apos;);
+const HtmlWebPackPlugin = require(&apos;html-webpack-plugin&apos;);
+// const PreloadWebpackPlugin = require(&apos;preload-webpack-plugin&apos;);
+const CircularDependencyPlugin = require(&apos;circular-dependency-plugin&apos;);
+// const UglifyJsPlugin = require(&apos;uglifyjs-webpack-plugin&apos;);
+const Visualizer = require(&apos;webpack-visualizer-plugin&apos;);
+
+const MonetJSONPlugin = require(&apos;../plugin/MonetJSONPlugin&apos;);
+const ZipPlugin = require(&apos;zip-webpack-plugin&apos;);
+
+console.log(&apos;ZipPlugin&apos;, ZipPlugin);
+
+module.exports = function ConfigGenerator({
+  mainJSFilepath,
+  mainHTMLFilepath,
+  outputPath,
+  richmediarcFilepath,
+  mode = &apos;production&apos;,
+}) {
+  let devtool = &apos;inline-source-map&apos;;
+
+  if (mode === &apos;production&apos;) {
+    devtool = false;
+  }
+
+  console.log(&apos;mode&apos;, mode);
+
+  return {
+    mode,
+    entry: [&apos;whatwg-fetch&apos;, &apos;promise-polyfill&apos;, &apos;webpack-hot-middleware/client&apos;, mainJSFilepath],
+
+    output: {
+      path: outputPath,
+      filename: &apos;main.js&apos;,
+    },
+    externals: {
+      // gsap external
+      TweenLite: &apos;TweenLite&apos;,
+      TweenMax: &apos;TweenMax&apos;,
+      TimelineLite: &apos;TimelineLite&apos;,
+      TimelineMax: &apos;TimelineMax&apos;,
+      Enabler: &apos;Enabler&apos;,
+      Monet: &apos;Monet&apos;,
+    },
+    resolve: {
+      alias: {
+        vendor: path.resolve(__dirname, &apos;../../../vendor&apos;),
+      },
+    },
+
+    module: {
+      rules: [
+        {
+          test: /\.scss$/,
+          use: [
+            {
+              loader: &apos;file-loader&apos;,
+              options: {
+                name: &apos;[name].css&apos;,
+              },
+            },
+            {
+              loader: &apos;extract-loader&apos;,
+            },
+            {
+              loader: &apos;css-loader&apos;,
+            },
+            {
+              loader: &apos;sass-loader&apos;,
+              options: {
+                sourceMap: true,
+              },
+            },
+          ],
+        },
+        {
+          test: /\.sketch$/,
+          use: [
+            {
+              loader: &apos;sketch-loader&apos;,
+            },
+          ],
+        },
+        {
+          test: /\.(mp4|svg)$/,
+          use: [
+            {
+              loader: &apos;file-loader&apos;,
+              options: {
+                name: &apos;[hash].[ext]&apos;,
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(png|jpg|gif)$/,
+          use: [
+            {
+              loader: &apos;file-loader&apos;,
+              options: {
+                name: &apos;[hash].[ext]&apos;,
+              },
+            },
+
+            {
+              loader: &apos;image-webpack-loader&apos;,
+              options: {
+                mozjpeg: {
+                  progressive: true,
+                  quality: 65,
+                },
+                // optipng.enabled: false will disable optipng
+                optipng: {
+                  enabled: false,
+                },
+                pngquant: {
+                  quality: &apos;65-90&apos;,
+                  speed: 4,
+                },
+                gifsicle: {
+                  interlaced: false,
+                },
+                // the webp option will enable WEBP
+                webp: {
+                  quality: 75,
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.js$/,
+          exclude: /node_modules/,
+          use: {
+            loader: &apos;babel-loader&apos;,
+            options: {
+              presets: [
+                [
+                  &apos;@babel/env&apos;,
+                  {
+                    targets: {
+                      browsers: [&apos;ie 11&apos;, &apos;last 2 versions&apos;, &apos;safari &gt;= 7&apos;],
+                    },
+                  },
+                ],
+              ],
+              plugins: [
+                [&apos;@babel/plugin-proposal-class-properties&apos;, { loose: true }],
+                &apos;@babel/plugin-proposal-object-rest-spread&apos;,
+              ],
+            },
+          },
+        },
+        {
+          test: /.richmediarc$/,
+          exclude: /node_modules/,
+          type: &apos;javascript/dynamic&apos;,
+          use: {
+            loader: &apos;./library/node/webpack/loader/MonetJSONLoader&apos;,
+          },
+        },
+
+        {
+          test: /\.html$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: &apos;html-loader&apos;,
+              options: {
+                minimize: false,
+
+                attrs: [&apos;img:src&apos;, &apos;video:src&apos;, &apos;link:href&apos;],
+              },
+            },
+          ],
+        },
+      ],
+    },
+    plugins: [
+      new HtmlWebPackPlugin({
+        template: mainHTMLFilepath,
+      }),
+
+      new MonetJSONPlugin({
+        config: richmediarcFilepath,
+        filePattern: &apos;[hash].[ext]&apos;,
+      }),
+
+      // new PreloadWebpackPlugin(),
+      new webpack.DefinePlugin({
+        PRODUCTION: JSON.stringify(false),
+      }),
+
+      new webpack.HotModuleReplacementPlugin(),
+
+      new CircularDependencyPlugin({
+        // exclude detection of files based on a RegExp
+        exclude: /node_modules/,
+        // add errors to webpack instead of warnings
+        failOnError: true,
+        // set the current working directory for displaying module paths
+        cwd: process.cwd(),
+      }),
+
+      new Visualizer({
+        filename: &apos;./statistics.html&apos;,
+      }),
+
+      mode !== &apos;production&apos;
+        ? null
+        : new ZipPlugin({
+            // OPTIONAL: defaults to the Webpack output path (above)
+            // can be relative (to Webpack output path) or absolute
+            // path: &apos;&apos;,
+
+            // OPTIONAL: defaults to the Webpack output filename (above) or,
+            // if not present, the basename of the path
+            filename: &apos;bundle.zip&apos;,
+
+            // OPTIONAL: defaults to &apos;zip&apos;
+            // the file extension to use instead of &apos;zip&apos;
+            // extension: &apos;ext&apos;,
+
+            // OPTIONAL: defaults to the empty string
+            // the prefix for the files included in the zip file
+            // pathPrefix: &apos;relative/path&apos;,
+
+            // OPTIONAL: defaults to the identity function
+            // a function mapping asset paths to new paths
+            // pathMapper: function(assetPath) {
+            //    // put all pngs in an `images` subdir
+            //    if (assetPath.endsWith(&apos;.png&apos;))
+            //       return path.join(path.dirname(assetPath), &apos;images&apos;, path.basename(assetPath));
+            //    return assetPath;
+            // },
+
+            // OPTIONAL: defaults to including everything
+            // can be a string, a RegExp, or an array of strings and RegExps
+            // include: [/\.js$/],
+
+            // OPTIONAL: defaults to excluding nothing
+            // can be a string, a RegExp, or an array of strings and RegExps
+            // if a file matches both include and exclude, exclude takes precedence
+            // exclude: [/\.png$/, /\.html$/],
+
+            // yazl Options
+
+            // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options
+            fileOptions: {
+              mtime: new Date(),
+              mode: 0o100664,
+              compress: true,
+              forceZip64Format: false,
+            },
+
+            // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback
+            zipOptions: {
+              forceZip64Format: false,
+            },
+          }),
+    ],
+    stats: {
+      colors: true,
+    },
+    devtool,
+  };
+};
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
