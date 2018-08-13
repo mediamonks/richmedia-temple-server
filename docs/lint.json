@@ -87,46 +87,5 @@
     "docParams": [
       "richmediarcList"
     ]
-  },
-  {
-    "name": "factoryWebpackConfigGenerator",
-    "filePath": "src/webpack/config/_factoryWebpackConfigGenerator.js",
-    "lines": [
-      {
-        "lineNumber": 16,
-        "line": "/**"
-      },
-      {
-        "lineNumber": 17,
-        "line": " *"
-      },
-      {
-        "lineNumber": 18,
-        "line": " * @param mode"
-      },
-      {
-        "lineNumber": 19,
-        "line": " * @param location"
-      },
-      {
-        "lineNumber": 20,
-        "line": " * @return {Promise<any>}"
-      },
-      {
-        "lineNumber": 21,
-        "line": " */"
-      },
-      {
-        "lineNumber": 22,
-        "line": "function factoryWebpackConfigGenerator({ mode = 'production', location = '**/.richmediarc' }) {"
-      }
-    ],
-    "codeParams": [
-      "*"
-    ],
-    "docParams": [
-      "mode",
-      "location"
-    ]
   }
 ]

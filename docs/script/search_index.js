@@ -282,12 +282,6 @@ window.esdocSearchIndex = [
     "external"
   ],
   [
-    "src/_dev.js",
-    "file/src/_dev.js.html",
-    "src/_dev.js",
-    "file"
-  ],
-  [
     "src/build.js",
     "file/src/build.js.html",
     "src/build.js",
@@ -354,12 +348,6 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/webpack/_dev-server.js",
-    "file/src/webpack/_dev-server.js.html",
-    "src/webpack/_dev-server.js",
-    "file"
-  ],
-  [
     "src/webpack/config/configgenerator.js",
     "file/src/webpack/config/ConfigGenerator.js.html",
     "src/webpack/config/ConfigGenerator.js",
@@ -369,12 +357,6 @@ window.esdocSearchIndex = [
     "src/webpack/config/configgeneratorbyrichmediarclist.js",
     "file/src/webpack/config/ConfigGeneratorByRichmediarcList.js.html",
     "src/webpack/config/ConfigGeneratorByRichmediarcList.js",
-    "file"
-  ],
-  [
-    "src/webpack/config/_factorywebpackconfiggenerator.js",
-    "file/src/webpack/config/_factoryWebpackConfigGenerator.js.html",
-    "src/webpack/config/_factoryWebpackConfigGenerator.js",
     "file"
   ],
   [

@@ -1,28 +1,8 @@
 {
-  "coverage": "7.25%",
-  "expectCount": 124,
-  "actualCount": 9,
+  "coverage": "8.6%",
+  "expectCount": 93,
+  "actualCount": 8,
   "files": {
-    "src/_dev.js": {
-      "expectCount": 14,
-      "actualCount": 0,
-      "undocumentLines": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        16,
-        17,
-        19,
-        20,
-        57
-      ]
-    },
     "src/build.js": {
       "expectCount": 3,
       "actualCount": 0,
@@ -140,17 +120,6 @@
         42
       ]
     },
-    "src/webpack/_dev-server.js": {
-      "expectCount": 5,
-      "actualCount": 0,
-      "undocumentLines": [
-        1,
-        2,
-        3,
-        5,
-        43
-      ]
-    },
     "src/webpack/config/ConfigGenerator.js": {
       "expectCount": 8,
       "actualCount": 0,
@@ -176,23 +145,6 @@
         5,
         7,
         8,
-        10,
-        12,
-        15
-      ]
-    },
-    "src/webpack/config/_factoryWebpackConfigGenerator.js": {
-      "expectCount": 12,
-      "actualCount": 1,
-      "undocumentLines": [
-        1,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
         10,
         12,
         15
