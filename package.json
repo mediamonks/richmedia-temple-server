@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/richmedia-temple-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "bin": {
     "rts": "src/bin/server",
