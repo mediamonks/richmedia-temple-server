@@ -1,5 +1,5 @@
 
-import {mockExample} from './ExampleMock';
+// import {mockExample} from './ExampleMock';
 import {expect} from 'chai';
 
 // let example;
