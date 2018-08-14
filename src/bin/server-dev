@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const program = require('commander');
-const dev = require('../src/cli/dev');
+const dev = require('../cli/dev');
 
 program
   .parse(process.argv);

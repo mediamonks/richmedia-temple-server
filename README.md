@@ -1,4 +1,4 @@
-# Richmedia Temple Server
+# Richmedia Temple Server (BETA)
 
 Richmedia Temple Server is used as a tool to build and develop richmedia units
 
@@ -12,7 +12,7 @@ Richmedia Temple Server is used as a tool to build and develop richmedia units
 ## Installation
 
 ```sh
-yarn add @mediamonks/richmedia-temple-server
+yarn global add @mediamonks/richmedia-temple-server
 ```
 
 ```sh

@@ -7,7 +7,7 @@ console.log(chalk.blue('Richmedia Temple Server'));
 console.log();
 
 program
-  .version(require('../package').version)
+  .version(require('../../package').version)
   .usage('<command> [options]')
   .command('dev', 'Start development')
   .command('build', 'Build Units')

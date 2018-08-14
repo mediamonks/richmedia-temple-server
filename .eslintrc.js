@@ -12,9 +12,9 @@ module.exports = {
   extends: ['airbnb-base', 'prettier'],
   plugins: ['import', 'prettier'],
   settings: {
-    "import/resolver": {
-      "node": true,
-      "typescript": true
+    'import/resolver': {
+      node: true,
+      typescript: true,
     },
   },
   rules: {
@@ -27,7 +27,9 @@ module.exports = {
         ts: 'never',
       },
     ],
+    'func-names': 0,
     // prettier compatibility
+    'no-param-reassign': 0,
     'max-len': 0,
     'prettier/prettier': [
       'error',
@@ -37,6 +39,6 @@ module.exports = {
     'no-underscore-dangle': 0,
     // to correctly work on windows with some tools that create windows line-endings
     // this will be correct by git when committed
-    'linebreak-style': 0
+    'linebreak-style': 0,
   },
 };

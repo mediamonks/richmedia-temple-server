@@ -9,13 +9,11 @@ const Visualizer = require('webpack-visualizer-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 
-console.log('ZipPlugin', ZipPlugin);
-
-module.exports = function ConfigGenerator({
-  mainJSFilepath,
-  mainHTMLFilepath,
+module.exports = function createConfig({
+  filepathJs,
+  filepathHtml,
+  filepathRichmediaRC,
   outputPath,
-  richmediarcFilepath,
   mode = 'production',
 }) {
   let devtool = 'inline-source-map';
@@ -24,11 +22,9 @@ module.exports = function ConfigGenerator({
     devtool = false;
   }
 
-  console.log('mode', mode);
-
   return {
     mode,
-    entry: ['whatwg-fetch', 'promise-polyfill', 'webpack-hot-middleware/client', mainJSFilepath],
+    entry: ['whatwg-fetch', 'promise-polyfill', 'webpack-hot-middleware/client', filepathJs],
 
     output: {
       path: outputPath,
@@ -179,11 +175,11 @@ module.exports = function ConfigGenerator({
     },
     plugins: [
       new HtmlWebPackPlugin({
-        template: mainHTMLFilepath,
+        template: filepathHtml,
       }),
 
       new MonetJSONPlugin({
-        config: richmediarcFilepath,
+        config: filepathRichmediaRC,
         filePattern: '[hash].[ext]',
       }),
 
