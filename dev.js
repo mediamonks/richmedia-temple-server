@@ -1,3 +1,3 @@
-const dev = require('../dev');
+const dev = require('./src/dev');
 
 dev();

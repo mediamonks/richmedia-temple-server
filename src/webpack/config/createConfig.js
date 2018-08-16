@@ -137,7 +137,8 @@ module.exports = function createConfig({
         },
         {
           test: /\.js$/,
-          exclude: /node_modules/,
+          // adding exception to libraries comming from @mediamonks namespace.
+          exclude: /(?!node_modules\/@mediamonks)node_modules/,
           use: {
             loader: 'babel-loader',
             options: {
@@ -152,7 +153,7 @@ module.exports = function createConfig({
                 ],
               ],
               plugins: [
-                [`@babel/plugin-proposal-class-properties`, { loose: true }],
+                `@babel/plugin-proposal-class-properties`,
                 `@babel/plugin-proposal-object-rest-spread`,
               ],
             },
