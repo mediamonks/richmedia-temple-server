@@ -1,4 +1,4 @@
-const getJSONConfig = require('./getRichmediaRC');
+const getRichmediaRC = require('./getRichmediaRC');
 const RCDto = require('../data/RCDto');
 const glob = require('glob');
 const doesNestedExist = require('./doesNestedExists');
@@ -15,7 +15,7 @@ function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
     glob(globQuery, {}, (err, files) => {
       Promise.all(
         files.map(location =>
-          getJSONConfig(location, './', true, cache).then(json => new RCDto(location, json)),
+          getRichmediaRC(location, './', true, cache).then(json => new RCDto(location, json)),
         ),
       ).then(result => {
         const resolvedPatterns = patterns.map(pattern => pattern.split('.'));

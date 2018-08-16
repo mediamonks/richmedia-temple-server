@@ -9,13 +9,17 @@ const handlebars = require('handlebars');
 const templatePromise = Promise.resolve(true).then(
   () =>
     new Promise((resolve, reject) => {
-      fs.readFile('./data/template.hbs', { encoding: 'utf-8' }, (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(handlebars.compile(data));
-        }
-      });
+      fs.readFile(
+        path.join(__dirname, './data/template.hbs'),
+        { encoding: 'utf-8' },
+        (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(handlebars.compile(data));
+          }
+        },
+      );
     }),
 );
 /**
@@ -54,7 +58,11 @@ module.exports = function devServer(configs) {
     // eslint-disable-next-line
     app.listen(3000, () => console.log('Example app listening on http://localhost:3000'));
 
-    process.on('uncaughtException', () => app.close());
+    process.on('uncaughtException', e => {
+      // eslint-disable-next-line
+      console.log(e);
+      // app.close();
+    });
     process.on('SIGTERM', () => app.close());
   });
 };

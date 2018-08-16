@@ -6,7 +6,7 @@
  */
 function doesNestedExist(obj, pattern) {
   for (let i = 0; i < pattern.length; i += 1) {
-    if (!obj || !Object.prototype.call(obj, pattern[i])) {
+    if (!obj || !Object.prototype.hasOwnProperty.call(obj, pattern[i])) {
       return false;
     }
 

@@ -2,12 +2,16 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 // const PreloadWebpackPlugin = require('preload-webpack-plugin');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
+// const CircularDependencyPlugin = require('circular-dependency-plugin');
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const Visualizer = require('webpack-visualizer-plugin');
+// const Visualizer = require('webpack-visualizer-plugin');
 
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
+
+const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
+
+// console.log(nodeModules);
 
 module.exports = function createConfig({
   filepathJs,
@@ -22,9 +26,9 @@ module.exports = function createConfig({
     devtool = false;
   }
 
-  return {
+  const config = {
     mode,
-    entry: ['whatwg-fetch', 'promise-polyfill', 'webpack-hot-middleware/client', filepathJs],
+    entry: [`whatwg-fetch`, `promise-polyfill`, `webpack-hot-middleware/client`, filepathJs],
 
     output: {
       path: outputPath,
@@ -40,9 +44,15 @@ module.exports = function createConfig({
       Monet: 'Monet',
     },
     resolve: {
+      modules: ['node_modules', nodeModules],
       alias: {
         vendor: path.resolve(__dirname, '../../../vendor'),
       },
+    },
+
+    resolveLoader: {
+      modules: ['node_modules', nodeModules],
+      symlinks: true,
     },
 
     module: {
@@ -133,7 +143,7 @@ module.exports = function createConfig({
             options: {
               presets: [
                 [
-                  '@babel/env',
+                  '@babel/preset-env',
                   {
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
@@ -142,8 +152,8 @@ module.exports = function createConfig({
                 ],
               ],
               plugins: [
-                ['@babel/plugin-proposal-class-properties', { loose: true }],
-                '@babel/plugin-proposal-object-rest-spread',
+                [`@babel/plugin-proposal-class-properties`, { loose: true }],
+                `@babel/plugin-proposal-object-rest-spread`,
               ],
             },
           },
@@ -153,7 +163,7 @@ module.exports = function createConfig({
           exclude: /node_modules/,
           type: 'javascript/dynamic',
           use: {
-            loader: './library/node/webpack/loader/MonetJSONLoader',
+            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
           },
         },
 
@@ -177,88 +187,92 @@ module.exports = function createConfig({
       new HtmlWebPackPlugin({
         template: filepathHtml,
       }),
-
+      //
       new MonetJSONPlugin({
         config: filepathRichmediaRC,
         filePattern: '[hash].[ext]',
       }),
-
+      //
       // new PreloadWebpackPlugin(),
       new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(false),
       }),
-
+      //
       new webpack.HotModuleReplacementPlugin(),
-
-      new CircularDependencyPlugin({
-        // exclude detection of files based on a RegExp
-        exclude: /node_modules/,
-        // add errors to webpack instead of warnings
-        failOnError: true,
-        // set the current working directory for displaying module paths
-        cwd: process.cwd(),
-      }),
-
-      new Visualizer({
-        filename: './statistics.html',
-      }),
-
-      mode !== 'production'
-        ? null
-        : new ZipPlugin({
-            // OPTIONAL: defaults to the Webpack output path (above)
-            // can be relative (to Webpack output path) or absolute
-            // path: '',
-
-            // OPTIONAL: defaults to the Webpack output filename (above) or,
-            // if not present, the basename of the path
-            filename: 'bundle.zip',
-
-            // OPTIONAL: defaults to 'zip'
-            // the file extension to use instead of 'zip'
-            // extension: 'ext',
-
-            // OPTIONAL: defaults to the empty string
-            // the prefix for the files included in the zip file
-            // pathPrefix: 'relative/path',
-
-            // OPTIONAL: defaults to the identity function
-            // a function mapping asset paths to new paths
-            // pathMapper: function(assetPath) {
-            //    // put all pngs in an `images` subdir
-            //    if (assetPath.endsWith('.png'))
-            //       return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
-            //    return assetPath;
-            // },
-
-            // OPTIONAL: defaults to including everything
-            // can be a string, a RegExp, or an array of strings and RegExps
-            // include: [/\.js$/],
-
-            // OPTIONAL: defaults to excluding nothing
-            // can be a string, a RegExp, or an array of strings and RegExps
-            // if a file matches both include and exclude, exclude takes precedence
-            // exclude: [/\.png$/, /\.html$/],
-
-            // yazl Options
-
-            // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options
-            fileOptions: {
-              mtime: new Date(),
-              mode: 0o100664,
-              compress: true,
-              forceZip64Format: false,
-            },
-
-            // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback
-            zipOptions: {
-              forceZip64Format: false,
-            },
-          }),
+      //
+      // new CircularDependencyPlugin({
+      //   // exclude detection of files based on a RegExp
+      //   exclude: /node_modules/,
+      //   // add errors to webpack instead of warnings
+      //   failOnError: true,
+      //   // set the current working directory for displaying module paths
+      //   cwd: process.cwd(),
+      // }),
+      //
+      // new Visualizer({
+      //   filename: './statistics.html',
+      // }),
     ],
     stats: {
       colors: true,
     },
     devtool,
   };
+
+  if (mode === 'production') {
+    config.plugins.push(
+      new ZipPlugin({
+        // OPTIONAL: defaults to the Webpack output path (above)
+        // can be relative (to Webpack output path) or absolute
+        // path: '',
+
+        // OPTIONAL: defaults to the Webpack output filename (above) or,
+        // if not present, the basename of the path
+        filename: 'bundle.zip',
+
+        // OPTIONAL: defaults to 'zip'
+        // the file extension to use instead of 'zip'
+        // extension: 'ext',
+
+        // OPTIONAL: defaults to the empty string
+        // the prefix for the files included in the zip file
+        // pathPrefix: 'relative/path',
+
+        // OPTIONAL: defaults to the identity function
+        // a function mapping asset paths to new paths
+        // pathMapper: function(assetPath) {
+        //    // put all pngs in an `images` subdir
+        //    if (assetPath.endsWith('.png'))
+        //       return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
+        //    return assetPath;
+        // },
+
+        // OPTIONAL: defaults to including everything
+        // can be a string, a RegExp, or an array of strings and RegExps
+        // include: [/\.js$/],
+
+        // OPTIONAL: defaults to excluding nothing
+        // can be a string, a RegExp, or an array of strings and RegExps
+        // if a file matches both include and exclude, exclude takes precedence
+        // exclude: [/\.png$/, /\.html$/],
+
+        // yazl Options
+
+        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options
+        fileOptions: {
+          mtime: new Date(),
+          mode: 0o100664,
+          compress: true,
+          forceZip64Format: false,
+        },
+
+        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback
+        zipOptions: {
+          forceZip64Format: false,
+        },
+      }),
+    );
+  }
+
+  return config;
 };

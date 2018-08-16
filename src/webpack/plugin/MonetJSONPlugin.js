@@ -1,4 +1,5 @@
 /* eslint no-param-reassign: 0 */
+/* eslint class-methods-use-this: 0 */
 
 const fs = require('fs-extra');
 const path = require('path');
@@ -14,67 +15,64 @@ class MonetJSONPlugin {
   }
 
   apply(compiler) {
-    compiler.plugin('emit', (compilation, callback) => {
-      getRichmediaRC(this.config)
-        .then(json => {
-          if (json.content) {
-            const result = Object.keys(json.content).map(key => {
-              const value = json.content[key];
+    compiler.hooks.emit.tapPromise('MonetJSONPlugin', async compilation => {
+      const json = await getRichmediaRC(this.config);
 
-              if ((value.type === 'image' || value.type === 'video') && !isExternalURL(value.url)) {
-                return new Promise(resolve => {
-                  const url = path.join(path.dirname(this.config), value.url);
-                  const data = path.parse(url);
-                  value.url = `${md5File.sync(url)}${data.ext}`;
+      if (json.content) {
+        const result = Object.keys(json.content).map(key => {
+          const value = json.content[key];
 
-                  fs.readFile(url, (err, source) => {
-                    compilation.assets[value.url] = {
-                      source: () => source,
-                      size() {
-                        return Buffer.byteLength(this.source());
-                      },
-                    };
+          if ((value.type === 'image' || value.type === 'video') && !isExternalURL(value.url)) {
+            const url = path.join(path.dirname(this.config), value.url);
+            const data = path.parse(url);
+            value.url = `${md5File.sync(url)}${data.ext}`;
 
-                    resolve();
-                  });
-                });
-              }
+            return new Promise(resolve => {
+              fs.readFile(url, (err, source) => {
+                compilation.assets[value.url] = {
+                  source: () => source,
+                  size() {
+                    return Buffer.byteLength(this.source());
+                  },
+                };
 
-              return null;
+                resolve(compilation);
+              });
             });
-
-            Promise.all(result).then(() => {
-              const backupResult = JSON.stringify(richmediaRCToMonetBackupJSON(json));
-              const manifestResult = JSON.stringify(richmediaRCToMonetManifestJSON(json));
-
-              // Insert this list into the Webpack build as a new file asset:
-              compilation.assets['backup.json'] = {
-                source: () => backupResult,
-                size() {
-                  return this.source().length;
-                },
-              };
-
-              compilation.assets['manifest.json'] = {
-                source: () => manifestResult,
-                size() {
-                  return this.source().length;
-                },
-              };
-
-              callback();
-            });
-          } else {
-            callback();
           }
-        })
-        .catch(err => {
-          // eslint-disable-next-line
-          console.log(err);
-          throw err;
+
+          return null;
         });
+
+        await Promise.all(result);
+        const backupResult = JSON.stringify(richmediaRCToMonetBackupJSON(json));
+        const manifestResult = JSON.stringify(richmediaRCToMonetManifestJSON(json));
+
+        // Insert this list into the Webpack build as a new file asset:
+        compilation.assets['backup.json'] = {
+          source: () => backupResult,
+          size() {
+            return this.source().length;
+          },
+        };
+
+        compilation.assets['manifest.json'] = {
+          source: () => manifestResult,
+          size() {
+            return this.source().length;
+          },
+        };
+
+        return compilation;
+      }
+
+      return compilation;
     });
   }
+
+  // apply_dadsa(compiler) {
+  //   compiler.hooks.emit.tapAsync('MonetJSONPlugin', (compilation, callback) => {});
+  // }
 }
 
 module.exports = MonetJSONPlugin;

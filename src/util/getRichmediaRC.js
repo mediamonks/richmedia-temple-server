@@ -34,20 +34,20 @@ function readJson(filepath, cacheObject) {
  * getJSONConfig retrieves a jsonConfig config file and will
  * also inherit configs from parent jsonConfig files
  *
- * @param {string} richmediarcFilepath
+ * @param {string} filepathRichmediarc
  * @param {string} rootPath
  * @param {boolean} inheritParentConfig
  * @param {any} cacheObject
  * @return {Promise<void | never>}
  */
 module.exports = function getRichmediaRC(
-  richmediarcFilepath,
+  filepathRichmediarc,
   rootPath = './',
   inheritParentConfig = true,
   cacheObject = null,
 ) {
   let result = {};
-  let filepath = path.resolve(richmediarcFilepath);
+  let filepath = path.resolve(filepathRichmediarc);
   const baseFilepath = filepath;
   const data = path.parse(baseFilepath);
 
@@ -61,7 +61,11 @@ module.exports = function getRichmediaRC(
     resolve = path.resolve(filepath) !== rootPath;
 
     prom = prom
-      .then(() => filepath)
+      .then(
+        function(filepath) {
+          return filepath;
+        }.bind(this, filepath),
+      )
       .then(filepath => readJson(`${filepath}/${data.name}${data.ext}`, cacheObject))
       .then(json => {
         if (json && json.content) {

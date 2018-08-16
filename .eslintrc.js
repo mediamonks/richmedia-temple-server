@@ -28,6 +28,7 @@ module.exports = {
       },
     ],
     'func-names': 0,
+    'prefer-arrow-callback': 0,
     // prettier compatibility
     'no-param-reassign': 0,
     'max-len': 0,

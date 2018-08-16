@@ -13,6 +13,12 @@ ajv.addMetaSchema(draft06);
 
 const schemaValidate = ajv.compile(schema);
 
+/**
+ *
+ * @param {string} location
+ * @param {any} richmediaRc
+ * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}
+ */
 function validateSchemaAndCreatePaths(location, richmediaRc) {
   // validate schema
   const valid = schemaValidate(richmediaRc);
@@ -63,36 +69,38 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
  */
 function createConfigByRichmediarcList(richmediarcList, mode) {
   const promiseList = richmediarcList.map(
-    ({ location, data }) =>
-      validateSchemaAndCreatePaths(location, data)
-        .then(({ filepathHtml, filepathJs, filepathRichmediaRC, outputPath }) =>
-          createConfig({
-            filepathHtml,
-            filepathJs,
-            filepathRichmediaRC,
-            outputPath,
-            mode,
-          }),
-        )
-        .then(config => {
-          const filepathPotentialWebpackConfig = `${path.dirname(location)}/webpack.config.js`;
+    ({ location, data }) => {
+      /**
+       * const {
+       *   filepathHtml,
+       *   filepathJs,
+       *   filepathRichmediaRC,
+       *   outputPath,
+       * } = validateSchemaAndCreatePaths(location, data);
+       */
+      const webpackConfig = createConfig({
+        ...validateSchemaAndCreatePaths(location, data),
+        mode,
+      });
 
-          // check if webpackconfig exists
-          return fs.pathExists(filepathPotentialWebpackConfig).then(exists => {
-            if (exists) {
-              // eslint-disable-next-line
-              const webpack = require(filepathPotentialWebpackConfig);
+      const filepathPotentialWebpackConfig = `${path.dirname(location)}/webpack.config.js`;
 
-              if (typeof webpack === 'function') {
-                return webpack(config);
-              }
+      // check if webpackconfig exists
+      return fs.pathExists(filepathPotentialWebpackConfig).then(exists => {
+        if (exists) {
+          // eslint-disable-next-line
+          const webpack = require(filepathPotentialWebpackConfig);
 
-              return webpack;
-            }
+          if (typeof webpack === 'function') {
+            return webpack(webpackConfig);
+          }
 
-            return config;
-          });
-        }),
+          return webpack;
+        }
+
+        return webpackConfig;
+      });
+    },
     // projects can have there own webpack config. this will override the generated one.
   );
 

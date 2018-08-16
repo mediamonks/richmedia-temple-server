@@ -1,9 +1,0 @@
-#!/usr/bin/env node
-
-const program = require('commander');
-const build = require('../cli/build');
-
-program
-  .parse(process.argv);
-
-build();
