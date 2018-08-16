@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/richmedia-temple-server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "scripts": {
     "test": "cross-env NODE_ENV=test nyc --all mocha \"./test/**/*.spec.{ts,js}\"",
@@ -14,11 +14,18 @@
   "main": "index.js",
   "lint-staged": {
     "linters": {
-      "src/**/*.{js,json}": ["prettier --write", "git add"],
-      "src/**/*.js": ["npm run lint:js"]
+      "src/**/*.{js,json}": [
+        "prettier --write",
+        "git add"
+      ],
+      "src/**/*.js": [
+        "npm run lint:js"
+      ]
     }
   },
-  "pre-push": ["validate"],
+  "pre-push": [
+    "validate"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mediamonks/temple.git"
