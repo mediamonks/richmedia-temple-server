@@ -10,9 +10,9 @@ sudo: false
 #before_install:
 #  - yarn global add codeclimate-test-reporter
 
-before_deploy:
-  - npm run build
-  - cd dist
+#before_deploy:
+#  - npm run build
+#  - cd dist
 
 script:
   - npm run test

@@ -27,5 +27,4 @@ CONTRIBUTING.md
 tsconfig.json
 tslint.json
 /example
-/src
 /test
