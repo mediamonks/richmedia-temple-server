@@ -12,7 +12,16 @@ const ZipPlugin = require('zip-webpack-plugin');
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
 // console.log(nodeModules);
-
+/**
+ *
+ * @param {object} options
+ * @param {string} options.filepathJs
+ * @param {string} options.filepathHtml
+ * @param {string} options.filepathRichmediaRC
+ * @param {string} options.outputPath
+ * @param {string} options.mode
+ * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
+ */
 module.exports = function createConfig({
   filepathJs,
   filepathHtml,
