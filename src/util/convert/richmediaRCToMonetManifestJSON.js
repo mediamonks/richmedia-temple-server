@@ -2,8 +2,8 @@ module.exports = function richmediaRCToMonetManifestJSON({ content, monet, setti
   const result = {
     rootComponents: [],
     titleComponents: [],
-    creativeName: '{creativeName}',
-    agencyName: 'Mediamonks',
+    creativeName: '',
+    agencyName: '',
     minTitles: 0,
     maxTitles: 0,
     width: 0,
@@ -12,8 +12,11 @@ module.exports = function richmediaRCToMonetManifestJSON({ content, monet, setti
 
   result.rootComponents = Object.keys(content).map(name => content[name]);
 
-  result.creativeName = monet.creativeName;
-  result.agencyName = monet.agencyName;
+  if (monet) {
+    result.creativeName = monet.creativeName;
+    result.agencyName = monet.agencyName;
+  }
+
   result.width = settings.size.width;
   result.height = settings.size.height;
 
