@@ -63,7 +63,7 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
 
 /**
  *
- * @param {Array<{RCDto}>} richmediarcList
+ * @param {Array<{location, data}>} richmediarcList
  * @param {string} mode
  * @return {Promise<any[]>}
  */
@@ -83,13 +83,13 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
         mode,
       });
 
-      const filepathPotentialWebpackConfig = `${path.dirname(location)}/webpack.config.js`;
+      const webpackFilepath = `${path.dirname(location)}/webpack.config.js`;
 
       // check if webpackconfig exists
-      return fs.pathExists(filepathPotentialWebpackConfig).then(exists => {
+      return fs.pathExists(webpackFilepath).then(exists => {
         if (exists) {
           // eslint-disable-next-line
-          const webpack = require(filepathPotentialWebpackConfig);
+          const webpack = require(webpackFilepath);
 
           if (typeof webpack === 'function') {
             return webpack(webpackConfig);

@@ -1,0 +1,16 @@
+.preloader-spinner {
+  background-image: url('../img/loader.svg');
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .preloader-spinner {
+    background-image: url('../img/loader.gif');
+
+  }
+}
+
+@supports (-ms-ime-align: auto) {
+  .preloader-spinner {
+    background-image: url('../img/loader.gif');
+  }
+}

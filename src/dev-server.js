@@ -1,3 +1,4 @@
+
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
@@ -5,6 +6,7 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const express = require('express');
 const handlebars = require('handlebars');
+const portscanner = require('portscanner');
 
 const templatePromise = Promise.resolve(true).then(
   () =>
@@ -24,12 +26,16 @@ const templatePromise = Promise.resolve(true).then(
 );
 /**
  *
- * @param {Array<{webpack: *, rc: RCDto}>} configs
+ * @param {Array<{webpack: *, settings: {location, data}}>} configs
  */
 module.exports = function devServer(configs) {
-  const webpackConfigs = configs.map(({ webpack: webpackConfig }) => webpackConfig);
-  const rcConfigs = configs.map(({ rc }) => rc);
-  const compiler = webpack(webpackConfigs);
+
+
+  const webpackConfigList = configs.map(({ webpack }) => webpack);
+  const settingList = configs.map(({ settings }) => settings);
+
+  console.log(webpackConfigList.length);
+  const compiler = webpack(webpackConfigList);
 
   templatePromise.then(template => {
     const app = express();
@@ -39,15 +45,15 @@ module.exports = function devServer(configs) {
 
     app.get('/', (req, res) => {
       const templateConfig = {
-        banner: rcConfigs.map(config => {
-          const urls = path.dirname(config.location).split('/');
+        banner: settingList.map(({ location, data }) => {
+          const urls = path.dirname(location).split('/');
           const name = urls[urls.length - 1];
 
           return {
             src: `./${name}/`,
             name,
-            width: config.data.settings.size.width,
-            height: config.data.settings.size.height,
+            width: data.settings.size.width,
+            height: data.settings.size.height,
           };
         }),
       };
@@ -55,8 +61,11 @@ module.exports = function devServer(configs) {
       res.send(template(templateConfig));
     });
 
+    portscanner.findAPortNotInUse(3000, 3010, '127.0.0.1', function(error, port) {
+      app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`));
+    })
+
     // eslint-disable-next-line
-    app.listen(3000, () => console.log('Example app listening on http://localhost:3000'));
 
     process.on('uncaughtException', e => {
       // eslint-disable-next-line

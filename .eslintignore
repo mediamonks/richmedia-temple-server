@@ -2,3 +2,4 @@ lib/**/*
 src/lib/vendor/**/*
 src/util/OptionsValidationError.js
 src/util/validateSchema.js
+src/example/**/*

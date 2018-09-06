@@ -9,18 +9,21 @@ module.exports = async function dev(allConfigsSelector = './**/.richmediarc') {
     'settings.entry.html',
   ]);
 
-  const questions = [];
+  if (configs.length === 0) {
+    throw new Error('could not find a compatible .richmediarc with entry points configured');
+  }
 
-  if (configs.length > 0) {
-    questions.push({
+  let questions;
+
+  const answers = await inquirer.prompt([
+    {
       type: 'list',
       name: 'devLocation',
       message: 'Please choose the current build to start developing.',
       choices: ['ALL', ...configs.map(({ location }) => location)],
-    });
-  }
+    },
+  ]);
 
-  const answers = await inquirer.prompt(questions);
   let configsResult = null;
 
   if (answers.devLocation === 'ALL') {
@@ -31,11 +34,7 @@ module.exports = async function dev(allConfigsSelector = './**/.richmediarc') {
 
   const result = await configGeneratorByRichmediarcList(configsResult, 'development');
 
-  if (result.length === 0) {
-    throw new Error('could not find a compatible .richmediarc with entry points configured');
-  }
-
-  const list = result.map((webpack, index) => ({ webpack, rc: configsResult[index] }));
+  const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));
 
   devServer(list);
 };
