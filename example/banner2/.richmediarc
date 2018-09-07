@@ -5,8 +5,10 @@
       "html": "./index.html"
     },
     "size": {
-      "width": 300,
+      "width": 600,
       "height": 250
     }
+  },
+  "content":{
   }
 }

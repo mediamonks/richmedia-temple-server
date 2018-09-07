@@ -35,6 +35,8 @@ module.exports = function createConfig({
     devtool = false;
   }
 
+  console.log(outputPath);
+
   const config = {
     mode,
     entry: [`whatwg-fetch`, `promise-polyfill`, `webpack-hot-middleware/client`, filepathJs],
