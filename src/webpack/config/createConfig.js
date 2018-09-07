@@ -149,7 +149,7 @@ module.exports = function createConfig({
         {
           test: /\.js$/,
           // adding exception to libraries comming from @mediamonks namespace.
-          exclude: /(?!node_modules\/@mediamonks)node_modules/,
+          exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
             loader: 'babel-loader',
             options: {
