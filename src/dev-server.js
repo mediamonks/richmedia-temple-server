@@ -37,26 +37,6 @@ module.exports = function devServer(configs) {
   const webpackConfigList = configs.map(({ webpack }) => webpack);
   const settingList = configs.map(({ settings }) => settings);
 
-  // const compiler = webpack(webpackConfigList, (err, stats) => {
-  //   if (err) {
-  //     console.error(err.stack || err);
-  //     if (err.details) {
-  //       console.error(err.details);
-  //     }
-  //     return;
-  //   }
-  //
-  //   const info = stats.toJson();
-  //
-  //   if (stats.hasErrors()) {
-  //     console.error(info.errors);
-  //   }
-  //
-  //   if (stats.hasWarnings()) {
-  //     console.warn(info.warnings);
-  //   }
-  // });
-
   templatePromise.then(template => {
     const app = express();
 
@@ -76,8 +56,6 @@ module.exports = function devServer(configs) {
       const templateConfig = {
         banner: settingList.map(value => {
           const name = getNameFromSetting(value);
-
-          console.log(value);
 
           return {
             src: `./${name}/`,
