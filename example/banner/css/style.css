@@ -1,11 +1,7 @@
-$width: 300px;
-$height: 250px;
+/*@import '../../css/base.css';*/
 
-@import '../../css/base';
-
-/* setup */
-$width: 300px;
-$height: 250px;
+--width: 300px;
+--height: 250px;
 
 html {
   box-sizing: border-box;
@@ -30,14 +26,11 @@ body {
 /* Banner Styles */
 #banner {
   position: relative;
-  width: $width;
-  height: $height;
+  width: var(--width);
+  height: var(--height);
   border: solid 1px #000;
   overflow: hidden;
   background-color: #fff;
-  // top: 50%;
-  // left: 50%;
-  // transform: translate(-50%,-50%);
 
   #div_main {
     position: absolute;

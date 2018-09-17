@@ -5,7 +5,6 @@
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .preloader-spinner {
     background-image: url('../img/loader.gif');
-
   }
 }
 

@@ -156,6 +156,13 @@
         "agency": { "type": "string" }
       },
       "required": ["creative", "agency"]
+    },
+    "doubleclick": {
+      "properties": {
+        "creative": { "type": "string" },
+        "agency": { "type": "string" }
+      },
+      "required": ["creative", "agency"]
     }
 
   },

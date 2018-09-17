@@ -8,5 +8,9 @@
       "width": 300,
       "height": 250
     }
+  },
+  "monet":{
+    "agency": "ads",
+    "creative": "asddas"
   }
 }
