@@ -5,6 +5,7 @@ const draft06 = require('ajv/lib/refs/json-schema-draft-06.json');
 
 const formatErrorMessage = require('../../util/formatErrorMessage');
 const createConfig = require('./createConfig');
+const getPlatformByRichmediaRc = require('../../util/getPlatformByRichmediaRc');
 
 const schema = require('../../schema/richmediarc.schema.json');
 
@@ -50,14 +51,15 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
   );
 
   const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));
-
   const filepathRichmediaRC = path.resolve(location);
+  const platform = getPlatformByRichmediaRc(richmediaRc);
 
   return {
     filepathHtml,
     filepathJs,
     filepathRichmediaRC,
     outputPath,
+    platform
   };
 }
 

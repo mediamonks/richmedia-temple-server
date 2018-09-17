@@ -28,14 +28,13 @@ module.exports = function createConfig({
   filepathRichmediaRC,
   outputPath,
   mode = 'production',
+  platform = 'unknown',
 }) {
   let devtool = 'inline-source-map';
 
   if (mode === 'production') {
     devtool = false;
   }
-
-  console.log(outputPath);
 
   const config = {
     mode,
@@ -78,12 +77,12 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: (loader) => [
+                plugins: loader => [
                   require('postcss-import')({ root: loader.resourcePath }),
                   require('postcss-preset-env')(),
-                  require('cssnano')()
-                ]
-              }
+                  require('cssnano')(),
+                ],
+              },
             },
           ],
         },
@@ -159,9 +158,7 @@ module.exports = function createConfig({
                   },
                 ],
               ],
-              plugins: [
-                `@babel/plugin-proposal-class-properties`,
-              ],
+              plugins: [`@babel/plugin-proposal-class-properties`],
             },
           },
         },
@@ -194,11 +191,7 @@ module.exports = function createConfig({
       new HtmlWebPackPlugin({
         template: filepathHtml,
       }),
-      //
-      new MonetJSONPlugin({
-        config: filepathRichmediaRC,
-        filePattern: '[hash].[ext]',
-      }),
+
       //
       // new PreloadWebpackPlugin(),
       new webpack.DefinePlugin({
@@ -225,6 +218,15 @@ module.exports = function createConfig({
     },
     devtool,
   };
+
+  if (platform === 'netflix') {
+    config.plugins.push(
+      new MonetJSONPlugin({
+        config: filepathRichmediaRC,
+        filePattern: '[hash].[ext]',
+      }),
+    );
+  }
 
   if (mode === 'production') {
     config.plugins.push(
