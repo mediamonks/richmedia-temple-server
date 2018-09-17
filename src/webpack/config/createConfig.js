@@ -69,25 +69,21 @@ module.exports = function createConfig({
     module: {
       rules: [
         {
-          test: /\.scss$/,
+          test: /\.css$/,
           use: [
             {
-              loader: 'file-loader',
+              loader: 'style-loader',
+            },
+            {
+              loader: 'postcss-loader',
               options: {
-                name: '[name].css',
-              },
-            },
-            {
-              loader: 'extract-loader',
-            },
-            {
-              loader: 'css-loader',
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                sourceMap: true,
-              },
+                ident: 'postcss',
+                plugins: (loader) => [
+                  require('postcss-import')({ root: loader.resourcePath }),
+                  require('postcss-preset-env')(),
+                  require('cssnano')()
+                ]
+              }
             },
           ],
         },
