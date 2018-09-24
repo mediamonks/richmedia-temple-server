@@ -31,14 +31,21 @@ module.exports = function createConfig({
   platform = 'unknown',
 }) {
   let devtool = 'inline-source-map';
+  const entry = [];//[`whatwg-fetch`, `promise-polyfill`];
 
   if (mode === 'production') {
     devtool = false;
   }
 
+  if(mode === 'development'){
+    entry.push(`webpack-hot-middleware/client`);
+  }
+
+  entry.push(filepathJs);
+
   const config = {
     mode,
-    entry: [`whatwg-fetch`, `promise-polyfill`, `webpack-hot-middleware/client`, filepathJs],
+    entry,
 
     output: {
       path: outputPath,
@@ -159,6 +166,7 @@ module.exports = function createConfig({
                 [
                   '@babel/preset-env',
                   {
+                    useBuiltIns: 'usage',
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
