@@ -30,6 +30,8 @@ node ./node_modules/@mediamonks/richmedia-temple-server/dev.js
 ```
 
 
+maybe use @mediamonks/generator-richmedia-temple for creating your setup automatically.
+
 ## Documentation
 
 View the [documentation](http://mediamonks.github.io/richmedia-temple-server/).
