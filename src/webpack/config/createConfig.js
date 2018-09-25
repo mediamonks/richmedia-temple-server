@@ -176,7 +176,10 @@ module.exports = function createConfig({
                   },
                 ],
               ],
-              plugins: [`@babel/plugin-proposal-class-properties`],
+              plugins: [
+                `@babel/plugin-proposal-class-properties`,
+                `@babel/plugin-transform-async-to-generator`,
+              ],
             },
           },
         },
