@@ -35,17 +35,16 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/webpack/loader/RichmediaRCLoader.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const loaderUtils = require(&apos;loader-utils&apos;);
-const isExternalURL = require(&apos;../util/isExternalURL&apos;);
+const isExternalURL = require(&apos;../../util/isExternalURL&apos;);
 
 /**
  * Allows you to import external files into a json value.
  * Can be used for any value, in an object or array.
  */
-module.exports = function(content) {
+module.exports = function RichmediaRCLoader(data) {
   this.cacheable();
   const loaderContext = this;
-
-  content = typeof content === &apos;string&apos; ? JSON.parse(content) : content;
+  let content = typeof data === &apos;string&apos; ? JSON.parse(data) : data;
 
   let ruuid = Date.now();
   const replaceItems = [];
@@ -54,7 +53,8 @@ module.exports = function(content) {
     Object.keys(content.content).forEach(key =&gt; {
       const item = content.content[key];
       if ((item.type === &apos;video&apos; || item.type === &apos;image&apos;) &amp;&amp; !isExternalURL(item.url)) {
-        const id = `uuid_replace_${(ruuid++).toString(16)}`;
+        ruuid += 1;
+        const id = `uuid_replace_${ruuid.toString(16)}`;
         replaceItems.push({
           key: loaderUtils.stringifyRequest(loaderContext, id),
           value: `require(${loaderUtils.stringifyRequest(
@@ -72,9 +72,7 @@ module.exports = function(content) {
     .replace(/\u2028/g, &apos;\\u2028&apos;)
     .replace(/\u2029/g, &apos;\\u2029&apos;);
 
-  content = replaceItems.reduce((prev, item) =&gt; {
-    return prev.replace(item.key, item.value);
-  }, content);
+  content = replaceItems.reduce((prev, item) =&gt; prev.replace(item.key, item.value), content);
 
   return `module.exports = ${content};`;
 };

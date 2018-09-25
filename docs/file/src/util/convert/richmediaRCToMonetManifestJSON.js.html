@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">src/util/formatErrorMessage.js | @mediamonks/richmedia-temple-server</title>
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/util/convert/richmediaRCToMonetManifestJSON.js | @mediamonks/richmedia-temple-server</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -33,15 +33,29 @@
 </div>
 </nav>
 
-<div class="content" data-ice="content"><h1 data-ice="title">src/util/formatErrorMessage.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
- *
- * @param {keyword: string, dataPath, schemaPath,params,message} error
- */
-module.exports = function formatErrorMessage(error) {
-  let result = &apos;&apos;;
+<div class="content" data-ice="content"><h1 data-ice="title">src/util/convert/richmediaRCToMonetManifestJSON.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">module.exports = function richmediaRCToMonetManifestJSON({ content, monet, settings }) {
+  const result = {
+    rootComponents: [],
+    titleComponents: [],
+    creativeName: &apos;&apos;,
+    agencyName: &apos;&apos;,
+    minTitles: 0,
+    maxTitles: 0,
+    width: 0,
+    height: 0,
+  };
 
-  result += `${error.dataPath.substr(1)} ${error.message}`;
+  result.rootComponents = Object.keys(content).map(name =&gt; content[name]);
+
+  if (monet) {
+    result.creativeName = monet.creativeName;
+    result.agencyName = monet.agencyName;
+  }
+
+  result.width = settings.size.width;
+  result.height = settings.size.height;
+
   return result;
 };
 </code></pre>

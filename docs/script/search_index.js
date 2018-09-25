@@ -288,27 +288,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/cli/build.js",
-    "file/src/cli/build.js.html",
-    "src/cli/build.js",
-    "file"
-  ],
-  [
-    "src/cli/dev.js",
-    "file/src/cli/dev.js.html",
-    "src/cli/dev.js",
-    "file"
-  ],
-  [
-    "src/data/rcdto.js",
-    "file/src/data/RCDto.js.html",
-    "src/data/RCDto.js",
-    "file"
-  ],
-  [
     "src/dev-server.js",
     "file/src/dev-server.js.html",
     "src/dev-server.js",
+    "file"
+  ],
+  [
+    "src/dev.js",
+    "file/src/dev.js.html",
+    "src/dev.js",
     "file"
   ],
   [
@@ -318,9 +306,27 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/util/findjsonconfigs.js",
-    "file/src/util/findJSONConfigs.js.html",
-    "src/util/findJSONConfigs.js",
+    "src/util/convert/richmediarctomonetbackupjson.js",
+    "file/src/util/convert/richmediaRCToMonetBackupJSON.js.html",
+    "src/util/convert/richmediaRCToMonetBackupJSON.js",
+    "file"
+  ],
+  [
+    "src/util/convert/richmediarctomonetmanifestjson.js",
+    "file/src/util/convert/richmediaRCToMonetManifestJSON.js.html",
+    "src/util/convert/richmediaRCToMonetManifestJSON.js",
+    "file"
+  ],
+  [
+    "src/util/doesnestedexists.js",
+    "file/src/util/doesNestedExists.js.html",
+    "src/util/doesNestedExists.js",
+    "file"
+  ],
+  [
+    "src/util/findrichmediarc.js",
+    "file/src/util/findRichmediaRC.js.html",
+    "src/util/findRichmediaRC.js",
     "file"
   ],
   [
@@ -330,9 +336,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/util/getjsonconfig.js",
-    "file/src/util/getJSONConfig.js.html",
-    "src/util/getJSONConfig.js",
+    "src/util/getplatformbyrichmediarc.js",
+    "file/src/util/getPlatformByRichmediaRc.js.html",
+    "src/util/getPlatformByRichmediaRc.js",
+    "file"
+  ],
+  [
+    "src/util/getrichmediarc.js",
+    "file/src/util/getRichmediaRC.js.html",
+    "src/util/getRichmediaRC.js",
     "file"
   ],
   [
@@ -348,15 +360,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/webpack/config/configgenerator.js",
-    "file/src/webpack/config/ConfigGenerator.js.html",
-    "src/webpack/config/ConfigGenerator.js",
+    "src/webpack/config/createconfig.js",
+    "file/src/webpack/config/createConfig.js.html",
+    "src/webpack/config/createConfig.js",
     "file"
   ],
   [
-    "src/webpack/config/configgeneratorbyrichmediarclist.js",
-    "file/src/webpack/config/ConfigGeneratorByRichmediarcList.js.html",
-    "src/webpack/config/ConfigGeneratorByRichmediarcList.js",
+    "src/webpack/config/createconfigbyrichmediarclist.js",
+    "file/src/webpack/config/createConfigByRichmediarcList.js.html",
+    "src/webpack/config/createConfigByRichmediarcList.js",
     "file"
   ],
   [

@@ -34,53 +34,90 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/dev-server.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const program = require(&apos;commander&apos;);
-const inquirer = require(&apos;inquirer&apos;);
-const fs = require(&apos;fs-extra&apos;);
-const path = require(&apos;path&apos;);
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const fs = require(&apos;fs&apos;);
 const webpack = require(&apos;webpack&apos;);
 const webpackDevMiddleware = require(&apos;webpack-dev-middleware&apos;);
 const webpackHotMiddleware = require(&apos;webpack-hot-middleware&apos;);
 const express = require(&apos;express&apos;);
-const Handlebars = require(&apos;handlebars&apos;);
+const handlebars = require(&apos;handlebars&apos;);
+const portscanner = require(&apos;portscanner&apos;);
 
+const templatePromise = Promise.resolve(true).then(
+  () =&gt;
+    new Promise((resolve, reject) =&gt; {
+      fs.readFile(
+        path.join(__dirname, &apos;./data/template.hbs&apos;),
+        { encoding: &apos;utf-8&apos; },
+        (err, data) =&gt; {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(handlebars.compile(data));
+          }
+        },
+      );
+    }),
+);
+
+function getNameFromSetting(setting) {
+  const urls = path.dirname(setting.location).split(&apos;/&apos;);
+  return urls[urls.length - 1];
+}
 
 /**
  *
- * @param {Array&lt;{webpack: *, rc: RCDto}&gt;} configs
+ * @param {Array&lt;{webpack: *, settings: {location, data}}&gt;} configs
  */
 module.exports = function devServer(configs) {
-  const webpackConfigs = configs.map(({webpack}) =&gt; webpack);
-  const rcConfigs = configs.map(({rc}) =&gt; rc);
-  const compiler = webpack(webpackConfigs);
+  const webpackConfigList = configs.map(({ webpack }) =&gt; webpack);
+  const settingList = configs.map(({ settings }) =&gt; settings);
 
-  const app = express();
+  templatePromise.then(template =&gt; {
+    const app = express();
 
-  app.use(webpackDevMiddleware(compiler));
-  app.use(webpackHotMiddleware(compiler));
+    webpackConfigList.forEach((config, index) =&gt; {
+      const compiler = webpack(config);
 
-  app.get(&apos;/&apos;, function(req, res) {
-    const templateConfig = {
-      banner: rcConfigs.map(config =&gt; {
-        const urls = path.dirname(config.location).split(&apos;/&apos;);
-        const name = urls[urls.length - 1];
+      app.use(
+        webpackDevMiddleware(compiler, {
+          publicPath: `/${getNameFromSetting(settingList[index])}/`,
+        }),
+      );
+      app.use(webpackHotMiddleware(compiler));
+    });
 
-        return {
-          src: `./${name}/`,
-          name,
-          width: config.data.settings.size.width,
-          height: config.data.settings.size.height,
-        };
-      }),
-    };
 
-    res.send(template(templateConfig));
+    app.get(&apos;/&apos;, (req, res) =&gt; {
+      const templateConfig = {
+        banner: settingList.map(value =&gt; {
+          const name = getNameFromSetting(value);
+
+          return {
+            src: `./${name}/`,
+            name,
+            width: value.data.settings.size.width,
+            height: value.data.settings.size.height,
+          };
+        }),
+      };
+
+      res.send(template(templateConfig));
+    });
+
+    portscanner.findAPortNotInUse(3000, 3010, &apos;127.0.0.1&apos;, function(error, port) {
+      app.listen(port, () =&gt; console.log(`Example app listening on http://localhost:${port}`));
+    });
+
+    // eslint-disable-next-line
+
+    process.on(&apos;uncaughtException&apos;, e =&gt; {
+      // eslint-disable-next-line
+      console.log(e);
+      // app.close();
+    });
+    process.on(&apos;SIGTERM&apos;, () =&gt; app.close());
   });
-
-  app.listen(3000, () =&gt; console.log(&apos;Example app listening on http://localhost:3000&apos;));
-
-  process.on(&apos;uncaughtException&apos;, () =&gt; app.close());
-  process.on(&apos;SIGTERM&apos;, () =&gt; app.close());
 };
 </code></pre>
 

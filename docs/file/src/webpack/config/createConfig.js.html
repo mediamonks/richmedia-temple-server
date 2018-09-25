@@ -1,15 +1,51 @@
-const path = require('path');
-const webpack = require('webpack');
-const HtmlWebPackPlugin = require('html-webpack-plugin');
-// const PreloadWebpackPlugin = require('preload-webpack-plugin');
-// const CircularDependencyPlugin = require('circular-dependency-plugin');
-// const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-// const Visualizer = require('webpack-visualizer-plugin');
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/webpack/config/createConfig.js | @mediamonks/richmedia-temple-server</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@mediamonks/richmedia-temple-server"><meta property="twitter:description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."></head>
+<body class="layout-container" data-ice="rootContainer">
 
-const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
-const ZipPlugin = require('zip-webpack-plugin');
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/mediamonks/temple"><img width="20px" src="./image/github.png"></a></header>
 
-const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/createConfig.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const webpack = require(&apos;webpack&apos;);
+const HtmlWebPackPlugin = require(&apos;html-webpack-plugin&apos;);
+// const PreloadWebpackPlugin = require(&apos;preload-webpack-plugin&apos;);
+// const CircularDependencyPlugin = require(&apos;circular-dependency-plugin&apos;);
+// const UglifyJsPlugin = require(&apos;uglifyjs-webpack-plugin&apos;);
+// const Visualizer = require(&apos;webpack-visualizer-plugin&apos;);
+
+const MonetJSONPlugin = require(&apos;../plugin/MonetJSONPlugin&apos;);
+const ZipPlugin = require(&apos;zip-webpack-plugin&apos;);
+
+const nodeModules = `${path.resolve(__dirname, &apos;../../../node_modules&apos;)}/`;
 
 // console.log(nodeModules);
 /**
@@ -27,17 +63,17 @@ module.exports = function createConfig({
   filepathHtml,
   filepathRichmediaRC,
   outputPath,
-  mode = 'production',
-  platform = 'unknown',
+  mode = &apos;production&apos;,
+  platform = &apos;unknown&apos;,
 }) {
-  let devtool = 'inline-source-map';
+  let devtool = &apos;inline-source-map&apos;;
   const entry = [];//[`whatwg-fetch`, `promise-polyfill`];
 
-  if (mode === 'production') {
+  if (mode === &apos;production&apos;) {
     devtool = false;
   }
 
-  if(mode === 'development'){
+  if(mode === &apos;development&apos;){
     entry.push(`webpack-hot-middleware/client`);
   }
 
@@ -49,28 +85,28 @@ module.exports = function createConfig({
 
     output: {
       path: outputPath,
-      filename: 'main.js',
+      filename: &apos;main.js&apos;,
     },
     externals: {
       // gsap external
-      TweenLite: 'TweenLite',
-      TweenMax: 'TweenMax',
-      TimelineLite: 'TimelineLite',
-      TimelineMax: 'TimelineMax',
+      TweenLite: &apos;TweenLite&apos;,
+      TweenMax: &apos;TweenMax&apos;,
+      TimelineLite: &apos;TimelineLite&apos;,
+      TimelineMax: &apos;TimelineMax&apos;,
 
       // doubleclick and monet external
-      Enabler: 'Enabler',
-      Monet: 'Monet',
+      Enabler: &apos;Enabler&apos;,
+      Monet: &apos;Monet&apos;,
     },
     resolve: {
-      modules: ['node_modules', nodeModules],
+      modules: [&apos;node_modules&apos;, nodeModules],
       alias: {
-        vendor: path.resolve(__dirname, '../../../vendor'),
+        vendor: path.resolve(__dirname, &apos;../../../vendor&apos;),
       },
     },
 
     resolveLoader: {
-      modules: ['node_modules', nodeModules],
+      modules: [&apos;node_modules&apos;, nodeModules],
       symlinks: true,
     },
 
@@ -80,24 +116,24 @@ module.exports = function createConfig({
           test: /\.css$/,
           use: [
             {
-              loader: 'file-loader',
+              loader: &apos;file-loader&apos;,
               options: {
-                name: '[name].css',
+                name: &apos;[name].css&apos;,
               },
             },
             {
-              loader: 'extract-loader',
+              loader: &apos;extract-loader&apos;,
             },
-            'css-loader',
+            &apos;css-loader&apos;,
             {
-              loader: 'postcss-loader',
+              loader: &apos;postcss-loader&apos;,
               options: {
-                ident: 'postcss',
-                plugins: (loader) => [
-                  require('postcss-import')({ root: loader.resourcePath }),
-                  require('postcss-preset-env')(),
-                  require('postcss-nested')(),
-                  require('cssnano')()
+                ident: &apos;postcss&apos;,
+                plugins: (loader) =&gt; [
+                  require(&apos;postcss-import&apos;)({ root: loader.resourcePath }),
+                  require(&apos;postcss-preset-env&apos;)(),
+                  require(&apos;postcss-nested&apos;)(),
+                  require(&apos;cssnano&apos;)()
                 ]
               }
             },
@@ -107,7 +143,7 @@ module.exports = function createConfig({
           test: /\.sketch$/,
           use: [
             {
-              loader: 'sketch-loader',
+              loader: &apos;sketch-loader&apos;,
             },
           ],
         },
@@ -115,9 +151,9 @@ module.exports = function createConfig({
           test: /\.(mp4|svg)$/,
           use: [
             {
-              loader: 'file-loader',
+              loader: &apos;file-loader&apos;,
               options: {
-                name: '[hash].[ext]',
+                name: &apos;[hash].[ext]&apos;,
               },
             },
           ],
@@ -126,14 +162,14 @@ module.exports = function createConfig({
           test: /\.(png|jpg|gif)$/,
           use: [
             {
-              loader: 'file-loader',
+              loader: &apos;file-loader&apos;,
               options: {
-                name: '[hash].[ext]',
+                name: &apos;[hash].[ext]&apos;,
               },
             },
 
             {
-              loader: 'image-webpack-loader',
+              loader: &apos;image-webpack-loader&apos;,
               options: {
                 mozjpeg: {
                   progressive: true,
@@ -144,7 +180,7 @@ module.exports = function createConfig({
                   enabled: false,
                 },
                 pngquant: {
-                  quality: '65-90',
+                  quality: &apos;65-90&apos;,
                   speed: 4,
                 },
                 gifsicle: {
@@ -163,15 +199,15 @@ module.exports = function createConfig({
           // adding exception to libraries comming from @mediamonks namespace.
           exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: &apos;babel-loader&apos;,
             options: {
               presets: [
                 [
-                  '@babel/preset-env',
+                  &apos;@babel/preset-env&apos;,
                   {
-                    useBuiltIns: 'usage',
+                    useBuiltIns: &apos;usage&apos;,
                     targets: {
-                      browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
+                      browsers: [&apos;ie 11&apos;, &apos;last 2 versions&apos;, &apos;safari &gt;= 7&apos;],
                     },
                   },
                 ],
@@ -183,9 +219,9 @@ module.exports = function createConfig({
         {
           test: /.richmediarc$/,
           exclude: /node_modules/,
-          type: 'javascript/dynamic',
+          type: &apos;javascript/dynamic&apos;,
           use: {
-            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
+            loader: path.resolve(path.join(__dirname, &apos;../loader/RichmediaRCLoader.js&apos;)),
           },
         },
 
@@ -194,11 +230,11 @@ module.exports = function createConfig({
           exclude: /node_modules/,
           use: [
             {
-              loader: 'html-loader',
+              loader: &apos;html-loader&apos;,
               options: {
                 minimize: false,
 
-                attrs: ['img:src', 'video:src', 'link:href'],
+                attrs: [&apos;img:src&apos;, &apos;video:src&apos;, &apos;link:href&apos;],
               },
             },
           ],
@@ -228,7 +264,7 @@ module.exports = function createConfig({
       // }),
       //
       // new Visualizer({
-      //   filename: './statistics.html',
+      //   filename: &apos;./statistics.html&apos;,
       // }),
     ],
     stats: {
@@ -237,40 +273,40 @@ module.exports = function createConfig({
     devtool,
   };
 
-  if (platform === 'monet') {
+  if (platform === &apos;monet&apos;) {
     config.plugins.push(
       new MonetJSONPlugin({
         config: filepathRichmediaRC,
-        filePattern: '[hash].[ext]',
+        filePattern: &apos;[hash].[ext]&apos;,
       }),
     );
   }
 
-  if (mode === 'production') {
+  if (mode === &apos;production&apos;) {
     config.plugins.push(
       new ZipPlugin({
         // OPTIONAL: defaults to the Webpack output path (above)
         // can be relative (to Webpack output path) or absolute
-        // path: '',
+        // path: &apos;&apos;,
 
         // OPTIONAL: defaults to the Webpack output filename (above) or,
         // if not present, the basename of the path
-        filename: 'bundle.zip',
+        filename: &apos;bundle.zip&apos;,
 
-        // OPTIONAL: defaults to 'zip'
-        // the file extension to use instead of 'zip'
-        // extension: 'ext',
+        // OPTIONAL: defaults to &apos;zip&apos;
+        // the file extension to use instead of &apos;zip&apos;
+        // extension: &apos;ext&apos;,
 
         // OPTIONAL: defaults to the empty string
         // the prefix for the files included in the zip file
-        // pathPrefix: 'relative/path',
+        // pathPrefix: &apos;relative/path&apos;,
 
         // OPTIONAL: defaults to the identity function
         // a function mapping asset paths to new paths
         // pathMapper: function(assetPath) {
         //    // put all pngs in an `images` subdir
-        //    if (assetPath.endsWith('.png'))
-        //       return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
+        //    if (assetPath.endsWith(&apos;.png&apos;))
+        //       return path.join(path.dirname(assetPath), &apos;images&apos;, path.basename(assetPath));
         //    return assetPath;
         // },
 
@@ -303,3 +339,20 @@ module.exports = function createConfig({
 
   return config;
 };
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../../">
+  <title data-ice="title">src/webpack/config/createConfigByRichmediarcList.js | @mediamonks/richmedia-temple-server</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@mediamonks/richmedia-temple-server"><meta property="twitter:description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/mediamonks/temple"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/createConfigByRichmediarcList.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const fs = require(&apos;fs-extra&apos;);
+const Ajv = require(&apos;ajv&apos;);
+const draft06 = require(&apos;ajv/lib/refs/json-schema-draft-06.json&apos;);
+
+const formatErrorMessage = require(&apos;../../util/formatErrorMessage&apos;);
+const createConfig = require(&apos;./createConfig&apos;);
+const getPlatformByRichmediaRc = require(&apos;../../util/getPlatformByRichmediaRc&apos;);
+
+const schema = require(&apos;../../schema/richmediarc.schema.json&apos;);
+
+const ajv = new Ajv();
+ajv.addMetaSchema(draft06);
+
+const schemaValidate = ajv.compile(schema);
+
+/**
+ *
+ * @param {string} location
+ * @param {any} richmediaRc
+ * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}
+ */
+function validateSchemaAndCreatePaths(location, richmediaRc) {
+  // validate schema
+  const valid = schemaValidate(richmediaRc);
+
+  if (!valid) {
+    schemaValidate.errors.forEach(error =&gt; {
+      // eslint-disable-next-line
+      console.error(JSON.stringify(error));
+    });
+
+    throw new Error(formatErrorMessage(schemaValidate.errors[0]));
+  }
+
+  if (
+    !richmediaRc ||
+    !richmediaRc.settings ||
+    !richmediaRc.settings.entry ||
+    !richmediaRc.settings.entry.js ||
+    !richmediaRc.settings.entry.html
+  ) {
+    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);
+  }
+
+  const list = path.dirname(location).split(path.sep);
+  const outputPath = path.resolve(path.join(&apos;./build/&apos;, list[list.length - 1]));
+
+  const filepathHtml = path.resolve(
+    path.join(path.dirname(location), richmediaRc.settings.entry.html),
+  );
+
+  const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));
+  const filepathRichmediaRC = path.resolve(location);
+  const platform = getPlatformByRichmediaRc(richmediaRc);
+
+  return {
+    filepathHtml,
+    filepathJs,
+    filepathRichmediaRC,
+    outputPath,
+    platform
+  };
+}
+
+/**
+ *
+ * @param {Array&lt;{location, data}&gt;} richmediarcList
+ * @param {string} mode
+ * @return {Promise&lt;any[]&gt;}
+ */
+function createConfigByRichmediarcList(richmediarcList, mode) {
+  const promiseList = richmediarcList.map(
+    ({ location, data }) =&gt; {
+      /**
+       * const {
+       *   filepathHtml,
+       *   filepathJs,
+       *   filepathRichmediaRC,
+       *   outputPath,
+       * } = validateSchemaAndCreatePaths(location, data);
+       */
+      const webpackConfig = createConfig({
+        ...validateSchemaAndCreatePaths(location, data),
+        mode,
+      });
+
+      const webpackFilepath = `${path.dirname(location)}/webpack.config.js`;
+
+      // check if webpackconfig exists
+      return fs.pathExists(webpackFilepath).then(exists =&gt; {
+        if (exists) {
+          // eslint-disable-next-line
+          const webpack = require(webpackFilepath);
+
+          if (typeof webpack === &apos;function&apos;) {
+            return webpack(webpackConfig);
+          }
+
+          return webpack;
+        }
+
+        return webpackConfig;
+      });
+    },
+    // projects can have there own webpack config. this will override the generated one.
+  );
+
+  return Promise.all(promiseList).then(webpackConfigs =&gt; webpackConfigs.filter(config =&gt; !!config));
+}
+
+module.exports = createConfigByRichmediarcList;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
