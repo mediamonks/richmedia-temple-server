@@ -36,41 +36,6 @@ maybe use @mediamonks/generator-richmedia-temple for creating your setup automat
 
 View the [documentation](http://mediamonks.github.io/richmedia-temple-server/).
 
-
-## Building
-
-In order to build seng-boilerplate, ensure that you have [Git](http://git-scm.com/downloads)
-and [Node.js](http://nodejs.org/) installed.
-
-Clone a copy of the repo:
-```sh
-git clone https://github.com/mediamonks/richmedia-temple-server.git
-```
-
-Change to the seng-boilerplate directory:
-```sh
-cd richmedia-temple-server
-```
-
-Install dev dependencies:
-```sh
-yarn
-```
-
-Use one of the following main scripts:
-```sh
-npm run build            # build this project
-npm run dev              # run compilers in watch mode, both for babel and typescript
-npm run test             # run the unit tests incl coverage
-npm run test:dev         # run the unit tests in watch mode
-npm run lint             # run eslint and tslint on this project
-npm run doc              # generate typedoc documentation
-```
-
-When installing this module, it adds a pre-commit hook, that runs lint and prettier commands
-before committing, so you can be sure that everything checks out.
-
-
 ## Contribute
 
 View [CONTRIBUTING.md](./CONTRIBUTING.md)
