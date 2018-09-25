@@ -31,7 +31,7 @@ module.exports = function createConfig({
   platform = 'unknown',
 }) {
   let devtool = 'inline-source-map';
-  const entry = [];//[`whatwg-fetch`, `promise-polyfill`];
+  const entry = ['@babel/polyfill'];//[`whatwg-fetch`, `promise-polyfill`];
 
   if (mode === 'production') {
     devtool = false;
@@ -169,7 +169,7 @@ module.exports = function createConfig({
                 [
                   '@babel/preset-env',
                   {
-                    useBuiltIns: 'usage',
+                    useBuiltIns: 'entry',
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
