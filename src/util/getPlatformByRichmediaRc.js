@@ -1,6 +1,6 @@
 module.exports = function getPlatformByRichmediaRc(richmediaRc) {
   if (!!richmediaRc.monet) {
-    return 'netflix';
+    return 'monet';
   } else if (!!richmediaRc.doubleclick) {
     return 'doubleclick';
   } else {

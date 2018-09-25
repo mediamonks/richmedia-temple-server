@@ -94,6 +94,7 @@ module.exports = function createConfig({
                 plugins: (loader) => [
                   require('postcss-import')({ root: loader.resourcePath }),
                   require('postcss-preset-env')(),
+                  require('postcss-nested')(),
                   require('cssnano')()
                 ]
               }
@@ -234,7 +235,7 @@ module.exports = function createConfig({
     devtool,
   };
 
-  if (platform === 'netflix') {
+  if (platform === 'monet') {
     config.plugins.push(
       new MonetJSONPlugin({
         config: filepathRichmediaRC,
