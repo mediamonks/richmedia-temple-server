@@ -3,6 +3,7 @@
   "version": "1.0.3",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "scripts": {
+    "test": "",
     "doc": "node_modules/.bin/esdoc",
     "lint": "npm-run-all lint:*",
     "lint:js": "eslint src --ext .js --cache",
@@ -77,6 +78,7 @@
     "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@mediamonks/richmedia-temple-screenshot": "^1.1.1",
     "ajv": "^6.5.2",
     "babel-loader": "^8.0.0",
     "circular-dependency-plugin": "^5.0.2",
@@ -95,7 +97,6 @@
     "loader-utils": "^1.1.0",
     "md5-file": "^4.0.0",
     "node-sass": "^4.9.3",
-    "portscanner": "^2.2.0",
     "postcss-import": "^12.0.0",
     "postcss-loader": "^3.0.0",
     "postcss-nested": "^4.1.0",
