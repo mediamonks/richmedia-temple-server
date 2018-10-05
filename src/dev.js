@@ -33,7 +33,6 @@ module.exports = async function dev(allConfigsSelector = './**/.richmediarc') {
   }
 
   const result = await configGeneratorByRichmediarcList(configsResult, 'development');
-
   const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));
 
   devServer(list);

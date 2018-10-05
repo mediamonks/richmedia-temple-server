@@ -27,9 +27,13 @@ const templatePromise = Promise.resolve(true).then(
     }),
 );
 
-function getNameFromSetting(setting) {
-  const urls = path.dirname(setting.location).split('/');
+function getNameFromSettings(settings) {
+  const urls = path.dirname(settings.location).split('/');
   return urls[urls.length - 1];
+}
+
+function getSettingsFromSettingsListByName(name, settingsList) {
+  const result = settingsList.find(settings => getNameFromSettings(settings) === name);
 }
 
 /**
@@ -38,9 +42,11 @@ function getNameFromSetting(setting) {
  */
 module.exports = async function devServer(configs) {
   const webpackConfigList = configs.map(({ webpack }) => webpack);
-  const settingList = configs.map(({ settings }) => settings);
+  const settingsList = configs.map(({ settings }) => settings);
   const port = await portfinder.getPortPromise();
   const template = await templatePromise;
+
+  console.log(settingsList);
 
   const app = express();
 
@@ -49,7 +55,7 @@ module.exports = async function devServer(configs) {
 
     app.use(
       webpackDevMiddleware(compiler, {
-        publicPath: `/${getNameFromSetting(settingList[index])}/`,
+        publicPath: `/${getNameFromSettings(settingsList[index])}/`,
       }),
     );
     app.use(webpackHotMiddleware(compiler));
@@ -57,8 +63,8 @@ module.exports = async function devServer(configs) {
 
   app.get('/', (req, res) => {
     const templateConfig = {
-      banner: settingList.map(value => {
-        const name = getNameFromSetting(value);
+      banner: settingsList.map(value => {
+        const name = getNameFromSettings(value);
 
         return {
           src: `./${name}/`,
@@ -73,14 +79,34 @@ module.exports = async function devServer(configs) {
   });
 
   app.get('/screenshot/:target', (req, res) => {
+    const name = req.params.target;
     const location = path.join(__dirname, '../tempfolder', 'screenshot.png');
+    const result = settingsList.find(val => getNameFromSettings(val) === name);
+
+    const data = {
+      config: {},
+      url: `http://localhost:${port}/${name}/`,
+      location,
+    };
+
+    if (
+      result &&
+      result.data &&
+      result.data.settings &&
+      result.data.settings.size &&
+      result.data.settings.size.width &&
+      result.data.settings.size.height
+    ) {
+      data.clip = {
+        x: 0,
+        y: 0,
+        width: result.data.settings.size.width,
+        height: result.data.settings.size.height,
+      };
+    }
 
     screenshot
-      .fromUrl({
-        config: {},
-        url: `http://localhost:${port}/${req.params.target}/`,
-        location,
-      })
+      .fromUrl(data)
       .then(() => readFile(location))
       .then(img => {
         res.contentType('image/png');
