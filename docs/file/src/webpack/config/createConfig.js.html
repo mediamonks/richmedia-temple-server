@@ -67,7 +67,7 @@ module.exports = function createConfig({
   platform = &apos;unknown&apos;,
 }) {
   let devtool = &apos;inline-source-map&apos;;
-  const entry = [];//[`whatwg-fetch`, `promise-polyfill`];
+  const entry = [&apos;@babel/polyfill&apos;];//[`whatwg-fetch`, `promise-polyfill`];
 
   if (mode === &apos;production&apos;) {
     devtool = false;
@@ -131,7 +131,13 @@ module.exports = function createConfig({
                 ident: &apos;postcss&apos;,
                 plugins: (loader) =&gt; [
                   require(&apos;postcss-import&apos;)({ root: loader.resourcePath }),
-                  require(&apos;postcss-preset-env&apos;)(),
+                  require(&apos;postcss-preset-env&apos;)({
+                    stage: 2,
+                    features: {
+                      &apos;nesting-rules&apos;: true
+                    },
+                    browsers: [&apos;defaults&apos;,&apos;ie 11&apos;]
+                  }),
                   require(&apos;postcss-nested&apos;)(),
                   require(&apos;cssnano&apos;)()
                 ]
@@ -205,14 +211,17 @@ module.exports = function createConfig({
                 [
                   &apos;@babel/preset-env&apos;,
                   {
-                    useBuiltIns: &apos;usage&apos;,
+                    useBuiltIns: &apos;entry&apos;,
                     targets: {
                       browsers: [&apos;ie 11&apos;, &apos;last 2 versions&apos;, &apos;safari &gt;= 7&apos;],
                     },
                   },
                 ],
               ],
-              plugins: [`@babel/plugin-proposal-class-properties`],
+              plugins: [
+                `@babel/plugin-proposal-class-properties`,
+                `@babel/plugin-transform-async-to-generator`,
+              ],
             },
           },
         },

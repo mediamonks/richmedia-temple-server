@@ -59,7 +59,7 @@ module.exports = async function build() {
       type: &apos;list&apos;,
       name: &apos;buildTarget&apos;,
       message: &apos;Please choose build location&apos;,
-      choices: [&apos;./build&apos;, &apos;other location&apos;],
+      choices: [&apos;./build&apos;],
     },
   );
 
@@ -84,13 +84,13 @@ module.exports = async function build() {
   if (answers.build === &apos;ALL&apos;) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({ location }) =&gt; location === answers.build);
+    configsResult = configs.filter(config =&gt; config.location === answers.build);
   }
 
   const result = await createConfigByRichmediarcList(configsResult);
 
   const compiler = webpack(result).run((err, stats) =&gt; {
-    console.log(err);
+    if(err) console.log(err);
   })
 };
 </code></pre>

@@ -41,7 +41,10 @@ const webpackDevMiddleware = require(&apos;webpack-dev-middleware&apos;);
 const webpackHotMiddleware = require(&apos;webpack-hot-middleware&apos;);
 const express = require(&apos;express&apos;);
 const handlebars = require(&apos;handlebars&apos;);
-const portscanner = require(&apos;portscanner&apos;);
+const portfinder = require(&apos;portfinder&apos;);
+const screenshot = require(&apos;@mediamonks/richmedia-temple-screenshot&apos;);
+const util = require(&apos;util&apos;);
+const readFile = util.promisify(fs.readFile);
 
 const templatePromise = Promise.resolve(true).then(
   () =&gt;
@@ -60,64 +63,103 @@ const templatePromise = Promise.resolve(true).then(
     }),
 );
 
-function getNameFromSetting(setting) {
-  const urls = path.dirname(setting.location).split(&apos;/&apos;);
+function getNameFromSettings(settings) {
+  const urls = path.dirname(settings.location).split(&apos;/&apos;);
   return urls[urls.length - 1];
+}
+
+function getSettingsFromSettingsListByName(name, settingsList) {
+  const result = settingsList.find(settings =&gt; getNameFromSettings(settings) === name);
 }
 
 /**
  *
  * @param {Array&lt;{webpack: *, settings: {location, data}}&gt;} configs
  */
-module.exports = function devServer(configs) {
+module.exports = async function devServer(configs) {
   const webpackConfigList = configs.map(({ webpack }) =&gt; webpack);
-  const settingList = configs.map(({ settings }) =&gt; settings);
+  const settingsList = configs.map(({ settings }) =&gt; settings);
+  const port = await portfinder.getPortPromise();
+  const template = await templatePromise;
 
-  templatePromise.then(template =&gt; {
-    const app = express();
+  console.log(settingsList);
 
-    webpackConfigList.forEach((config, index) =&gt; {
-      const compiler = webpack(config);
+  const app = express();
 
-      app.use(
-        webpackDevMiddleware(compiler, {
-          publicPath: `/${getNameFromSetting(settingList[index])}/`,
-        }),
-      );
-      app.use(webpackHotMiddleware(compiler));
-    });
+  webpackConfigList.forEach((config, index) =&gt; {
+    const compiler = webpack(config);
 
-
-    app.get(&apos;/&apos;, (req, res) =&gt; {
-      const templateConfig = {
-        banner: settingList.map(value =&gt; {
-          const name = getNameFromSetting(value);
-
-          return {
-            src: `./${name}/`,
-            name,
-            width: value.data.settings.size.width,
-            height: value.data.settings.size.height,
-          };
-        }),
-      };
-
-      res.send(template(templateConfig));
-    });
-
-    portscanner.findAPortNotInUse(3000, 3010, &apos;127.0.0.1&apos;, function(error, port) {
-      app.listen(port, () =&gt; console.log(`Example app listening on http://localhost:${port}`));
-    });
-
-    // eslint-disable-next-line
-
-    process.on(&apos;uncaughtException&apos;, e =&gt; {
-      // eslint-disable-next-line
-      console.log(e);
-      // app.close();
-    });
-    process.on(&apos;SIGTERM&apos;, () =&gt; app.close());
+    app.use(
+      webpackDevMiddleware(compiler, {
+        publicPath: `/${getNameFromSettings(settingsList[index])}/`,
+      }),
+    );
+    app.use(webpackHotMiddleware(compiler));
   });
+
+  app.get(&apos;/&apos;, (req, res) =&gt; {
+    const templateConfig = {
+      banner: settingsList.map(value =&gt; {
+        const name = getNameFromSettings(value);
+
+        return {
+          src: `./${name}/`,
+          name,
+          width: value.data.settings.size.width,
+          height: value.data.settings.size.height,
+        };
+      }),
+    };
+
+    res.send(template(templateConfig));
+  });
+
+  app.get(&apos;/screenshot/:target&apos;, (req, res) =&gt; {
+    const name = req.params.target;
+    const location = path.join(__dirname, &apos;../tempfolder&apos;, &apos;screenshot.png&apos;);
+    const result = settingsList.find(val =&gt; getNameFromSettings(val) === name);
+
+    const data = {
+      config: {},
+      url: `http://localhost:${port}/${name}/`,
+      location,
+    };
+
+    if (
+      result &amp;&amp;
+      result.data &amp;&amp;
+      result.data.settings &amp;&amp;
+      result.data.settings.size &amp;&amp;
+      result.data.settings.size.width &amp;&amp;
+      result.data.settings.size.height
+    ) {
+      data.clip = {
+        x: 0,
+        y: 0,
+        width: result.data.settings.size.width,
+        height: result.data.settings.size.height,
+      };
+    }
+
+    screenshot
+      .fromUrl(data)
+      .then(() =&gt; readFile(location))
+      .then(img =&gt; {
+        res.contentType(&apos;image/png&apos;);
+        res.end(img, &apos;binary&apos;);
+      });
+  });
+
+  app.listen(port, () =&gt; console.log(`Example app listening on http://localhost:${port}`));
+
+  // eslint-disable-next-line
+
+  process.on(&apos;uncaughtException&apos;, e =&gt; {
+    // eslint-disable-next-line
+    console.log(e);
+    // app.close();
+  });
+  process.on(&apos;SIGTERM&apos;, () =&gt; app.close());
 };
 </code></pre>
 

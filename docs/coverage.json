@@ -1,6 +1,6 @@
 {
-  "coverage": "10.11%",
-  "expectCount": 89,
+  "coverage": "9.67%",
+  "expectCount": 93,
   "actualCount": 9,
   "files": {
     "src/build.js": {
@@ -15,7 +15,7 @@
       ]
     },
     "src/dev-server.js": {
-      "expectCount": 11,
+      "expectCount": 15,
       "actualCount": 1,
       "undocumentLines": [
         1,
@@ -26,8 +26,12 @@
         6,
         7,
         8,
+        9,
         10,
-        27
+        11,
+        13,
+        30,
+        35
       ]
     },
     "src/dev.js": {
