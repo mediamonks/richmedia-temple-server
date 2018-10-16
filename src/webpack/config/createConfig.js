@@ -95,7 +95,13 @@ module.exports = function createConfig({
                 ident: 'postcss',
                 plugins: (loader) => [
                   require('postcss-import')({ root: loader.resourcePath }),
-                  require('postcss-preset-env')(),
+                  require('postcss-preset-env')({
+                    stage: 2,
+                    features: {
+                      'nesting-rules': true
+                    },
+                    browsers: ['defaults','ie 11']
+                  }),
                   require('postcss-nested')(),
                   require('cssnano')()
                 ]
