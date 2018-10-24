@@ -82,7 +82,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name].css',
+                name: '[name]-[sha512:hash:base64:7].css',
               },
             },
             {
@@ -123,47 +123,42 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[hash].[ext]',
+                name: '[name]-[sha512:hash:base64:7].[ext]',
               },
             },
           ],
         },
         {
-          test: /\.(png|jpg|gif)$/,
+          test: /\.(gif|png|jpe?g|svg)$/i,
           use: [
             {
               loader: 'file-loader',
               options: {
-                name: '[hash].[ext]',
+                name: '[name]-[sha512:hash:base64:7].[ext]',
               },
             },
-
             {
               loader: 'image-webpack-loader',
               options: {
+                optipng: {
+                  enabled: true,
+                },
                 mozjpeg: {
                   progressive: true,
-                  quality: 65,
-                },
-                // optipng.enabled: false will disable optipng
-                optipng: {
-                  enabled: false,
+                  quality: 65
                 },
                 pngquant: {
                   quality: '65-90',
-                  speed: 4,
+                  speed: 4
                 },
                 gifsicle: {
                   interlaced: false,
-                },
-                // the webp option will enable WEBP
-                webp: {
-                  quality: 75,
                 },
               },
             },
           ],
         },
+
         {
           test: /\.js$/,
           // adding exception to libraries comming from @mediamonks namespace.
