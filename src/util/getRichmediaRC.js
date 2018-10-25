@@ -60,37 +60,34 @@ module.exports = function getRichmediaRC(
     filepath = path.join(filepath, '..');
     resolve = path.resolve(filepath) !== rootPath;
 
-    prom = prom
-      .then(
-        function(filepath) {
-          return filepath;
-        }.bind(this, filepath),
-      )
-      .then(filepath => readJson(`${filepath}/${data.name}${data.ext}`, cacheObject))
-      .then(json => {
-        if (json && json.content) {
-          Object.keys(json.content).forEach(key => {
-            const item = json.content[key];
-            if (
-              (item.type === 'image' || item.type === 'video') &&
-              item.url &&
-              !isExternalURL(item.url)
-            ) {
-              json.content[key].url = path.relative(
-                path.dirname(baseFilepath),
-                path.resolve(path.join(filepath, item.url)),
-              );
-            }
-          });
-        }
+    (function(scopedFilepath) {
+      prom = prom
+        .then(() => readJson(`${scopedFilepath}/${data.name}${data.ext}`, cacheObject))
+        .then(json => {
+          if (json && json.content) {
+            Object.keys(json.content).forEach(key => {
+              const item = json.content[key];
+              if (
+                (item.type === 'image' || item.type === 'video') &&
+                item.url &&
+                !isExternalURL(item.url)
+              ) {
+                json.content[key].url = path.relative(
+                  path.dirname(baseFilepath),
+                  path.resolve(path.join(scopedFilepath, item.url)),
+                );
+              }
+            });
+          }
 
-        if (json) {
-          result = {
-            ...json,
-            ...result,
-          };
-        }
-      });
+          if (json) {
+            result = {
+              ...json,
+              ...result,
+            };
+          }
+        });
+    })(filepath);
   }
 
   return prom.then(() => result);
