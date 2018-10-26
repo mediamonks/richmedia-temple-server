@@ -51,7 +51,7 @@ module.exports = async function build() {
     configsResult = configs.filter(config => config.location === answers.build);
   }
 
-  const result = await createConfigByRichmediarcList(configsResult);
+  const result = await createConfigByRichmediarcList(configsResult, 'production');
 
   const compiler = webpack(result).run((err, stats) => {
     if(err) console.log(err);

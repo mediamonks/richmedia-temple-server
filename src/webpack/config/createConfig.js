@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 // const PreloadWebpackPlugin = require('preload-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin');
@@ -31,13 +32,13 @@ module.exports = function createConfig({
   platform = 'unknown',
 }) {
   let devtool = 'inline-source-map';
-  const entry = ['@babel/polyfill'];//[`whatwg-fetch`, `promise-polyfill`];
+  const entry = []; //['@babel/polyfill']; //[`whatwg-fetch`, `promise-polyfill`];
 
   if (mode === 'production') {
     devtool = false;
   }
 
-  if(mode === 'development'){
+  if (mode === 'development') {
     entry.push(`webpack-hot-middleware/client`);
   }
 
@@ -45,11 +46,13 @@ module.exports = function createConfig({
 
   const config = {
     mode,
-    entry,
+    entry: {
+      main: entry,
+    },
 
     output: {
       path: outputPath,
-      filename: 'main.js',
+      filename: './[name].js',
     },
     externals: {
       // gsap external
@@ -74,6 +77,34 @@ module.exports = function createConfig({
       symlinks: true,
     },
 
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            comments: false,
+            mangle: false,
+            compress: false,
+          },
+        }),
+        new UglifyJsPlugin({
+          include: /\.min\.js$/,
+          sourceMap: false,
+          uglifyOptions: {
+            warnings: false,
+            parse: {},
+            compress: {},
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: false,
+          },
+        }),
+      ],
+    },
+
     module: {
       rules: [
         {
@@ -93,19 +124,19 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: (loader) => [
+                plugins: loader => [
                   require('postcss-import')({ root: loader.resourcePath }),
                   require('postcss-preset-env')({
                     stage: 2,
                     features: {
-                      'nesting-rules': true
+                      'nesting-rules': true,
                     },
-                    browsers: ['defaults','ie 11']
+                    browsers: ['defaults', 'ie 11'],
                   }),
                   require('postcss-nested')(),
-                  require('cssnano')()
-                ]
-              }
+                  require('cssnano')(),
+                ],
+              },
             },
           ],
         },
@@ -145,11 +176,11 @@ module.exports = function createConfig({
                 },
                 mozjpeg: {
                   progressive: true,
-                  quality: 65
+                  quality: 65,
                 },
                 pngquant: {
                   quality: '65-90',
-                  speed: 4
+                  speed: 4,
                 },
                 gifsicle: {
                   interlaced: false,
@@ -170,7 +201,7 @@ module.exports = function createConfig({
                 [
                   '@babel/preset-env',
                   {
-                    useBuiltIns: 'entry',
+                    useBuiltIns: 'usage',
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
@@ -214,13 +245,9 @@ module.exports = function createConfig({
         template: filepathHtml,
       }),
 
-      //
-      // new PreloadWebpackPlugin(),
       new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(false),
       }),
-      //
-      new webpack.HotModuleReplacementPlugin(),
       //
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
@@ -250,46 +277,15 @@ module.exports = function createConfig({
     );
   }
 
+  if (mode === 'development') {
+    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+  }
+
   if (mode === 'production') {
     config.plugins.push(
       new ZipPlugin({
-        // OPTIONAL: defaults to the Webpack output path (above)
-        // can be relative (to Webpack output path) or absolute
-        // path: '',
-
-        // OPTIONAL: defaults to the Webpack output filename (above) or,
-        // if not present, the basename of the path
         filename: 'bundle.zip',
 
-        // OPTIONAL: defaults to 'zip'
-        // the file extension to use instead of 'zip'
-        // extension: 'ext',
-
-        // OPTIONAL: defaults to the empty string
-        // the prefix for the files included in the zip file
-        // pathPrefix: 'relative/path',
-
-        // OPTIONAL: defaults to the identity function
-        // a function mapping asset paths to new paths
-        // pathMapper: function(assetPath) {
-        //    // put all pngs in an `images` subdir
-        //    if (assetPath.endsWith('.png'))
-        //       return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));
-        //    return assetPath;
-        // },
-
-        // OPTIONAL: defaults to including everything
-        // can be a string, a RegExp, or an array of strings and RegExps
-        // include: [/\.js$/],
-
-        // OPTIONAL: defaults to excluding nothing
-        // can be a string, a RegExp, or an array of strings and RegExps
-        // if a file matches both include and exclude, exclude takes precedence
-        // exclude: [/\.png$/, /\.html$/],
-
-        // yazl Options
-
-        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options
         fileOptions: {
           mtime: new Date(),
           mode: 0o100664,
@@ -297,7 +293,6 @@ module.exports = function createConfig({
           forceZip64Format: false,
         },
 
-        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback
         zipOptions: {
           forceZip64Format: false,
         },
