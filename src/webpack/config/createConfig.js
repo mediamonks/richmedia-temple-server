@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 // const PreloadWebpackPlugin = require('preload-webpack-plugin');
 // const CircularDependencyPlugin = require('circular-dependency-plugin');
@@ -31,7 +32,7 @@ module.exports = function createConfig({
   platform = 'unknown',
 }) {
   let devtool = 'inline-source-map';
-  const entry = ['@babel/polyfill']; //[`whatwg-fetch`, `promise-polyfill`];
+  const entry = []; //['@babel/polyfill']; //[`whatwg-fetch`, `promise-polyfill`];
 
   if (mode === 'production') {
     devtool = false;
@@ -45,11 +46,13 @@ module.exports = function createConfig({
 
   const config = {
     mode,
-    entry,
+    entry: {
+      main: entry,
+    },
 
     output: {
       path: outputPath,
-      filename: './main.js',
+      filename: './[name].js',
     },
     externals: {
       // gsap external
@@ -72,6 +75,34 @@ module.exports = function createConfig({
     resolveLoader: {
       modules: ['node_modules', nodeModules],
       symlinks: true,
+    },
+
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            comments: false,
+            mangle: false,
+            compress: false,
+          },
+        }),
+        new UglifyJsPlugin({
+          include: /\.min\.js$/,
+          sourceMap: false,
+          uglifyOptions: {
+            warnings: false,
+            parse: {},
+            compress: {},
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: false,
+          },
+        }),
+      ],
     },
 
     module: {
@@ -170,7 +201,7 @@ module.exports = function createConfig({
                 [
                   '@babel/preset-env',
                   {
-                    useBuiltIns: 'entry',
+                    useBuiltIns: 'usage',
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
@@ -214,12 +245,9 @@ module.exports = function createConfig({
         template: filepathHtml,
       }),
 
-      //
-      // new PreloadWebpackPlugin(),
       new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(false),
       }),
-
       //
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
