@@ -223,7 +223,15 @@ module.exports = function createConfig({
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
           },
         },
-
+        {
+          test: /\.(ttf|eot|woff|woff2)$/,
+          use: {
+            loader: "file-loader",
+            options: {
+              name: "[name]-[sha512:hash:base64:7].[ext]",
+            },
+          },
+        },
         {
           test: /\.html$/,
           exclude: /node_modules/,
