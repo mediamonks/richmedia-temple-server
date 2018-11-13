@@ -13,8 +13,8 @@ module.exports = function richmediaRCToMonetManifestJSON({ content, monet, setti
   result.rootComponents = Object.keys(content).map(name => content[name]);
 
   if (monet) {
-    result.creativeName = monet.creativeName;
-    result.agencyName = monet.agencyName;
+    result.creativeName = monet.creative;
+    result.agencyName = monet.agency;
   }
 
   result.width = settings.size.width;

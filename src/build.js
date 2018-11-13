@@ -53,7 +53,7 @@ module.exports = async function build() {
 
   const result = await createConfigByRichmediarcList(configsResult, 'production');
 
-  const compiler = webpack(result).run((err, stats) => {
-    if(err) console.log(err);
-  })
+  webpack(result).run((err, stats) => {
+    if (err) console.log(err);
+  });
 };

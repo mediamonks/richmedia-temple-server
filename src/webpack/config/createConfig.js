@@ -1,18 +1,15 @@
+const PlatformEnum = require('../../data/PlatformEnum');
+const DevEnum = require('../../data/DevEnum');
+
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-// const PreloadWebpackPlugin = require('preload-webpack-plugin');
-// const CircularDependencyPlugin = require('circular-dependency-plugin');
-// const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-// const Visualizer = require('webpack-visualizer-plugin');
 
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
-
-// console.log(nodeModules);
 /**
  *
  * @param {object} options
@@ -31,15 +28,16 @@ module.exports = function createConfig({
   mode = 'production',
   platform = 'unknown',
 }) {
-  let devtool = 'inline-source-map';
-  const entry = []; //['@babel/polyfill']; //[`whatwg-fetch`, `promise-polyfill`];
+  let devtool = false;
+  const entry = [];
 
-  if (mode === 'production') {
+  if (mode === DevEnum.PRODUCTION) {
     devtool = false;
   }
 
-  if (mode === 'development') {
+  if (mode === DevEnum.DEVELOPMENT) {
     entry.push(`webpack-hot-middleware/client`);
+    devtool = 'inline-source-map'
   }
 
   entry.push(filepathJs);
@@ -226,9 +224,9 @@ module.exports = function createConfig({
         {
           test: /\.(ttf|eot|woff|woff2)$/,
           use: {
-            loader: "file-loader",
+            loader: 'file-loader',
             options: {
-              name: "[name]-[sha512:hash:base64:7].[ext]",
+              name: '[name]-[sha512:hash:base64:7].[ext]',
             },
           },
         },
@@ -241,7 +239,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: ['img:src', 'video:src', 'link:href'],
+                attrs: ['img:src', 'video:src', 'link:href', 'source:src'],
               },
             },
           ],
@@ -256,7 +254,6 @@ module.exports = function createConfig({
       new webpack.DefinePlugin({
         PRODUCTION: JSON.stringify(false),
       }),
-      //
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
@@ -276,7 +273,7 @@ module.exports = function createConfig({
     devtool,
   };
 
-  if (platform === 'monet') {
+  if (platform === PlatformEnum.MONET) {
     config.plugins.push(
       new MonetJSONPlugin({
         config: filepathRichmediaRC,
@@ -285,11 +282,11 @@ module.exports = function createConfig({
     );
   }
 
-  if (mode === 'development') {
+  if (mode === DevEnum.DEVELOPMENT) {
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
-  if (mode === 'production') {
+  if (mode === DevEnum.PRODUCTION) {
     config.plugins.push(
       new ZipPlugin({
         filename: 'bundle.zip',
