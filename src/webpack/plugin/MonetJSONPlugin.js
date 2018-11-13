@@ -69,10 +69,6 @@ class MonetJSONPlugin {
       return compilation;
     });
   }
-
-  // apply_dadsa(compiler) {
-  //   compiler.hooks.emit.tapAsync('MonetJSONPlugin', (compilation, callback) => {});
-  // }
 }
 
 module.exports = MonetJSONPlugin;
