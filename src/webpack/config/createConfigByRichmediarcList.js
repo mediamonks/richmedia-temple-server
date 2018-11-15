@@ -85,7 +85,7 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
         mode,
       });
 
-      const webpackFilepath = `${path.dirname(location)}/webpack.config.js`;
+      const webpackFilepath = path.resolve(`${path.dirname(location)}/webpack.config.js`);
 
       // check if webpackconfig exists
       return fs.pathExists(webpackFilepath).then(exists => {
