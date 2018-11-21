@@ -106,6 +106,22 @@ module.exports = function createConfig({
     module: {
       rules: [
         {
+          test: /\.scss$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name]-[sha512:hash:base64:7].css',
+              },
+            },
+            {
+              loader: 'extract-loader',
+            },
+            'css-loader', // translates CSS into CommonJS
+            'sass-loader', // compiles Sass to CSS, using Node Sass by default
+          ],
+        },
+        {
           test: /\.css$/,
           use: [
             {
@@ -147,7 +163,7 @@ module.exports = function createConfig({
           ],
         },
         {
-          test: /\.(mp4|woff2|woff|oet|ttf|otf)$/,
+          test: /\.(mp4|woff2|woff|oet|ttf|otf|svg)$/,
           use: [
             {
               loader: 'file-loader',
@@ -158,7 +174,7 @@ module.exports = function createConfig({
           ],
         },
         {
-          test: /\.(gif|png|jpe?g|svg)$/i,
+          test: /\.(gif|png|jpe?g)$/i,
           use: [
             {
               loader: 'file-loader',
