@@ -37,7 +37,7 @@ module.exports = function createConfig({
 
   if (mode === DevEnum.DEVELOPMENT) {
     entry.push(`webpack-hot-middleware/client`);
-    devtool = 'inline-source-map'
+    devtool = 'inline-source-map';
   }
 
   entry.push(filepathJs);
@@ -255,7 +255,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: ['img:src', 'video:src', 'link:href', 'source:src'],
+                attrs: ['img:src', 'video:src', 'link:href', 'source:src', 'netflix-video:source'],
               },
             },
           ],
