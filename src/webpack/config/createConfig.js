@@ -255,7 +255,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: ['img:src', 'video:src', 'link:href', 'source:src', 'netflix-video:source'],
+                attrs: [':src', ':href', 'netflix-video:source', ':data-src'],
               },
             },
           ],
