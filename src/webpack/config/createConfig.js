@@ -163,7 +163,7 @@ module.exports = function createConfig({
           ],
         },
         {
-          test: /\.(mp4|woff2|woff|oet|ttf|otf|svg)$/,
+          test: /\.(mp4|svg)$/,
           use: [
             {
               loader: 'file-loader',
