@@ -113,7 +113,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]-[sha512:hash:base64:7].css',
+                name: '[name]_[sha512:hash:base64:7].css',
               },
             },
             {
@@ -129,7 +129,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]-[sha512:hash:base64:7].css',
+                name: '[name]_[sha512:hash:base64:7].css',
               },
             },
             {
@@ -170,7 +170,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]-[sha512:hash:base64:7].[ext]',
+                name: '[name]_[sha512:hash:base64:7].[ext]',
               },
             },
           ],
@@ -181,7 +181,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]-[sha512:hash:base64:7].[ext]',
+                name: '[name]_[sha512:hash:base64:7].[ext]',
               },
             },
             {
@@ -244,7 +244,7 @@ module.exports = function createConfig({
           use: {
             loader: 'file-loader',
             options: {
-              name: '[name]-[sha512:hash:base64:7].[ext]',
+              name: '[name]_[sha512:hash:base64:7].[ext]',
             },
           },
         },
