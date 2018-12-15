@@ -3,7 +3,7 @@ const configGeneratorByRichmediarcList = require('./webpack/config/createConfigB
 const devServer = require('./dev-server');
 const inquirer = require('inquirer');
 
-module.exports = async function dev(allConfigsSelector = './**/.richmediarc') {
+module.exports = async function dev(packageLocationList = null, allConfigsSelector = './**/.richmediarc') {
   const configs = await findJSONConfigs(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',

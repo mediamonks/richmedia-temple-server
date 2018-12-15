@@ -2,58 +2,73 @@ const findJSONConfigs = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const webpack = require('webpack');
 const inquirer = require('inquirer');
+const Spinner = require('cli-spinner').Spinner;
 
-module.exports = async function build() {
+module.exports = async function build(configPackages = null, buildTarget = './build') {
+  const spinner = new Spinner('gathering data.. %s');
+  spinner.setSpinnerString('|/-\\');
+  spinner.start();
+
   const allConfigsSelector = './**/.richmediarc';
 
   const configs = await findJSONConfigs(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
-  const questions = [];
 
-  questions.push(
-    {
-      type: 'list',
-      name: 'build',
-      message: 'Please choose the current build to start.',
-      choices: ['ALL', ...configs.map(({ location }) => location)],
-    },
-    {
-      type: 'list',
-      name: 'buildTarget',
-      message: 'Please choose build location',
-      choices: ['./build'],
-    },
-  );
+  let answers = {};
 
-  let answers = await inquirer.prompt(questions);
+  spinner.stop(true);
 
-  if (answers.buildTarget === 'other location') {
-    answers = {
-      ...answers,
-      ...(await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'buildTarget',
-          message: 'Please type in build location',
-          default: './build',
-        },
-      ])),
-    };
+  if (!configPackages || configPackages.length === 0) {
+    const questions = [];
+
+    questions.push(
+      {
+        type: 'checkbox',
+        name: 'build',
+        message: 'Please choose the current build to start.',
+        choices: [
+          { name: 'all' },
+          ...configs.map(({ location }) => ({ name: location, checked: false })),
+        ],
+      },
+      {
+        type: 'input',
+        name: 'buildTarget',
+        message: 'Please choose build location',
+        default: './build',
+      },
+    );
+
+    answers = await inquirer.prompt(questions);
   }
 
   let configsResult = null;
 
-  if (answers.build === 'ALL') {
+  if (!answers.build) {
+    answers.build = [...configPackages];
+  }
+
+  if (!answers.buildTarget) {
+    answers.buildTarget = buildTarget;
+  }
+
+  if (answers.build.find(item => item === 'all')) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(config => config.location === answers.build);
+    configsResult = configs.filter(config => answers.build.indexOf(config.location) >= 0);
   }
 
   const result = await createConfigByRichmediarcList(configsResult, 'production');
 
+  const spinnerBuilding = new Spinner(`building to ${answers.buildTarget} %s`);
+  spinnerBuilding.setSpinnerString('|/-\\');
+  spinnerBuilding.start();
+
   webpack(result).run((err, stats) => {
     if (err) console.log(err);
+
+    spinnerBuilding.stop();
   });
 };
