@@ -1,4 +1,6 @@
 const dev = require('./src/dev');
+const program = require('commander');
+const package = require('./package');
 
 program
   .version(package.version)
