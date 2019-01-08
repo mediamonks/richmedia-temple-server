@@ -5,8 +5,8 @@ const inquirer = require('inquirer');
 const Spinner = require('cli-spinner').Spinner;
 
 module.exports = async function build(configPackages = null, buildTarget = './build') {
-  const spinner = new Spinner('gathering data.. %s');
-  spinner.setSpinnerString('|/-\\');
+  const spinner = new Spinner('processing.. %s');
+  spinner.setSpinnerString('⠋⠙⠚⠒⠂⠂⠒⠲⠴⠦⠖⠒⠐⠐⠒⠓⠋');
   spinner.start();
 
   const allConfigsSelector = './**/.richmediarc';
@@ -62,13 +62,14 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
 
   const result = await createConfigByRichmediarcList(configsResult, 'production');
 
-  const spinnerBuilding = new Spinner(`building to ${answers.buildTarget} %s`);
-  spinnerBuilding.setSpinnerString('|/-\\');
-  spinnerBuilding.start();
-
-  webpack(result).run((err, stats) => {
-    if (err) console.log(err);
-
-    spinnerBuilding.stop();
-  });
+  return new Promise((resolve, reject) => {
+    webpack(result).run((err, stats) => {
+      if (err){
+        console.log(err);
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  })
 };

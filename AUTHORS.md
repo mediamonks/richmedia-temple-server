@@ -1,1 +1,1 @@
-* [Firstname Lastname](https://github.com/username)
+* [Mient-jan Stelling](https://github.com/meintjan)

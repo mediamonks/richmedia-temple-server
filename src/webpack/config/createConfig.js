@@ -1,15 +1,16 @@
-const PlatformEnum = require('../../data/PlatformEnum');
-const DevEnum = require('../../data/DevEnum');
-
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
+const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
+
+const PlatformEnum = require('../../data/PlatformEnum');
+const DevEnum = require('../../data/DevEnum');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
+
 /**
  *
  * @param {object} options
@@ -40,8 +41,8 @@ module.exports = function createConfig({
     devtool = 'inline-source-map';
   }
 
-  entry.push("@babel/polyfill");
-  entry.push("whatwg-fetch");
+  entry.push('@babel/polyfill');
+  entry.push('whatwg-fetch');
   entry.push(filepathJs);
 
   const config = {
@@ -322,6 +323,12 @@ module.exports = function createConfig({
       }),
     );
   }
+
+  config.plugins.push(
+    new SimpleProgressWebpackPlugin({
+      format: 'compact',
+    }),
+  );
 
   return config;
 };
