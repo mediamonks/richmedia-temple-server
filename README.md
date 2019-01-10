@@ -1,4 +1,4 @@
-# Richmedia Temple Server v1.0.0
+# Richmedia Temple Server v1.3.0
 
 Richmedia Temple Server is used as a tool to build and develop richmedia units
 
