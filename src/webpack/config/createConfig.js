@@ -227,6 +227,7 @@ module.exports = function createConfig({
               ],
               plugins: [
                 `@babel/plugin-proposal-class-properties`,
+                `@babel/plugin-syntax-dynamic-import`,
                 `@babel/plugin-transform-async-to-generator`,
               ],
             },
@@ -271,7 +272,7 @@ module.exports = function createConfig({
       }),
 
       new webpack.DefinePlugin({
-        PRODUCTION: JSON.stringify(false),
+        PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
       }),
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
