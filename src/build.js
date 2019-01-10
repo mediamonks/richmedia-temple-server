@@ -2,6 +2,7 @@ const findJSONConfigs = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const webpack = require('webpack');
 const inquirer = require('inquirer');
+const chalk = require('chalk');
 const Spinner = require('cli-spinner').Spinner;
 
 module.exports = async function build(configPackages = null, buildTarget = './build') {
@@ -20,28 +21,45 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
 
   spinner.stop(true);
 
+  if (configs.length === 0) {
+    throw new Error('could not find a compatible .richmediarc with entry points configured');
+  }
+
   if (!configPackages || configPackages.length === 0) {
     const questions = [];
 
-    questions.push(
-      {
+    if (configs.length > 1) {
+      questions.push({
         type: 'checkbox',
         name: 'build',
         message: 'Please choose the current build to start.',
         choices: [
-          { name: 'all' },
+          { name: 'all', checked: false },
           ...configs.map(({ location }) => ({ name: location, checked: false })),
         ],
-      },
-      {
-        type: 'input',
-        name: 'buildTarget',
-        message: 'Please choose build location',
-        default: './build',
-      },
-    );
+        validate: function(answer) {
+          if (answer.length < 1) {
+            return 'You must choose at least one.';
+          }
+          return true;
+        },
+      });
+    } else {
+      console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
+      answers.build = [configs[0].location];
+    }
 
-    answers = await inquirer.prompt(questions);
+    questions.push({
+      type: 'input',
+      name: 'buildTarget',
+      message: 'Please choose build location',
+      default: './build',
+    });
+
+    answers = {
+      ...answers,
+      ...(await inquirer.prompt(questions)),
+    };
   }
 
   let configsResult = null;
@@ -64,12 +82,12 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
 
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {
-      if (err){
+      if (err) {
         console.log(err);
         reject(err);
       } else {
         resolve();
       }
     });
-  })
+  });
 };

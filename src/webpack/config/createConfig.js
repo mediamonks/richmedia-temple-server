@@ -37,7 +37,7 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.DEVELOPMENT) {
-    entry.push(`webpack-hot-middleware/client`);
+    // entry.push(`webpack-hot-middleware/client?path=/${}/__webpack_hmr`);
     devtool = 'inline-source-map';
   }
 

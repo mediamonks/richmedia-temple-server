@@ -8,6 +8,7 @@ const handlebars = require('handlebars');
 const portfinder = require('portfinder');
 const screenshot = require('@mediamonks/richmedia-temple-screenshot');
 const util = require('util');
+const chalk = require('chalk');
 const readFile = util.promisify(fs.readFile);
 
 const templatePromise = Promise.resolve(true).then(
@@ -46,19 +47,37 @@ module.exports = async function devServer(configs) {
   const port = await portfinder.getPortPromise();
   const template = await templatePromise;
 
-  console.log(settingsList);
+  console.log(`${chalk.grey.bold('-')}
+${chalk.blue('i')} Server running. Please go to http://localhost:${port} } 
+${chalk.grey.bold('-')}
+`);
 
   const app = express();
 
   webpackConfigList.forEach((config, index) => {
+
     const compiler = webpack(config);
+    const name = getNameFromSettings(settingsList[index]);
 
     app.use(
       webpackDevMiddleware(compiler, {
-        publicPath: `/${getNameFromSettings(settingsList[index])}/`,
+        noInfo: true,
+        publicPath: `/${name}/`,
+        // publicPath: config.output.path,
       }),
     );
-    app.use(webpackHotMiddleware(compiler));
+
+    app.use(
+      webpackHotMiddleware(compiler, {
+        log: console.log,
+        path: `/${name}/__webpack_hmr`,
+        heartbeat: 10 * 1000,
+      }),
+    );
+    //
+    // app.use(webpackHotMiddleware(compiler, {
+    //   path: `/${getNameFromSettings(settingsList[index])}/__webpack_hmr`
+    // }));
   });
 
   app.get('/', (req, res) => {
@@ -114,7 +133,9 @@ module.exports = async function devServer(configs) {
       });
   });
 
-  app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`));
+  app.listen(port, () => {
+
+  });
 
   // eslint-disable-next-line
 
