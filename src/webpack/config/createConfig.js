@@ -78,34 +78,6 @@ module.exports = function createConfig({
       symlinks: true,
     },
 
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new UglifyJsPlugin({
-          uglifyOptions: {
-            comments: false,
-            mangle: false,
-            compress: false,
-          },
-        }),
-        new UglifyJsPlugin({
-          include: /\.min\.js$/,
-          sourceMap: false,
-          uglifyOptions: {
-            warnings: false,
-            parse: {},
-            compress: {},
-            mangle: true, // Note `mangle.properties` is `false` by default.
-            output: null,
-            toplevel: false,
-            nameCache: null,
-            ie8: false,
-            keep_fnames: false,
-          },
-        }),
-      ],
-    },
-
     module: {
       rules: [
         {
@@ -323,6 +295,34 @@ module.exports = function createConfig({
         },
       }),
     );
+
+    config.optimization = {
+      minimize: true,
+        minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            comments: false,
+            mangle: false,
+            compress: false,
+          },
+        }),
+        new UglifyJsPlugin({
+          include: /\.min\.js$/,
+          sourceMap: false,
+          uglifyOptions: {
+            warnings: false,
+            parse: {},
+            compress: {},
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: false,
+          },
+        }),
+      ],
+    };
   }
 
   config.plugins.push(
