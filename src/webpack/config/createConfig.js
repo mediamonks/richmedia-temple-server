@@ -162,10 +162,10 @@ module.exports = function createConfig({
                 },
                 mozjpeg: {
                   progressive: true,
-                  quality: 65,
+                  quality: 100,
                 },
                 pngquant: {
-                  quality: '65-90',
+                  quality: '95-100',
                   speed: 4,
                 },
                 gifsicle: {
