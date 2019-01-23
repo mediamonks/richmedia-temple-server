@@ -5,6 +5,7 @@ const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const PlatformEnum = require('../../data/PlatformEnum');
 const DevEnum = require('../../data/DevEnum');
@@ -67,9 +68,6 @@ module.exports = function createConfig({
     },
     resolve: {
       modules: ['node_modules', nodeModules],
-      alias: {
-        vendor: path.resolve(__dirname, '../../../vendor'),
-      },
     },
 
     resolveLoader: {
@@ -257,6 +255,9 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: './statistics.html',
       // }),
+      new CopyWebpackPlugin([
+        { from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }
+      ], {})
     ],
     stats: {
       colors: true,
