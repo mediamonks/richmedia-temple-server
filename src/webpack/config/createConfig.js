@@ -41,7 +41,7 @@ module.exports = function createConfig({
     devtool = 'inline-source-map';
   }
 
-  entry.push('@babel/polyfill');
+  // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
 
@@ -162,7 +162,7 @@ module.exports = function createConfig({
                 },
                 mozjpeg: {
                   progressive: true,
-                  quality: 65,
+                  quality: 80,
                 },
                 pngquant: {
                   quality: '65-90',
@@ -187,7 +187,7 @@ module.exports = function createConfig({
                 [
                   '@babel/preset-env',
                   {
-                    useBuiltIns: 'entry',
+                    useBuiltIns: 'usage',
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
