@@ -43,8 +43,8 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
     throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);
   }
 
-  const list = path.dirname(location).split(path.sep);
-  const outputPath = path.resolve(path.join('./build/', list[list.length - 1]));
+  const list = path.dirname(location).split(path.sep).filter(val => val[0] !== '.' );
+  const outputPath = path.resolve(path.join('./build/', list.join('_')));
 
   const filepathHtml = path.resolve(
     path.join(path.dirname(location), richmediaRc.settings.entry.html),

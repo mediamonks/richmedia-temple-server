@@ -29,12 +29,8 @@ const templatePromise = Promise.resolve(true).then(
 );
 
 function getNameFromSettings(settings) {
-  const urls = path.dirname(settings.location).split('/');
-  return urls[urls.length - 1];
-}
-
-function getSettingsFromSettingsListByName(name, settingsList) {
-  const result = settingsList.find(settings => getNameFromSettings(settings) === name);
+  const urls = path.dirname(settings.location).split('/').filter(val => val[0] !== '.' )
+  return urls.join('_');
 }
 
 /**
