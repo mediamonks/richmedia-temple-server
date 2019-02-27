@@ -58,6 +58,30 @@
         }
       },
       "required": ["type", "id", "videoType", "width", "height", "duration", "url"]
+    },
+    "monetVideo": {
+      "properties": {
+        "type": { "enum": ["monetVideo"] },
+        "id": { "type": "string" },
+        "videoType": { "type": "string" },
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "duration": { "type": "number" },
+        "video": {
+          "properties": {
+            "url":{
+              "format": "uri-reference",
+              "type": "string"
+            },
+            "encodes": {
+              "type": "array",
+              "items": {
+              }
+            }
+          }
+        }
+      },
+      "required": ["type", "id", "videoType", "width", "height", "duration", "video"]
     }
   },
   "properties": {
@@ -80,6 +104,9 @@
             },
             {
               "$ref": "#/definitions/video"
+            },
+            {
+              "$ref": "#/definitions/monetVideo"
             }
           ],
           "required": ["type", "id"]
