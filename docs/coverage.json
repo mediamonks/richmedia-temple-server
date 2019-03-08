@@ -1,17 +1,19 @@
 {
-  "coverage": "9.67%",
-  "expectCount": 93,
+  "coverage": "8.91%",
+  "expectCount": 101,
   "actualCount": 9,
   "files": {
     "src/build.js": {
-      "expectCount": 5,
+      "expectCount": 7,
       "actualCount": 0,
       "undocumentLines": [
         1,
         2,
         3,
         4,
-        6
+        5,
+        6,
+        8
       ]
     },
     "src/dev-server.js": {
@@ -29,20 +31,21 @@
         9,
         10,
         11,
-        13,
-        30,
-        35
+        12,
+        14,
+        31
       ]
     },
     "src/dev.js": {
-      "expectCount": 5,
+      "expectCount": 6,
       "actualCount": 0,
       "undocumentLines": [
         1,
         2,
         3,
         4,
-        6
+        5,
+        7
       ]
     },
     "src/util/OptionsValidationError.js": {
@@ -135,15 +138,20 @@
       ]
     },
     "src/webpack/config/createConfig.js": {
-      "expectCount": 7,
+      "expectCount": 12,
       "actualCount": 1,
       "undocumentLines": [
         1,
         2,
         3,
-        9,
+        4,
+        5,
+        6,
+        7,
+        8,
         10,
-        12
+        11,
+        13
       ]
     },
     "src/webpack/config/createConfigByRichmediarcList.js": {

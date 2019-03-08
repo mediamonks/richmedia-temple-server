@@ -42,6 +42,14 @@
 
   result.rootAssets = Object.keys(content).reduce((prev, name) =&gt; {
     const value = content[name];
+
+    if(value.type === &apos;monetVideo&apos;){
+      value.type = &apos;video&apos;;
+      value.url = value.video.url;
+
+      delete value.video
+    }
+
     prev[`${value.type}.${name}`] = value;
     return prev;
   }, {});

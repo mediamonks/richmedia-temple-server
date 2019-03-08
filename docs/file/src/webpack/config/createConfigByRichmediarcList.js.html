@@ -79,8 +79,8 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
     throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);
   }
 
-  const list = path.dirname(location).split(path.sep);
-  const outputPath = path.resolve(path.join(&apos;./build/&apos;, list[list.length - 1]));
+  const list = path.dirname(location).split(path.sep).filter(val =&gt; val[0] !== &apos;.&apos; );
+  const outputPath = path.resolve(path.join(&apos;./build/&apos;, list.join(&apos;_&apos;)));
 
   const filepathHtml = path.resolve(
     path.join(path.dirname(location), richmediaRc.settings.entry.html),
@@ -121,7 +121,7 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
         mode,
       });
 
-      const webpackFilepath = `${path.dirname(location)}/webpack.config.js`;
+      const webpackFilepath = path.resolve(`${path.dirname(location)}/webpack.config.js`);
 
       // check if webpackconfig exists
       return fs.pathExists(webpackFilepath).then(exists =&gt; {

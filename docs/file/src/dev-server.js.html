@@ -44,6 +44,7 @@ const handlebars = require(&apos;handlebars&apos;);
 const portfinder = require(&apos;portfinder&apos;);
 const screenshot = require(&apos;@mediamonks/richmedia-temple-screenshot&apos;);
 const util = require(&apos;util&apos;);
+const chalk = require(&apos;chalk&apos;);
 const readFile = util.promisify(fs.readFile);
 
 const templatePromise = Promise.resolve(true).then(
@@ -64,12 +65,8 @@ const templatePromise = Promise.resolve(true).then(
 );
 
 function getNameFromSettings(settings) {
-  const urls = path.dirname(settings.location).split(&apos;/&apos;);
-  return urls[urls.length - 1];
-}
-
-function getSettingsFromSettingsListByName(name, settingsList) {
-  const result = settingsList.find(settings =&gt; getNameFromSettings(settings) === name);
+  const urls = path.dirname(settings.location).split(&apos;/&apos;).filter(val =&gt; val[0] !== &apos;.&apos; )
+  return urls.join(&apos;_&apos;);
 }
 
 /**
@@ -82,19 +79,37 @@ module.exports = async function devServer(configs) {
   const port = await portfinder.getPortPromise();
   const template = await templatePromise;
 
-  console.log(settingsList);
+  console.log(`${chalk.grey.bold(&apos;-&apos;)}
+${chalk.blue(&apos;i&apos;)} Server running. Please go to http://localhost:${port} } 
+${chalk.grey.bold(&apos;-&apos;)}
+`);
 
   const app = express();
 
   webpackConfigList.forEach((config, index) =&gt; {
+
     const compiler = webpack(config);
+    const name = getNameFromSettings(settingsList[index]);
 
     app.use(
       webpackDevMiddleware(compiler, {
-        publicPath: `/${getNameFromSettings(settingsList[index])}/`,
+        noInfo: true,
+        publicPath: `/${name}/`,
+        // publicPath: config.output.path,
       }),
     );
-    app.use(webpackHotMiddleware(compiler));
+
+    app.use(
+      webpackHotMiddleware(compiler, {
+        log: console.log,
+        path: `/${name}/__webpack_hmr`,
+        heartbeat: 10 * 1000,
+      }),
+    );
+    //
+    // app.use(webpackHotMiddleware(compiler, {
+    //   path: `/${getNameFromSettings(settingsList[index])}/__webpack_hmr`
+    // }));
   });
 
   app.get(&apos;/&apos;, (req, res) =&gt; {
@@ -150,7 +165,9 @@ module.exports = async function devServer(configs) {
       });
   });
 
-  app.listen(port, () =&gt; console.log(`Example app listening on http://localhost:${port}`));
+  app.listen(port, () =&gt; {
+
+  });
 
   // eslint-disable-next-line
 

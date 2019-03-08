@@ -38,34 +38,61 @@
 const configGeneratorByRichmediarcList = require(&apos;./webpack/config/createConfigByRichmediarcList&apos;);
 const devServer = require(&apos;./dev-server&apos;);
 const inquirer = require(&apos;inquirer&apos;);
+const chalk = require(&apos;chalk&apos;);
 
-module.exports = async function dev(allConfigsSelector = &apos;./**/.richmediarc&apos;) {
+module.exports = async function dev(
+  packageLocationList = null,
+  allConfigsSelector = &apos;./**/.richmediarc&apos;,
+) {
+
+  console.log(`${chalk.blue(&apos;i&apos;)} Searching for configs`);
+
   const configs = await findJSONConfigs(allConfigsSelector, [
     &apos;settings.entry.js&apos;,
     &apos;settings.entry.html&apos;,
   ]);
 
+
   if (configs.length === 0) {
     throw new Error(&apos;could not find a compatible .richmediarc with entry points configured&apos;);
   }
 
-  let questions;
+  console.log(`${chalk.green(&apos;&#x2714;&apos;)} Found ${configs.length} config(s)`);
 
-  const answers = await inquirer.prompt([
-    {
-      type: &apos;list&apos;,
-      name: &apos;devLocation&apos;,
-      message: &apos;Please choose the current build to start developing.&apos;,
-      choices: [&apos;ALL&apos;, ...configs.map(({ location }) =&gt; location)],
-    },
-  ]);
+  const question = {};
+  let answers = {
+    devLocation: &apos;all&apos;,
+  };
+
+  if (configs.length === 1) {
+    console.log(`  Choosing ${configs[0].location}`);
+    answers.devLocation = configs[0].location;
+  } else {
+    answers = await inquirer.prompt([
+      {
+        type: &apos;checkbox&apos;,
+        name: &apos;devLocation&apos;,
+        message: &apos;Please select config(s) build:&apos;,
+        choices: [
+          { name: &apos;all&apos;, checked: false },
+          ...configs.map(({ location }) =&gt; ({ name: location, checked: false })),
+        ],
+        validate(answer) {
+          if (answer.length &lt; 1) {
+            return `${chalk.red(&apos;&#x2716; You must choose at least one.&apos;)} `;
+          }
+          return true;
+        },
+      },
+    ]);
+  }
 
   let configsResult = null;
 
-  if (answers.devLocation === &apos;ALL&apos;) {
+  if (answers.devLocation.indexOf(&apos;all&apos;) &gt; -1) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({ location }) =&gt; location === answers.devLocation);
+    configsResult = configs.filter(({ location }) =&gt; answers.devLocation.indexOf(location) &gt; -1);
   }
 
   const result = await configGeneratorByRichmediarcList(configsResult, &apos;development&apos;);

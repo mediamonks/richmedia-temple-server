@@ -288,6 +288,18 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/data/devenum.js",
+    "file/src/data/DevEnum.js.html",
+    "src/data/DevEnum.js",
+    "file"
+  ],
+  [
+    "src/data/platformenum.js",
+    "file/src/data/PlatformEnum.js.html",
+    "src/data/PlatformEnum.js",
+    "file"
+  ],
+  [
     "src/dev-server.js",
     "file/src/dev-server.js.html",
     "src/dev-server.js",

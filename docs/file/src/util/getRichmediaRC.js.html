@@ -96,37 +96,34 @@ module.exports = function getRichmediaRC(
     filepath = path.join(filepath, &apos;..&apos;);
     resolve = path.resolve(filepath) !== rootPath;
 
-    prom = prom
-      .then(
-        function(filepath) {
-          return filepath;
-        }.bind(this, filepath),
-      )
-      .then(filepath =&gt; readJson(`${filepath}/${data.name}${data.ext}`, cacheObject))
-      .then(json =&gt; {
-        if (json &amp;&amp; json.content) {
-          Object.keys(json.content).forEach(key =&gt; {
-            const item = json.content[key];
-            if (
-              (item.type === &apos;image&apos; || item.type === &apos;video&apos;) &amp;&amp;
-              item.url &amp;&amp;
-              !isExternalURL(item.url)
-            ) {
-              json.content[key].url = path.relative(
-                path.dirname(baseFilepath),
-                path.resolve(path.join(filepath, item.url)),
-              );
-            }
-          });
-        }
+    (function(scopedFilepath) {
+      prom = prom
+        .then(() =&gt; readJson(`${scopedFilepath}/${data.name}${data.ext}`, cacheObject))
+        .then(json =&gt; {
+          if (json &amp;&amp; json.content) {
+            Object.keys(json.content).forEach(key =&gt; {
+              const item = json.content[key];
+              if (
+                (item.type === &apos;image&apos; || item.type === &apos;video&apos;) &amp;&amp;
+                item.url &amp;&amp;
+                !isExternalURL(item.url)
+              ) {
+                json.content[key].url = path.relative(
+                  path.dirname(baseFilepath),
+                  path.resolve(path.join(scopedFilepath, item.url)),
+                );
+              }
+            });
+          }
 
-        if (json) {
-          result = {
-            ...json,
-            ...result,
-          };
-        }
-      });
+          if (json) {
+            result = {
+              ...json,
+              ...result,
+            };
+          }
+        });
+    })(filepath);
   }
 
   return prom.then(() =&gt; result);

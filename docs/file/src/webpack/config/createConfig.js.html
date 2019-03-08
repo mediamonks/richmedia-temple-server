@@ -36,18 +36,18 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/createConfig.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
 const webpack = require(&apos;webpack&apos;);
+const UglifyJsPlugin = require(&apos;uglifyjs-webpack-plugin&apos;);
 const HtmlWebPackPlugin = require(&apos;html-webpack-plugin&apos;);
-// const PreloadWebpackPlugin = require(&apos;preload-webpack-plugin&apos;);
-// const CircularDependencyPlugin = require(&apos;circular-dependency-plugin&apos;);
-// const UglifyJsPlugin = require(&apos;uglifyjs-webpack-plugin&apos;);
-// const Visualizer = require(&apos;webpack-visualizer-plugin&apos;);
-
 const MonetJSONPlugin = require(&apos;../plugin/MonetJSONPlugin&apos;);
 const ZipPlugin = require(&apos;zip-webpack-plugin&apos;);
+const SimpleProgressWebpackPlugin = require(&apos;simple-progress-webpack-plugin&apos;);
+const CopyWebpackPlugin = require(&apos;copy-webpack-plugin&apos;);
+
+const PlatformEnum = require(&apos;../../data/PlatformEnum&apos;);
+const DevEnum = require(&apos;../../data/DevEnum&apos;);
 
 const nodeModules = `${path.resolve(__dirname, &apos;../../../node_modules&apos;)}/`;
 
-// console.log(nodeModules);
 /**
  *
  * @param {object} options
@@ -66,26 +66,30 @@ module.exports = function createConfig({
   mode = &apos;production&apos;,
   platform = &apos;unknown&apos;,
 }) {
-  let devtool = &apos;inline-source-map&apos;;
-  const entry = [&apos;@babel/polyfill&apos;];//[`whatwg-fetch`, `promise-polyfill`];
+  let devtool = false;
+  const entry = [];
 
-  if (mode === &apos;production&apos;) {
+  if (mode === DevEnum.PRODUCTION) {
     devtool = false;
   }
 
-  if(mode === &apos;development&apos;){
-    entry.push(`webpack-hot-middleware/client`);
+  if (mode === DevEnum.DEVELOPMENT) {
+    devtool = &apos;inline-source-map&apos;;
   }
 
+  // entry.push(&apos;@babel/polyfill&apos;);
+  entry.push(&apos;whatwg-fetch&apos;);
   entry.push(filepathJs);
 
   const config = {
     mode,
-    entry,
+    entry: {
+      main: entry,
+    },
 
     output: {
       path: outputPath,
-      filename: &apos;main.js&apos;,
+      filename: &apos;./[name].js&apos;,
     },
     externals: {
       // gsap external
@@ -100,9 +104,6 @@ module.exports = function createConfig({
     },
     resolve: {
       modules: [&apos;node_modules&apos;, nodeModules],
-      alias: {
-        vendor: path.resolve(__dirname, &apos;../../../vendor&apos;),
-      },
     },
 
     resolveLoader: {
@@ -113,12 +114,28 @@ module.exports = function createConfig({
     module: {
       rules: [
         {
+          test: /\.scss$/,
+          use: [
+            {
+              loader: &apos;file-loader&apos;,
+              options: {
+                name: &apos;[name]_[sha512:hash:base64:7].css&apos;,
+              },
+            },
+            {
+              loader: &apos;extract-loader&apos;,
+            },
+            &apos;css-loader&apos;, // translates CSS into CommonJS
+            &apos;sass-loader&apos;, // compiles Sass to CSS, using Node Sass by default
+          ],
+        },
+        {
           test: /\.css$/,
           use: [
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[name].css&apos;,
+                name: &apos;[name]_[sha512:hash:base64:7].css&apos;,
               },
             },
             {
@@ -129,19 +146,19 @@ module.exports = function createConfig({
               loader: &apos;postcss-loader&apos;,
               options: {
                 ident: &apos;postcss&apos;,
-                plugins: (loader) =&gt; [
+                plugins: loader =&gt; [
                   require(&apos;postcss-import&apos;)({ root: loader.resourcePath }),
                   require(&apos;postcss-preset-env&apos;)({
                     stage: 2,
                     features: {
-                      &apos;nesting-rules&apos;: true
+                      &apos;nesting-rules&apos;: true,
                     },
-                    browsers: [&apos;defaults&apos;,&apos;ie 11&apos;]
+                    browsers: [&apos;defaults&apos;, &apos;ie 11&apos;],
                   }),
                   require(&apos;postcss-nested&apos;)(),
-                  require(&apos;cssnano&apos;)()
-                ]
-              }
+                  require(&apos;cssnano&apos;)(),
+                ],
+              },
             },
           ],
         },
@@ -159,31 +176,29 @@ module.exports = function createConfig({
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[hash].[ext]&apos;,
+                name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
               },
             },
           ],
         },
         {
-          test: /\.(png|jpg|gif)$/,
+          test: /\.(gif|png|jpe?g)$/i,
           use: [
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[hash].[ext]&apos;,
+                name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
               },
             },
-
             {
               loader: &apos;image-webpack-loader&apos;,
               options: {
+                optipng: {
+                  enabled: true,
+                },
                 mozjpeg: {
                   progressive: true,
-                  quality: 65,
-                },
-                // optipng.enabled: false will disable optipng
-                optipng: {
-                  enabled: false,
+                  quality: 80,
                 },
                 pngquant: {
                   quality: &apos;65-90&apos;,
@@ -192,14 +207,11 @@ module.exports = function createConfig({
                 gifsicle: {
                   interlaced: false,
                 },
-                // the webp option will enable WEBP
-                webp: {
-                  quality: 75,
-                },
               },
             },
           ],
         },
+
         {
           test: /\.js$/,
           // adding exception to libraries comming from @mediamonks namespace.
@@ -211,7 +223,7 @@ module.exports = function createConfig({
                 [
                   &apos;@babel/preset-env&apos;,
                   {
-                    useBuiltIns: &apos;entry&apos;,
+                    useBuiltIns: &apos;usage&apos;,
                     targets: {
                       browsers: [&apos;ie 11&apos;, &apos;last 2 versions&apos;, &apos;safari &gt;= 7&apos;],
                     },
@@ -220,6 +232,7 @@ module.exports = function createConfig({
               ],
               plugins: [
                 `@babel/plugin-proposal-class-properties`,
+                `@babel/plugin-syntax-dynamic-import`,
                 `@babel/plugin-transform-async-to-generator`,
               ],
             },
@@ -233,7 +246,15 @@ module.exports = function createConfig({
             loader: path.resolve(path.join(__dirname, &apos;../loader/RichmediaRCLoader.js&apos;)),
           },
         },
-
+        {
+          test: /\.(ttf|eot|woff|woff2)$/,
+          use: {
+            loader: &apos;file-loader&apos;,
+            options: {
+              name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
+            },
+          },
+        },
         {
           test: /\.html$/,
           exclude: /node_modules/,
@@ -243,7 +264,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: [&apos;img:src&apos;, &apos;video:src&apos;, &apos;link:href&apos;],
+                attrs: [&apos;:src&apos;, &apos;:href&apos;, &apos;netflix-video:source&apos;, &apos;:data-src&apos;],
               },
             },
           ],
@@ -255,14 +276,9 @@ module.exports = function createConfig({
         template: filepathHtml,
       }),
 
-      //
-      // new PreloadWebpackPlugin(),
       new webpack.DefinePlugin({
-        PRODUCTION: JSON.stringify(false),
+        PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
       }),
-      //
-      new webpack.HotModuleReplacementPlugin(),
-      //
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
@@ -275,6 +291,9 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: &apos;./statistics.html&apos;,
       // }),
+      new CopyWebpackPlugin([
+        { from: path.resolve(path.dirname(filepathRichmediaRC), &apos;./static&apos;), to: &apos;static&apos; }
+      ], {})
     ],
     stats: {
       colors: true,
@@ -282,7 +301,7 @@ module.exports = function createConfig({
     devtool,
   };
 
-  if (platform === &apos;monet&apos;) {
+  if (platform === PlatformEnum.MONET) {
     config.plugins.push(
       new MonetJSONPlugin({
         config: filepathRichmediaRC,
@@ -291,46 +310,15 @@ module.exports = function createConfig({
     );
   }
 
-  if (mode === &apos;production&apos;) {
+  if (mode === DevEnum.DEVELOPMENT) {
+    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+  }
+
+  if (mode === DevEnum.PRODUCTION) {
     config.plugins.push(
       new ZipPlugin({
-        // OPTIONAL: defaults to the Webpack output path (above)
-        // can be relative (to Webpack output path) or absolute
-        // path: &apos;&apos;,
-
-        // OPTIONAL: defaults to the Webpack output filename (above) or,
-        // if not present, the basename of the path
         filename: &apos;bundle.zip&apos;,
 
-        // OPTIONAL: defaults to &apos;zip&apos;
-        // the file extension to use instead of &apos;zip&apos;
-        // extension: &apos;ext&apos;,
-
-        // OPTIONAL: defaults to the empty string
-        // the prefix for the files included in the zip file
-        // pathPrefix: &apos;relative/path&apos;,
-
-        // OPTIONAL: defaults to the identity function
-        // a function mapping asset paths to new paths
-        // pathMapper: function(assetPath) {
-        //    // put all pngs in an `images` subdir
-        //    if (assetPath.endsWith(&apos;.png&apos;))
-        //       return path.join(path.dirname(assetPath), &apos;images&apos;, path.basename(assetPath));
-        //    return assetPath;
-        // },
-
-        // OPTIONAL: defaults to including everything
-        // can be a string, a RegExp, or an array of strings and RegExps
-        // include: [/\.js$/],
-
-        // OPTIONAL: defaults to excluding nothing
-        // can be a string, a RegExp, or an array of strings and RegExps
-        // if a file matches both include and exclude, exclude takes precedence
-        // exclude: [/\.png$/, /\.html$/],
-
-        // yazl Options
-
-        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options
         fileOptions: {
           mtime: new Date(),
           mode: 0o100664,
@@ -338,13 +326,46 @@ module.exports = function createConfig({
           forceZip64Format: false,
         },
 
-        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback
         zipOptions: {
           forceZip64Format: false,
         },
       }),
     );
+
+    config.optimization = {
+      minimize: true,
+        minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            comments: false,
+            mangle: false,
+            compress: false,
+          },
+        }),
+        new UglifyJsPlugin({
+          include: /\.min\.js$/,
+          sourceMap: false,
+          uglifyOptions: {
+            warnings: false,
+            parse: {},
+            compress: {},
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: false,
+          },
+        }),
+      ],
+    };
   }
+
+  config.plugins.push(
+    new SimpleProgressWebpackPlugin({
+      format: &apos;compact&apos;,
+    }),
+  );
 
   return config;
 };

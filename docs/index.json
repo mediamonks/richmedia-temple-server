@@ -567,7 +567,7 @@
     "__docId__": 48,
     "kind": "file",
     "name": "src/build.js",
-    "content": "const findJSONConfigs = require('./util/findRichmediaRC');\nconst createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');\nconst webpack = require('webpack');\nconst inquirer = require('inquirer');\n\nmodule.exports = async function build() {\n  const allConfigsSelector = './**/.richmediarc';\n\n  const configs = await findJSONConfigs(allConfigsSelector, [\n    'settings.entry.js',\n    'settings.entry.html',\n  ]);\n  const questions = [];\n\n  questions.push(\n    {\n      type: 'list',\n      name: 'build',\n      message: 'Please choose the current build to start.',\n      choices: ['ALL', ...configs.map(({ location }) => location)],\n    },\n    {\n      type: 'list',\n      name: 'buildTarget',\n      message: 'Please choose build location',\n      choices: ['./build'],\n    },\n  );\n\n  let answers = await inquirer.prompt(questions);\n\n  if (answers.buildTarget === 'other location') {\n    answers = {\n      ...answers,\n      ...(await inquirer.prompt([\n        {\n          type: 'input',\n          name: 'buildTarget',\n          message: 'Please type in build location',\n          default: './build',\n        },\n      ])),\n    };\n  }\n\n  let configsResult = null;\n\n  if (answers.build === 'ALL') {\n    configsResult = configs;\n  } else {\n    configsResult = configs.filter(config => config.location === answers.build);\n  }\n\n  const result = await createConfigByRichmediarcList(configsResult);\n\n  const compiler = webpack(result).run((err, stats) => {\n    if(err) console.log(err);\n  })\n};\n",
+    "content": "const findJSONConfigs = require('./util/findRichmediaRC');\nconst createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');\nconst webpack = require('webpack');\nconst inquirer = require('inquirer');\nconst chalk = require('chalk');\nconst Spinner = require('cli-spinner').Spinner;\n\nmodule.exports = async function build(configPackages = null, buildTarget = './build') {\n  const spinner = new Spinner('processing.. %s');\n  spinner.setSpinnerString('⠋⠙⠚⠒⠂⠂⠒⠲⠴⠦⠖⠒⠐⠐⠒⠓⠋');\n  spinner.start();\n\n  const allConfigsSelector = './**/.richmediarc';\n\n  const configs = await findJSONConfigs(allConfigsSelector, [\n    'settings.entry.js',\n    'settings.entry.html',\n  ]);\n\n  let answers = {};\n\n  spinner.stop(true);\n\n  if (configs.length === 0) {\n    throw new Error('could not find a compatible .richmediarc with entry points configured');\n  }\n\n  if (!configPackages || configPackages.length === 0) {\n    const questions = [];\n\n    if (configs.length > 1) {\n      questions.push({\n        type: 'checkbox',\n        name: 'build',\n        message: 'Please choose the current build to start.',\n        choices: [\n          { name: 'all', checked: false },\n          ...configs.map(({ location }) => ({ name: location, checked: false })),\n        ],\n        validate: function(answer) {\n          if (answer.length < 1) {\n            return 'You must choose at least one.';\n          }\n          return true;\n        },\n      });\n    } else {\n      console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);\n      answers.build = [configs[0].location];\n    }\n\n    questions.push({\n      type: 'input',\n      name: 'buildTarget',\n      message: 'Please choose build location',\n      default: './build',\n    });\n\n    answers = {\n      ...answers,\n      ...(await inquirer.prompt(questions)),\n    };\n  }\n\n  let configsResult = null;\n\n  if (!answers.build) {\n    answers.build = [...configPackages];\n  }\n\n  if (!answers.buildTarget) {\n    answers.buildTarget = buildTarget;\n  }\n\n  if (answers.build.find(item => item === 'all')) {\n    configsResult = configs;\n  } else {\n    configsResult = configs.filter(config => answers.build.indexOf(config.location) >= 0);\n  }\n\n  const result = await createConfigByRichmediarcList(configsResult, 'production');\n\n  return new Promise((resolve, reject) => {\n    webpack(result).run((err, stats) => {\n      if (err) {\n        console.log(err);\n        reject(err);\n      } else {\n        resolve();\n      }\n    });\n  });\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/build.js",
     "access": "public",
@@ -660,6 +660,48 @@
   },
   {
     "__docId__": 53,
+    "kind": "variable",
+    "name": "chalk",
+    "memberof": "src/build.js",
+    "static": true,
+    "longname": "src/build.js~chalk",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/build.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 54,
+    "kind": "variable",
+    "name": "Spinner",
+    "memberof": "src/build.js",
+    "static": true,
+    "longname": "src/build.js~Spinner",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/build.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 6,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 55,
     "kind": "function",
     "name": "exports",
     "memberof": "src/build.js",
@@ -672,17 +714,61 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/build.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 6,
+    "lineNumber": 8,
     "undocument": true,
-    "params": [],
-    "return": null,
+    "params": [
+      {
+        "name": "configPackages",
+        "optional": true,
+        "types": [
+          "undefined"
+        ],
+        "defaultValue": "undefined"
+      },
+      {
+        "name": "buildTarget",
+        "optional": true,
+        "types": [
+          "string"
+        ],
+        "defaultRaw": "./build",
+        "defaultValue": "./build"
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
     "ignore": true
   },
   {
-    "__docId__": 54,
+    "__docId__": 56,
+    "kind": "file",
+    "name": "src/data/DevEnum.js",
+    "content": "module.exports = {\n  DEVELOPMENT: 'development',\n  PRODUCTION: 'production',\n};\n",
+    "static": true,
+    "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/data/DevEnum.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 57,
+    "kind": "file",
+    "name": "src/data/PlatformEnum.js",
+    "content": "module.exports = {\n  MONET: 'monet',\n  DOUBLECLICK: 'doubleclick',\n}\n",
+    "static": true,
+    "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/data/PlatformEnum.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 58,
     "kind": "file",
     "name": "src/dev-server.js",
-    "content": "const path = require('path');\nconst fs = require('fs');\nconst webpack = require('webpack');\nconst webpackDevMiddleware = require('webpack-dev-middleware');\nconst webpackHotMiddleware = require('webpack-hot-middleware');\nconst express = require('express');\nconst handlebars = require('handlebars');\nconst portfinder = require('portfinder');\nconst screenshot = require('@mediamonks/richmedia-temple-screenshot');\nconst util = require('util');\nconst readFile = util.promisify(fs.readFile);\n\nconst templatePromise = Promise.resolve(true).then(\n  () =>\n    new Promise((resolve, reject) => {\n      fs.readFile(\n        path.join(__dirname, './data/template.hbs'),\n        { encoding: 'utf-8' },\n        (err, data) => {\n          if (err) {\n            reject(err);\n          } else {\n            resolve(handlebars.compile(data));\n          }\n        },\n      );\n    }),\n);\n\nfunction getNameFromSettings(settings) {\n  const urls = path.dirname(settings.location).split('/');\n  return urls[urls.length - 1];\n}\n\nfunction getSettingsFromSettingsListByName(name, settingsList) {\n  const result = settingsList.find(settings => getNameFromSettings(settings) === name);\n}\n\n/**\n *\n * @param {Array<{webpack: *, settings: {location, data}}>} configs\n */\nmodule.exports = async function devServer(configs) {\n  const webpackConfigList = configs.map(({ webpack }) => webpack);\n  const settingsList = configs.map(({ settings }) => settings);\n  const port = await portfinder.getPortPromise();\n  const template = await templatePromise;\n\n  console.log(settingsList);\n\n  const app = express();\n\n  webpackConfigList.forEach((config, index) => {\n    const compiler = webpack(config);\n\n    app.use(\n      webpackDevMiddleware(compiler, {\n        publicPath: `/${getNameFromSettings(settingsList[index])}/`,\n      }),\n    );\n    app.use(webpackHotMiddleware(compiler));\n  });\n\n  app.get('/', (req, res) => {\n    const templateConfig = {\n      banner: settingsList.map(value => {\n        const name = getNameFromSettings(value);\n\n        return {\n          src: `./${name}/`,\n          name,\n          width: value.data.settings.size.width,\n          height: value.data.settings.size.height,\n        };\n      }),\n    };\n\n    res.send(template(templateConfig));\n  });\n\n  app.get('/screenshot/:target', (req, res) => {\n    const name = req.params.target;\n    const location = path.join(__dirname, '../tempfolder', 'screenshot.png');\n    const result = settingsList.find(val => getNameFromSettings(val) === name);\n\n    const data = {\n      config: {},\n      url: `http://localhost:${port}/${name}/`,\n      location,\n    };\n\n    if (\n      result &&\n      result.data &&\n      result.data.settings &&\n      result.data.settings.size &&\n      result.data.settings.size.width &&\n      result.data.settings.size.height\n    ) {\n      data.clip = {\n        x: 0,\n        y: 0,\n        width: result.data.settings.size.width,\n        height: result.data.settings.size.height,\n      };\n    }\n\n    screenshot\n      .fromUrl(data)\n      .then(() => readFile(location))\n      .then(img => {\n        res.contentType('image/png');\n        res.end(img, 'binary');\n      });\n  });\n\n  app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`));\n\n  // eslint-disable-next-line\n\n  process.on('uncaughtException', e => {\n    // eslint-disable-next-line\n    console.log(e);\n    // app.close();\n  });\n  process.on('SIGTERM', () => app.close());\n};\n",
+    "content": "const path = require('path');\nconst fs = require('fs');\nconst webpack = require('webpack');\nconst webpackDevMiddleware = require('webpack-dev-middleware');\nconst webpackHotMiddleware = require('webpack-hot-middleware');\nconst express = require('express');\nconst handlebars = require('handlebars');\nconst portfinder = require('portfinder');\nconst screenshot = require('@mediamonks/richmedia-temple-screenshot');\nconst util = require('util');\nconst chalk = require('chalk');\nconst readFile = util.promisify(fs.readFile);\n\nconst templatePromise = Promise.resolve(true).then(\n  () =>\n    new Promise((resolve, reject) => {\n      fs.readFile(\n        path.join(__dirname, './data/template.hbs'),\n        { encoding: 'utf-8' },\n        (err, data) => {\n          if (err) {\n            reject(err);\n          } else {\n            resolve(handlebars.compile(data));\n          }\n        },\n      );\n    }),\n);\n\nfunction getNameFromSettings(settings) {\n  const urls = path.dirname(settings.location).split('/').filter(val => val[0] !== '.' )\n  return urls.join('_');\n}\n\n/**\n *\n * @param {Array<{webpack: *, settings: {location, data}}>} configs\n */\nmodule.exports = async function devServer(configs) {\n  const webpackConfigList = configs.map(({ webpack }) => webpack);\n  const settingsList = configs.map(({ settings }) => settings);\n  const port = await portfinder.getPortPromise();\n  const template = await templatePromise;\n\n  console.log(`${chalk.grey.bold('-')}\n${chalk.blue('i')} Server running. Please go to http://localhost:${port} } \n${chalk.grey.bold('-')}\n`);\n\n  const app = express();\n\n  webpackConfigList.forEach((config, index) => {\n\n    const compiler = webpack(config);\n    const name = getNameFromSettings(settingsList[index]);\n\n    app.use(\n      webpackDevMiddleware(compiler, {\n        noInfo: true,\n        publicPath: `/${name}/`,\n        // publicPath: config.output.path,\n      }),\n    );\n\n    app.use(\n      webpackHotMiddleware(compiler, {\n        log: console.log,\n        path: `/${name}/__webpack_hmr`,\n        heartbeat: 10 * 1000,\n      }),\n    );\n    //\n    // app.use(webpackHotMiddleware(compiler, {\n    //   path: `/${getNameFromSettings(settingsList[index])}/__webpack_hmr`\n    // }));\n  });\n\n  app.get('/', (req, res) => {\n    const templateConfig = {\n      banner: settingsList.map(value => {\n        const name = getNameFromSettings(value);\n\n        return {\n          src: `./${name}/`,\n          name,\n          width: value.data.settings.size.width,\n          height: value.data.settings.size.height,\n        };\n      }),\n    };\n\n    res.send(template(templateConfig));\n  });\n\n  app.get('/screenshot/:target', (req, res) => {\n    const name = req.params.target;\n    const location = path.join(__dirname, '../tempfolder', 'screenshot.png');\n    const result = settingsList.find(val => getNameFromSettings(val) === name);\n\n    const data = {\n      config: {},\n      url: `http://localhost:${port}/${name}/`,\n      location,\n    };\n\n    if (\n      result &&\n      result.data &&\n      result.data.settings &&\n      result.data.settings.size &&\n      result.data.settings.size.width &&\n      result.data.settings.size.height\n    ) {\n      data.clip = {\n        x: 0,\n        y: 0,\n        width: result.data.settings.size.width,\n        height: result.data.settings.size.height,\n      };\n    }\n\n    screenshot\n      .fromUrl(data)\n      .then(() => readFile(location))\n      .then(img => {\n        res.contentType('image/png');\n        res.end(img, 'binary');\n      });\n  });\n\n  app.listen(port, () => {\n\n  });\n\n  // eslint-disable-next-line\n\n  process.on('uncaughtException', e => {\n    // eslint-disable-next-line\n    console.log(e);\n    // app.close();\n  });\n  process.on('SIGTERM', () => app.close());\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/dev-server.js",
     "access": "public",
@@ -690,7 +776,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 55,
+    "__docId__": 59,
     "kind": "variable",
     "name": "path",
     "memberof": "src/dev-server.js",
@@ -711,7 +797,7 @@
     "ignore": true
   },
   {
-    "__docId__": 56,
+    "__docId__": 60,
     "kind": "variable",
     "name": "fs",
     "memberof": "src/dev-server.js",
@@ -732,7 +818,7 @@
     "ignore": true
   },
   {
-    "__docId__": 57,
+    "__docId__": 61,
     "kind": "variable",
     "name": "webpack",
     "memberof": "src/dev-server.js",
@@ -753,7 +839,7 @@
     "ignore": true
   },
   {
-    "__docId__": 58,
+    "__docId__": 62,
     "kind": "variable",
     "name": "webpackDevMiddleware",
     "memberof": "src/dev-server.js",
@@ -774,7 +860,7 @@
     "ignore": true
   },
   {
-    "__docId__": 59,
+    "__docId__": 63,
     "kind": "variable",
     "name": "webpackHotMiddleware",
     "memberof": "src/dev-server.js",
@@ -795,7 +881,7 @@
     "ignore": true
   },
   {
-    "__docId__": 60,
+    "__docId__": 64,
     "kind": "variable",
     "name": "express",
     "memberof": "src/dev-server.js",
@@ -816,7 +902,7 @@
     "ignore": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 65,
     "kind": "variable",
     "name": "handlebars",
     "memberof": "src/dev-server.js",
@@ -837,7 +923,7 @@
     "ignore": true
   },
   {
-    "__docId__": 62,
+    "__docId__": 66,
     "kind": "variable",
     "name": "portfinder",
     "memberof": "src/dev-server.js",
@@ -858,7 +944,7 @@
     "ignore": true
   },
   {
-    "__docId__": 63,
+    "__docId__": 67,
     "kind": "variable",
     "name": "screenshot",
     "memberof": "src/dev-server.js",
@@ -879,7 +965,7 @@
     "ignore": true
   },
   {
-    "__docId__": 64,
+    "__docId__": 68,
     "kind": "variable",
     "name": "util",
     "memberof": "src/dev-server.js",
@@ -900,12 +986,12 @@
     "ignore": true
   },
   {
-    "__docId__": 65,
+    "__docId__": 69,
     "kind": "variable",
-    "name": "readFile",
+    "name": "chalk",
     "memberof": "src/dev-server.js",
     "static": true,
-    "longname": "src/dev-server.js~readFile",
+    "longname": "src/dev-server.js~chalk",
     "access": "public",
     "export": false,
     "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
@@ -921,7 +1007,28 @@
     "ignore": true
   },
   {
-    "__docId__": 66,
+    "__docId__": 70,
+    "kind": "variable",
+    "name": "readFile",
+    "memberof": "src/dev-server.js",
+    "static": true,
+    "longname": "src/dev-server.js~readFile",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 12,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 71,
     "kind": "variable",
     "name": "templatePromise",
     "memberof": "src/dev-server.js",
@@ -932,7 +1039,7 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 13,
+    "lineNumber": 14,
     "undocument": true,
     "type": {
       "types": [
@@ -942,7 +1049,7 @@
     "ignore": true
   },
   {
-    "__docId__": 67,
+    "__docId__": 72,
     "kind": "function",
     "name": "getNameFromSettings",
     "memberof": "src/dev-server.js",
@@ -955,7 +1062,7 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 30,
+    "lineNumber": 31,
     "undocument": true,
     "params": [
       {
@@ -973,40 +1080,7 @@
     "ignore": true
   },
   {
-    "__docId__": 68,
-    "kind": "function",
-    "name": "getSettingsFromSettingsListByName",
-    "memberof": "src/dev-server.js",
-    "generator": false,
-    "async": false,
-    "static": true,
-    "longname": "src/dev-server.js~getSettingsFromSettingsListByName",
-    "access": "public",
-    "export": false,
-    "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
-    "importStyle": null,
-    "description": null,
-    "lineNumber": 35,
-    "undocument": true,
-    "params": [
-      {
-        "name": "name",
-        "types": [
-          "*"
-        ]
-      },
-      {
-        "name": "settingsList",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": null,
-    "ignore": true
-  },
-  {
-    "__docId__": 69,
+    "__docId__": 73,
     "kind": "function",
     "name": "exports",
     "memberof": "src/dev-server.js",
@@ -1019,7 +1093,7 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/dev-server.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 43,
+    "lineNumber": 40,
     "params": [
       {
         "nullable": null,
@@ -1036,10 +1110,10 @@
     "ignore": true
   },
   {
-    "__docId__": 70,
+    "__docId__": 74,
     "kind": "file",
     "name": "src/dev.js",
-    "content": "const findJSONConfigs = require('./util/findRichmediaRC');\nconst configGeneratorByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');\nconst devServer = require('./dev-server');\nconst inquirer = require('inquirer');\n\nmodule.exports = async function dev(allConfigsSelector = './**/.richmediarc') {\n  const configs = await findJSONConfigs(allConfigsSelector, [\n    'settings.entry.js',\n    'settings.entry.html',\n  ]);\n\n  if (configs.length === 0) {\n    throw new Error('could not find a compatible .richmediarc with entry points configured');\n  }\n\n  let questions;\n\n  const answers = await inquirer.prompt([\n    {\n      type: 'list',\n      name: 'devLocation',\n      message: 'Please choose the current build to start developing.',\n      choices: ['ALL', ...configs.map(({ location }) => location)],\n    },\n  ]);\n\n  let configsResult = null;\n\n  if (answers.devLocation === 'ALL') {\n    configsResult = configs;\n  } else {\n    configsResult = configs.filter(({ location }) => location === answers.devLocation);\n  }\n\n  const result = await configGeneratorByRichmediarcList(configsResult, 'development');\n  const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));\n\n  devServer(list);\n};\n",
+    "content": "const findJSONConfigs = require('./util/findRichmediaRC');\nconst configGeneratorByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');\nconst devServer = require('./dev-server');\nconst inquirer = require('inquirer');\nconst chalk = require('chalk');\n\nmodule.exports = async function dev(\n  packageLocationList = null,\n  allConfigsSelector = './**/.richmediarc',\n) {\n\n  console.log(`${chalk.blue('i')} Searching for configs`);\n\n  const configs = await findJSONConfigs(allConfigsSelector, [\n    'settings.entry.js',\n    'settings.entry.html',\n  ]);\n\n\n  if (configs.length === 0) {\n    throw new Error('could not find a compatible .richmediarc with entry points configured');\n  }\n\n  console.log(`${chalk.green('✔')} Found ${configs.length} config(s)`);\n\n  const question = {};\n  let answers = {\n    devLocation: 'all',\n  };\n\n  if (configs.length === 1) {\n    console.log(`  Choosing ${configs[0].location}`);\n    answers.devLocation = configs[0].location;\n  } else {\n    answers = await inquirer.prompt([\n      {\n        type: 'checkbox',\n        name: 'devLocation',\n        message: 'Please select config(s) build:',\n        choices: [\n          { name: 'all', checked: false },\n          ...configs.map(({ location }) => ({ name: location, checked: false })),\n        ],\n        validate(answer) {\n          if (answer.length < 1) {\n            return `${chalk.red('✖ You must choose at least one.')} `;\n          }\n          return true;\n        },\n      },\n    ]);\n  }\n\n  let configsResult = null;\n\n  if (answers.devLocation.indexOf('all') > -1) {\n    configsResult = configs;\n  } else {\n    configsResult = configs.filter(({ location }) => answers.devLocation.indexOf(location) > -1);\n  }\n\n  const result = await configGeneratorByRichmediarcList(configsResult, 'development');\n  const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));\n\n  devServer(list);\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/dev.js",
     "access": "public",
@@ -1047,7 +1121,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 71,
+    "__docId__": 75,
     "kind": "variable",
     "name": "findJSONConfigs",
     "memberof": "src/dev.js",
@@ -1068,7 +1142,7 @@
     "ignore": true
   },
   {
-    "__docId__": 72,
+    "__docId__": 76,
     "kind": "variable",
     "name": "configGeneratorByRichmediarcList",
     "memberof": "src/dev.js",
@@ -1089,7 +1163,7 @@
     "ignore": true
   },
   {
-    "__docId__": 73,
+    "__docId__": 77,
     "kind": "variable",
     "name": "devServer",
     "memberof": "src/dev.js",
@@ -1110,7 +1184,7 @@
     "ignore": true
   },
   {
-    "__docId__": 74,
+    "__docId__": 78,
     "kind": "variable",
     "name": "inquirer",
     "memberof": "src/dev.js",
@@ -1131,7 +1205,28 @@
     "ignore": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 79,
+    "kind": "variable",
+    "name": "chalk",
+    "memberof": "src/dev.js",
+    "static": true,
+    "longname": "src/dev.js~chalk",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/dev.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 80,
     "kind": "function",
     "name": "exports",
     "memberof": "src/dev.js",
@@ -1144,9 +1239,17 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/dev.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 6,
+    "lineNumber": 7,
     "undocument": true,
     "params": [
+      {
+        "name": "packageLocationList",
+        "optional": true,
+        "types": [
+          "undefined"
+        ],
+        "defaultValue": "undefined"
+      },
       {
         "name": "allConfigsSelector",
         "optional": true,
@@ -1157,11 +1260,15 @@
         "defaultValue": "./**/.richmediarc"
       }
     ],
-    "return": null,
+    "return": {
+      "types": [
+        "boolean"
+      ]
+    },
     "ignore": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 81,
     "kind": "file",
     "name": "src/util/OptionsValidationError.js",
     "content": "/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Gajus Kuizinas @gajus\n*/\n\n'use strict';\n\nconst WebpackError = require('./WebpackError');\nconst webpackOptionsSchema = require('../schemas/WebpackOptions.json');\n\nconst getSchemaPart = (path, parents, additionalPath) => {\n  parents = parents || 0;\n  path = path.split('/');\n  path = path.slice(0, path.length - parents);\n  if (additionalPath) {\n    additionalPath = additionalPath.split('/');\n    path = path.concat(additionalPath);\n  }\n  let schemaPart = webpackOptionsSchema;\n  for (let i = 1; i < path.length; i++) {\n    const inner = schemaPart[path[i]];\n    if (inner) schemaPart = inner;\n  }\n  return schemaPart;\n};\n\nconst getSchemaPartText = (schemaPart, additionalPath) => {\n  if (additionalPath) {\n    for (let i = 0; i < additionalPath.length; i++) {\n      const inner = schemaPart[additionalPath[i]];\n      if (inner) schemaPart = inner;\n    }\n  }\n  while (schemaPart.$ref) {\n    schemaPart = getSchemaPart(schemaPart.$ref);\n  }\n  let schemaText = WebpackOptionsValidationError.formatSchema(schemaPart);\n  if (schemaPart.description) {\n    schemaText += `\\n-> ${schemaPart.description}`;\n  }\n  return schemaText;\n};\n\nconst getSchemaPartDescription = schemaPart => {\n  while (schemaPart.$ref) {\n    schemaPart = getSchemaPart(schemaPart.$ref);\n  }\n  if (schemaPart.description) {\n    return `\\n-> ${schemaPart.description}`;\n  }\n  return '';\n};\n\nconst filterChildren = children => {\n  return children.filter(\n    err => err.keyword !== 'anyOf' && err.keyword !== 'allOf' && err.keyword !== 'oneOf',\n  );\n};\n\nconst indent = (str, prefix, firstLine) => {\n  if (firstLine) {\n    return prefix + str.replace(/\\n(?!$)/g, '\\n' + prefix);\n  } else {\n    return str.replace(/\\n(?!$)/g, `\\n${prefix}`);\n  }\n};\n\nclass OptionsValidationError extends WebpackError {\n  constructor(validationErrors) {\n    super();\n\n    this.name = 'WebpackOptionsValidationError';\n    this.message =\n      'Invalid configuration object. ' +\n      'Webpack has been initialised using a configuration object that does not match the API schema.\\n' +\n      validationErrors\n        .map(\n          err =>\n            ' - ' + indent(WebpackOptionsValidationError.formatValidationError(err), '   ', false),\n        )\n        .join('\\n');\n    this.validationErrors = validationErrors;\n\n    Error.captureStackTrace(this, this.constructor);\n  }\n\n  static formatSchema(schema, prevSchemas) {\n    prevSchemas = prevSchemas || [];\n\n    const formatInnerSchema = (innerSchema, addSelf) => {\n      if (!addSelf) {\n        return WebpackOptionsValidationError.formatSchema(innerSchema, prevSchemas);\n      }\n      if (prevSchemas.includes(innerSchema)) {\n        return '(recursive)';\n      }\n      return WebpackOptionsValidationError.formatSchema(innerSchema, prevSchemas.concat(schema));\n    };\n\n    if (schema.type === 'string') {\n      if (schema.minLength === 1) {\n        return 'non-empty string';\n      }\n      if (schema.minLength > 1) {\n        return `string (min length ${schema.minLength})`;\n      }\n      return 'string';\n    }\n    if (schema.type === 'boolean') {\n      return 'boolean';\n    }\n    if (schema.type === 'number') {\n      return 'number';\n    }\n    if (schema.type === 'object') {\n      if (schema.properties) {\n        const required = schema.required || [];\n        return `object { ${Object.keys(schema.properties)\n          .map(property => {\n            if (!required.includes(property)) return property + '?';\n            return property;\n          })\n          .concat(schema.additionalProperties ? ['…'] : [])\n          .join(', ')} }`;\n      }\n      if (schema.additionalProperties) {\n        return `object { <key>: ${formatInnerSchema(schema.additionalProperties)} }`;\n      }\n      return 'object';\n    }\n    if (schema.type === 'array') {\n      return `[${formatInnerSchema(schema.items)}]`;\n    }\n\n    switch (schema.instanceof) {\n      case 'Function':\n        return 'function';\n      case 'RegExp':\n        return 'RegExp';\n    }\n\n    if (schema.$ref) {\n      return formatInnerSchema(getSchemaPart(schema.$ref), true);\n    }\n    if (schema.allOf) {\n      return schema.allOf.map(formatInnerSchema).join(' & ');\n    }\n    if (schema.oneOf) {\n      return schema.oneOf.map(formatInnerSchema).join(' | ');\n    }\n    if (schema.anyOf) {\n      return schema.anyOf.map(formatInnerSchema).join(' | ');\n    }\n    if (schema.enum) {\n      return schema.enum.map(item => JSON.stringify(item)).join(' | ');\n    }\n    return JSON.stringify(schema, null, 2);\n  }\n\n  static formatValidationError(err) {\n    const dataPath = `configuration${err.dataPath}`;\n    if (err.keyword === 'additionalProperties') {\n      const baseMessage = `${dataPath} has an unknown property '${\n        err.params.additionalProperty\n      }'. These properties are valid:\\n${getSchemaPartText(err.parentSchema)}`;\n      if (!err.dataPath) {\n        switch (err.params.additionalProperty) {\n          case 'debug':\n            return (\n              `${baseMessage}\\n` +\n              \"The 'debug' property was removed in webpack 2.0.0.\\n\" +\n              'Loaders should be updated to allow passing this option via loader options in module.rules.\\n' +\n              'Until loaders are updated one can use the LoaderOptionsPlugin to switch loaders into debug mode:\\n' +\n              'plugins: [\\n' +\n              '  new webpack.LoaderOptionsPlugin({\\n' +\n              '    debug: true\\n' +\n              '  })\\n' +\n              ']'\n            );\n        }\n        return (\n          `${baseMessage}\\n` +\n          'For typos: please correct them.\\n' +\n          'For loader options: webpack >= v2.0.0 no longer allows custom properties in configuration.\\n' +\n          '  Loaders should be updated to allow passing options via loader options in module.rules.\\n' +\n          '  Until loaders are updated one can use the LoaderOptionsPlugin to pass these options to the loader:\\n' +\n          '  plugins: [\\n' +\n          '    new webpack.LoaderOptionsPlugin({\\n' +\n          '      // test: /\\\\.xxx$/, // may apply this only for some modules\\n' +\n          '      options: {\\n' +\n          `        ${err.params.additionalProperty}: …\\n` +\n          '      }\\n' +\n          '    })\\n' +\n          '  ]'\n        );\n      }\n      return baseMessage;\n    } else if (err.keyword === 'oneOf' || err.keyword === 'anyOf') {\n      if (err.children && err.children.length > 0) {\n        if (err.schema.length === 1) {\n          const lastChild = err.children[err.children.length - 1];\n          const remainingChildren = err.children.slice(0, err.children.length - 1);\n          return WebpackOptionsValidationError.formatValidationError(\n            Object.assign({}, lastChild, {\n              children: remainingChildren,\n              parentSchema: Object.assign({}, err.parentSchema, lastChild.parentSchema),\n            }),\n          );\n        }\n        return (\n          `${dataPath} should be one of these:\\n${getSchemaPartText(err.parentSchema)}\\n` +\n          `Details:\\n${filterChildren(err.children)\n            .map(\n              err =>\n                ' * ' +\n                indent(WebpackOptionsValidationError.formatValidationError(err), '   ', false),\n            )\n            .join('\\n')}`\n        );\n      }\n      return `${dataPath} should be one of these:\\n${getSchemaPartText(err.parentSchema)}`;\n    } else if (err.keyword === 'enum') {\n      if (err.parentSchema && err.parentSchema.enum && err.parentSchema.enum.length === 1) {\n        return `${dataPath} should be ${getSchemaPartText(err.parentSchema)}`;\n      }\n      return `${dataPath} should be one of these:\\n${getSchemaPartText(err.parentSchema)}`;\n    } else if (err.keyword === 'allOf') {\n      return `${dataPath} should be:\\n${getSchemaPartText(err.parentSchema)}`;\n    } else if (err.keyword === 'type') {\n      switch (err.params.type) {\n        case 'object':\n          return `${dataPath} should be an object.${getSchemaPartDescription(err.parentSchema)}`;\n        case 'string':\n          return `${dataPath} should be a string.${getSchemaPartDescription(err.parentSchema)}`;\n        case 'boolean':\n          return `${dataPath} should be a boolean.${getSchemaPartDescription(err.parentSchema)}`;\n        case 'number':\n          return `${dataPath} should be a number.${getSchemaPartDescription(err.parentSchema)}`;\n        case 'array':\n          return `${dataPath} should be an array:\\n${getSchemaPartText(err.parentSchema)}`;\n      }\n      return `${dataPath} should be ${err.params.type}:\\n${getSchemaPartText(err.parentSchema)}`;\n    } else if (err.keyword === 'instanceof') {\n      return `${dataPath} should be an instance of ${getSchemaPartText(err.parentSchema)}`;\n    } else if (err.keyword === 'required') {\n      const missingProperty = err.params.missingProperty.replace(/^\\./, '');\n      return `${dataPath} misses the property '${missingProperty}'.\\n${getSchemaPartText(\n        err.parentSchema,\n        ['properties', missingProperty],\n      )}`;\n    } else if (err.keyword === 'minimum') {\n      return `${dataPath} ${err.message}.${getSchemaPartDescription(err.parentSchema)}`;\n    } else if (err.keyword === 'uniqueItems') {\n      return `${dataPath} should not contain the item '${\n        err.data[err.params.i]\n      }' twice.${getSchemaPartDescription(err.parentSchema)}`;\n    } else if (\n      err.keyword === 'minLength' ||\n      err.keyword === 'minItems' ||\n      err.keyword === 'minProperties'\n    ) {\n      if (err.params.limit === 1) {\n        return `${dataPath} should not be empty.${getSchemaPartDescription(err.parentSchema)}`;\n      } else {\n        return `${dataPath} ${err.message}${getSchemaPartDescription(err.parentSchema)}`;\n      }\n    } else if (err.keyword === 'absolutePath') {\n      const baseMessage = `${dataPath}: ${err.message}${getSchemaPartDescription(\n        err.parentSchema,\n      )}`;\n      if (dataPath === 'configuration.output.filename') {\n        return (\n          `${baseMessage}\\n` +\n          'Please use output.path to specify absolute path and output.filename for the file name.'\n        );\n      }\n      return baseMessage;\n    } else {\n      // eslint-disable-line no-fallthrough\n      return `${dataPath} ${err.message} (${JSON.stringify(err, null, 2)}).\\n${getSchemaPartText(\n        err.parentSchema,\n      )}`;\n    }\n  }\n}\n\nmodule.exports = OptionsValidationError;\n",
@@ -1172,7 +1279,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 77,
+    "__docId__": 82,
     "kind": "variable",
     "name": "WebpackError",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1193,7 +1300,7 @@
     "ignore": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 83,
     "kind": "variable",
     "name": "webpackOptionsSchema",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1214,7 +1321,7 @@
     "ignore": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 84,
     "kind": "function",
     "name": "getSchemaPart",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1257,7 +1364,7 @@
     "ignore": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 85,
     "kind": "function",
     "name": "getSchemaPartText",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1294,7 +1401,7 @@
     "ignore": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 86,
     "kind": "function",
     "name": "getSchemaPartDescription",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1325,7 +1432,7 @@
     "ignore": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 87,
     "kind": "function",
     "name": "filterChildren",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1356,7 +1463,7 @@
     "ignore": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 88,
     "kind": "function",
     "name": "indent",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1399,7 +1506,7 @@
     "ignore": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 89,
     "kind": "class",
     "name": "OptionsValidationError",
     "memberof": "src/util/OptionsValidationError.js",
@@ -1419,7 +1526,7 @@
     "ignore": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 90,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1433,7 +1540,7 @@
     "undocument": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 91,
     "kind": "member",
     "name": "name",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1450,7 +1557,7 @@
     }
   },
   {
-    "__docId__": 87,
+    "__docId__": 92,
     "kind": "member",
     "name": "message",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1467,7 +1574,7 @@
     }
   },
   {
-    "__docId__": 88,
+    "__docId__": 93,
     "kind": "member",
     "name": "validationErrors",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1484,7 +1591,7 @@
     }
   },
   {
-    "__docId__": 89,
+    "__docId__": 94,
     "kind": "method",
     "name": "formatSchema",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1517,7 +1624,7 @@
     }
   },
   {
-    "__docId__": 90,
+    "__docId__": 95,
     "kind": "method",
     "name": "formatValidationError",
     "memberof": "src/util/OptionsValidationError.js~OptionsValidationError",
@@ -1544,10 +1651,10 @@
     }
   },
   {
-    "__docId__": 91,
+    "__docId__": 96,
     "kind": "file",
     "name": "src/util/convert/richmediaRCToMonetBackupJSON.js",
-    "content": "module.exports = function richmediaRCToMonetBackupJSON({ content }) {\n  const result = {\n    rootAssets: {},\n    assetGroups: [],\n  };\n\n  result.rootAssets = Object.keys(content).reduce((prev, name) => {\n    const value = content[name];\n    prev[`${value.type}.${name}`] = value;\n    return prev;\n  }, {});\n\n  return result;\n};\n",
+    "content": "module.exports = function richmediaRCToMonetBackupJSON({ content }) {\n  const result = {\n    rootAssets: {},\n    assetGroups: [],\n  };\n\n  result.rootAssets = Object.keys(content).reduce((prev, name) => {\n    const value = content[name];\n\n    if(value.type === 'monetVideo'){\n      value.type = 'video';\n      value.url = value.video.url;\n\n      delete value.video\n    }\n\n    prev[`${value.type}.${name}`] = value;\n    return prev;\n  }, {});\n\n  return result;\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/util/convert/richmediaRCToMonetBackupJSON.js",
     "access": "public",
@@ -1555,7 +1662,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 92,
+    "__docId__": 97,
     "kind": "function",
     "name": "exports",
     "memberof": "src/util/convert/richmediaRCToMonetBackupJSON.js",
@@ -1590,10 +1697,10 @@
     "ignore": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 98,
     "kind": "file",
     "name": "src/util/convert/richmediaRCToMonetManifestJSON.js",
-    "content": "module.exports = function richmediaRCToMonetManifestJSON({ content, monet, settings }) {\n  const result = {\n    rootComponents: [],\n    titleComponents: [],\n    creativeName: '',\n    agencyName: '',\n    minTitles: 0,\n    maxTitles: 0,\n    width: 0,\n    height: 0,\n  };\n\n  result.rootComponents = Object.keys(content).map(name => content[name]);\n\n  if (monet) {\n    result.creativeName = monet.creativeName;\n    result.agencyName = monet.agencyName;\n  }\n\n  result.width = settings.size.width;\n  result.height = settings.size.height;\n\n  return result;\n};\n",
+    "content": "module.exports = function richmediaRCToMonetManifestJSON({ content, monet, settings }) {\n  const result = {\n    rootComponents: [],\n    titleComponents: [],\n    creativeName: '',\n    agencyName: '',\n    minTitles: 0,\n    maxTitles: 0,\n    width: 0,\n    height: 0,\n  };\n\n  result.rootComponents = Object.keys(content).map(name => content[name]);\n\n  if (monet) {\n    result.creativeName = monet.creative;\n    result.agencyName = monet.agency;\n  }\n\n  result.width = settings.size.width;\n  result.height = settings.size.height;\n\n  return result;\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/util/convert/richmediaRCToMonetManifestJSON.js",
     "access": "public",
@@ -1601,7 +1708,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 94,
+    "__docId__": 99,
     "kind": "function",
     "name": "exports",
     "memberof": "src/util/convert/richmediaRCToMonetManifestJSON.js",
@@ -1638,7 +1745,7 @@
     "ignore": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 100,
     "kind": "file",
     "name": "src/util/doesNestedExists.js",
     "content": "/**\n * checks if single pattern in property names\n * @param {any} obj\n * @param {Array<string>} pattern\n * @return {boolean}\n */\nfunction doesNestedExist(obj, pattern) {\n  for (let i = 0; i < pattern.length; i += 1) {\n    if (!obj || !Object.prototype.hasOwnProperty.call(obj, pattern[i])) {\n      return false;\n    }\n\n    // eslint-disable-next-line\n    obj = obj[pattern[i]];\n  }\n\n  return true;\n}\n\nmodule.exports = doesNestedExist;\n",
@@ -1649,7 +1756,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 96,
+    "__docId__": 101,
     "kind": "function",
     "name": "doesNestedExist",
     "memberof": "src/util/doesNestedExists.js",
@@ -1696,10 +1803,10 @@
     "ignore": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 102,
     "kind": "file",
     "name": "src/util/findRichmediaRC.js",
-    "content": "const getRichmediaRC = require('./getRichmediaRC');\nconst glob = require('glob');\nconst doesNestedExist = require('./doesNestedExists');\n\n/**\n * @description will search for files with a pattern.\n * @param {string} globQuery\n * @param {Array<string>} patterns ['data.settings.entry.js', 'data.settings.entry.html']\n * @return {Promise<Array<RCDto>>}\n */\nfunction findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {\n  return new Promise(resolve => {\n    const cache = {};\n    glob(globQuery, {}, (err, files) => {\n      Promise.all(\n        files.map(location =>\n          getRichmediaRC(location, './', true, cache).then(data => ({location, data})),\n        ),\n      ).then(result => {\n        const resolvedPatterns = patterns.map(pattern => pattern.split('.'));\n\n        resolve(\n          result.filter(({ data }) =>\n            resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),\n          ),\n        );\n      });\n    });\n  });\n}\n\nmodule.exports = findRichmediaRC;\n",
+    "content": "const getRichmediaRC = require('./getRichmediaRC');\nconst glob = require('glob');\nconst doesNestedExist = require('./doesNestedExists');\n\n/**\n * @description will search for files with a pattern.\n * @param {string} globQuery\n * @param {Array<string>} patterns ['data.settings.entry.js', 'data.settings.entry.html']\n * @return {Promise<Array<RCDto>>}\n */\nfunction findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {\n\n  return new Promise(resolve => {\n    const cache = {};\n    glob(globQuery, {ignore: ['./node_modules/**/.richmediarc']}, (err, files) => {\n      Promise.all(\n        files.map(location =>\n          getRichmediaRC(location, './', true, cache).then(data => ({location, data})),\n        ),\n      ).then(result => {\n        const resolvedPatterns = patterns.map(pattern => pattern.split('.'));\n\n        resolve(\n          result.filter(({ data }) =>\n            resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),\n          ),\n        );\n      });\n    });\n  });\n}\n\nmodule.exports = findRichmediaRC;\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/util/findRichmediaRC.js",
     "access": "public",
@@ -1707,7 +1814,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 98,
+    "__docId__": 103,
     "kind": "variable",
     "name": "getRichmediaRC",
     "memberof": "src/util/findRichmediaRC.js",
@@ -1728,7 +1835,7 @@
     "ignore": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 104,
     "kind": "variable",
     "name": "glob",
     "memberof": "src/util/findRichmediaRC.js",
@@ -1749,7 +1856,7 @@
     "ignore": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 105,
     "kind": "variable",
     "name": "doesNestedExist",
     "memberof": "src/util/findRichmediaRC.js",
@@ -1770,7 +1877,7 @@
     "ignore": true
   },
   {
-    "__docId__": 101,
+    "__docId__": 106,
     "kind": "function",
     "name": "findRichmediaRC",
     "memberof": "src/util/findRichmediaRC.js",
@@ -1823,7 +1930,7 @@
     "ignore": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 107,
     "kind": "file",
     "name": "src/util/formatErrorMessage.js",
     "content": "/**\n *\n * @param {keyword: string, dataPath, schemaPath,params,message} error\n */\nmodule.exports = function formatErrorMessage(error) {\n  let result = '';\n\n  result += `${error.dataPath.substr(1)} ${error.message}`;\n  return result;\n};\n",
@@ -1834,7 +1941,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 103,
+    "__docId__": 108,
     "kind": "function",
     "name": "exports",
     "memberof": "src/util/formatErrorMessage.js",
@@ -1868,7 +1975,7 @@
     "ignore": true
   },
   {
-    "__docId__": 104,
+    "__docId__": 109,
     "kind": "file",
     "name": "src/util/getPlatformByRichmediaRc.js",
     "content": "module.exports = function getPlatformByRichmediaRc(richmediaRc) {\n  if (!!richmediaRc.monet) {\n    return 'monet';\n  } else if (!!richmediaRc.doubleclick) {\n    return 'doubleclick';\n  } else {\n    return 'unknown';\n  }\n};\n",
@@ -1879,7 +1986,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 105,
+    "__docId__": 110,
     "kind": "function",
     "name": "exports",
     "memberof": "src/util/getPlatformByRichmediaRc.js",
@@ -1910,10 +2017,10 @@
     "ignore": true
   },
   {
-    "__docId__": 106,
+    "__docId__": 111,
     "kind": "file",
     "name": "src/util/getRichmediaRC.js",
-    "content": "/* eslint no-param-reassign: 0 */\n/* eslint no-unused-vars: 0 */\n/* eslint no-loop-func: 0 */\n/* eslint no-shadow: 0 */\n\nconst fs = require('fs-extra');\nconst path = require('path');\nconst isExternalURL = require('../util/isExternalURL');\n\nfunction readJson(filepath, cacheObject) {\n  let promiseJson;\n  if (cacheObject && cacheObject[filepath]) {\n    promiseJson = Promise.resolve(cacheObject[filepath]);\n  } else {\n    promiseJson = fs.pathExists(filepath).then(val => {\n      if (val) {\n        return fs.readJson(filepath).then(json => {\n          if (cacheObject && !cacheObject[filepath]) {\n            cacheObject[filepath] = json;\n          }\n\n          return json;\n        });\n      }\n\n      return false;\n    });\n  }\n\n  return promiseJson;\n}\n\n/**\n * getJSONConfig retrieves a jsonConfig config file and will\n * also inherit configs from parent jsonConfig files\n *\n * @param {string} filepathRichmediarc\n * @param {string} rootPath\n * @param {boolean} inheritParentConfig\n * @param {any} cacheObject\n * @return {Promise<void | never>}\n */\nmodule.exports = function getRichmediaRC(\n  filepathRichmediarc,\n  rootPath = './',\n  inheritParentConfig = true,\n  cacheObject = null,\n) {\n  let result = {};\n  let filepath = path.resolve(filepathRichmediarc);\n  const baseFilepath = filepath;\n  const data = path.parse(baseFilepath);\n\n  rootPath = path.resolve(rootPath);\n\n  let prom = Promise.resolve();\n  let resolve = path.resolve(baseFilepath) !== rootPath;\n\n  while (resolve) {\n    filepath = path.join(filepath, '..');\n    resolve = path.resolve(filepath) !== rootPath;\n\n    prom = prom\n      .then(\n        function(filepath) {\n          return filepath;\n        }.bind(this, filepath),\n      )\n      .then(filepath => readJson(`${filepath}/${data.name}${data.ext}`, cacheObject))\n      .then(json => {\n        if (json && json.content) {\n          Object.keys(json.content).forEach(key => {\n            const item = json.content[key];\n            if (\n              (item.type === 'image' || item.type === 'video') &&\n              item.url &&\n              !isExternalURL(item.url)\n            ) {\n              json.content[key].url = path.relative(\n                path.dirname(baseFilepath),\n                path.resolve(path.join(filepath, item.url)),\n              );\n            }\n          });\n        }\n\n        if (json) {\n          result = {\n            ...json,\n            ...result,\n          };\n        }\n      });\n  }\n\n  return prom.then(() => result);\n};\n",
+    "content": "/* eslint no-param-reassign: 0 */\n/* eslint no-unused-vars: 0 */\n/* eslint no-loop-func: 0 */\n/* eslint no-shadow: 0 */\n\nconst fs = require('fs-extra');\nconst path = require('path');\nconst isExternalURL = require('../util/isExternalURL');\n\nfunction readJson(filepath, cacheObject) {\n  let promiseJson;\n  if (cacheObject && cacheObject[filepath]) {\n    promiseJson = Promise.resolve(cacheObject[filepath]);\n  } else {\n    promiseJson = fs.pathExists(filepath).then(val => {\n      if (val) {\n        return fs.readJson(filepath).then(json => {\n          if (cacheObject && !cacheObject[filepath]) {\n            cacheObject[filepath] = json;\n          }\n\n          return json;\n        });\n      }\n\n      return false;\n    });\n  }\n\n  return promiseJson;\n}\n\n/**\n * getJSONConfig retrieves a jsonConfig config file and will\n * also inherit configs from parent jsonConfig files\n *\n * @param {string} filepathRichmediarc\n * @param {string} rootPath\n * @param {boolean} inheritParentConfig\n * @param {any} cacheObject\n * @return {Promise<void | never>}\n */\nmodule.exports = function getRichmediaRC(\n  filepathRichmediarc,\n  rootPath = './',\n  inheritParentConfig = true,\n  cacheObject = null,\n) {\n  let result = {};\n  let filepath = path.resolve(filepathRichmediarc);\n  const baseFilepath = filepath;\n  const data = path.parse(baseFilepath);\n\n  rootPath = path.resolve(rootPath);\n\n  let prom = Promise.resolve();\n  let resolve = path.resolve(baseFilepath) !== rootPath;\n\n  while (resolve) {\n    filepath = path.join(filepath, '..');\n    resolve = path.resolve(filepath) !== rootPath;\n\n    (function(scopedFilepath) {\n      prom = prom\n        .then(() => readJson(`${scopedFilepath}/${data.name}${data.ext}`, cacheObject))\n        .then(json => {\n          if (json && json.content) {\n            Object.keys(json.content).forEach(key => {\n              const item = json.content[key];\n              if (\n                (item.type === 'image' || item.type === 'video') &&\n                item.url &&\n                !isExternalURL(item.url)\n              ) {\n                json.content[key].url = path.relative(\n                  path.dirname(baseFilepath),\n                  path.resolve(path.join(scopedFilepath, item.url)),\n                );\n              }\n            });\n          }\n\n          if (json) {\n            result = {\n              ...json,\n              ...result,\n            };\n          }\n        });\n    })(filepath);\n  }\n\n  return prom.then(() => result);\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/util/getRichmediaRC.js",
     "access": "public",
@@ -1921,7 +2028,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 107,
+    "__docId__": 112,
     "kind": "variable",
     "name": "fs",
     "memberof": "src/util/getRichmediaRC.js",
@@ -1942,7 +2049,7 @@
     "ignore": true
   },
   {
-    "__docId__": 108,
+    "__docId__": 113,
     "kind": "variable",
     "name": "path",
     "memberof": "src/util/getRichmediaRC.js",
@@ -1963,7 +2070,7 @@
     "ignore": true
   },
   {
-    "__docId__": 109,
+    "__docId__": 114,
     "kind": "variable",
     "name": "isExternalURL",
     "memberof": "src/util/getRichmediaRC.js",
@@ -1984,7 +2091,7 @@
     "ignore": true
   },
   {
-    "__docId__": 110,
+    "__docId__": 115,
     "kind": "function",
     "name": "readJson",
     "memberof": "src/util/getRichmediaRC.js",
@@ -2021,7 +2128,7 @@
     "ignore": true
   },
   {
-    "__docId__": 111,
+    "__docId__": 116,
     "kind": "function",
     "name": "exports",
     "memberof": "src/util/getRichmediaRC.js",
@@ -2088,7 +2195,7 @@
     "ignore": true
   },
   {
-    "__docId__": 112,
+    "__docId__": 117,
     "kind": "file",
     "name": "src/util/isExternalURL.js",
     "content": "const reg = /^https?:\\/\\//;\n\nfunction isExternalURL(url) {\n  return reg.test(url);\n}\n\nmodule.exports = isExternalURL;\n",
@@ -2099,7 +2206,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 113,
+    "__docId__": 118,
     "kind": "variable",
     "name": "reg",
     "memberof": "src/util/isExternalURL.js",
@@ -2120,7 +2227,7 @@
     "ignore": true
   },
   {
-    "__docId__": 114,
+    "__docId__": 119,
     "kind": "function",
     "name": "isExternalURL",
     "memberof": "src/util/isExternalURL.js",
@@ -2151,7 +2258,7 @@
     "ignore": true
   },
   {
-    "__docId__": 115,
+    "__docId__": 120,
     "kind": "file",
     "name": "src/util/validateSchema.js",
     "content": "/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Gajus Kuizinas @gajus\n*/\nconst Ajv = require('ajv');\nconst ajv = new Ajv({\n  errorDataPath: 'configuration',\n  allErrors: true,\n  verbose: true,\n});\n// require(\"ajv-keywords\")(ajv, [\"instanceof\"]);\n// require(\"../schemas/ajv.absolutePath\")(ajv);\n\nconst validateSchema = (schema, options) => {\n  if (Array.isArray(options)) {\n    const errors = options.map(options => validateObject(schema, options));\n    errors.forEach((list, idx) => {\n      const applyPrefix = err => {\n        err.dataPath = `[${idx}]${err.dataPath}`;\n        if (err.children) {\n          err.children.forEach(applyPrefix);\n        }\n      };\n      list.forEach(applyPrefix);\n    });\n    return errors.reduce((arr, items) => {\n      return arr.concat(items);\n    }, []);\n  } else {\n    return validateObject(schema, options);\n  }\n};\n\nconst validateObject = (schema, options) => {\n  const validate = ajv.compile(schema);\n  const valid = validate(options);\n  return valid ? [] : filterErrors(validate.errors);\n};\n\nconst filterErrors = errors => {\n  let newErrors = [];\n  for (const err of errors) {\n    const dataPath = err.dataPath;\n    let children = [];\n    newErrors = newErrors.filter(oldError => {\n      if (oldError.dataPath.includes(dataPath)) {\n        if (oldError.children) {\n          children = children.concat(oldError.children.slice(0));\n        }\n        oldError.children = undefined;\n        children.push(oldError);\n        return false;\n      }\n      return true;\n    });\n    if (children.length) {\n      err.children = children;\n    }\n    newErrors.push(err);\n  }\n\n  return newErrors;\n};\n\nmodule.exports = validateSchema;\n",
@@ -2162,7 +2269,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 116,
+    "__docId__": 121,
     "kind": "variable",
     "name": "Ajv",
     "memberof": "src/util/validateSchema.js",
@@ -2183,7 +2290,7 @@
     "ignore": true
   },
   {
-    "__docId__": 117,
+    "__docId__": 122,
     "kind": "variable",
     "name": "ajv",
     "memberof": "src/util/validateSchema.js",
@@ -2204,7 +2311,7 @@
     "ignore": true
   },
   {
-    "__docId__": 118,
+    "__docId__": 123,
     "kind": "function",
     "name": "validateSchema",
     "memberof": "src/util/validateSchema.js",
@@ -2241,7 +2348,7 @@
     "ignore": true
   },
   {
-    "__docId__": 119,
+    "__docId__": 124,
     "kind": "function",
     "name": "validateObject",
     "memberof": "src/util/validateSchema.js",
@@ -2278,7 +2385,7 @@
     "ignore": true
   },
   {
-    "__docId__": 120,
+    "__docId__": 125,
     "kind": "function",
     "name": "filterErrors",
     "memberof": "src/util/validateSchema.js",
@@ -2309,10 +2416,10 @@
     "ignore": true
   },
   {
-    "__docId__": 121,
+    "__docId__": 126,
     "kind": "file",
     "name": "src/webpack/config/createConfig.js",
-    "content": "const path = require('path');\nconst webpack = require('webpack');\nconst HtmlWebPackPlugin = require('html-webpack-plugin');\n// const PreloadWebpackPlugin = require('preload-webpack-plugin');\n// const CircularDependencyPlugin = require('circular-dependency-plugin');\n// const UglifyJsPlugin = require('uglifyjs-webpack-plugin');\n// const Visualizer = require('webpack-visualizer-plugin');\n\nconst MonetJSONPlugin = require('../plugin/MonetJSONPlugin');\nconst ZipPlugin = require('zip-webpack-plugin');\n\nconst nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;\n\n// console.log(nodeModules);\n/**\n *\n * @param {object} options\n * @param {string} options.filepathJs\n * @param {string} options.filepathHtml\n * @param {string} options.filepathRichmediaRC\n * @param {string} options.outputPath\n * @param {string} options.mode\n * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}\n */\nmodule.exports = function createConfig({\n  filepathJs,\n  filepathHtml,\n  filepathRichmediaRC,\n  outputPath,\n  mode = 'production',\n  platform = 'unknown',\n}) {\n  let devtool = 'inline-source-map';\n  const entry = ['@babel/polyfill'];//[`whatwg-fetch`, `promise-polyfill`];\n\n  if (mode === 'production') {\n    devtool = false;\n  }\n\n  if(mode === 'development'){\n    entry.push(`webpack-hot-middleware/client`);\n  }\n\n  entry.push(filepathJs);\n\n  const config = {\n    mode,\n    entry,\n\n    output: {\n      path: outputPath,\n      filename: 'main.js',\n    },\n    externals: {\n      // gsap external\n      TweenLite: 'TweenLite',\n      TweenMax: 'TweenMax',\n      TimelineLite: 'TimelineLite',\n      TimelineMax: 'TimelineMax',\n\n      // doubleclick and monet external\n      Enabler: 'Enabler',\n      Monet: 'Monet',\n    },\n    resolve: {\n      modules: ['node_modules', nodeModules],\n      alias: {\n        vendor: path.resolve(__dirname, '../../../vendor'),\n      },\n    },\n\n    resolveLoader: {\n      modules: ['node_modules', nodeModules],\n      symlinks: true,\n    },\n\n    module: {\n      rules: [\n        {\n          test: /\\.css$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[name].css',\n              },\n            },\n            {\n              loader: 'extract-loader',\n            },\n            'css-loader',\n            {\n              loader: 'postcss-loader',\n              options: {\n                ident: 'postcss',\n                plugins: (loader) => [\n                  require('postcss-import')({ root: loader.resourcePath }),\n                  require('postcss-preset-env')({\n                    stage: 2,\n                    features: {\n                      'nesting-rules': true\n                    },\n                    browsers: ['defaults','ie 11']\n                  }),\n                  require('postcss-nested')(),\n                  require('cssnano')()\n                ]\n              }\n            },\n          ],\n        },\n        {\n          test: /\\.sketch$/,\n          use: [\n            {\n              loader: 'sketch-loader',\n            },\n          ],\n        },\n        {\n          test: /\\.(mp4|svg)$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[hash].[ext]',\n              },\n            },\n          ],\n        },\n        {\n          test: /\\.(png|jpg|gif)$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[hash].[ext]',\n              },\n            },\n\n            {\n              loader: 'image-webpack-loader',\n              options: {\n                mozjpeg: {\n                  progressive: true,\n                  quality: 65,\n                },\n                // optipng.enabled: false will disable optipng\n                optipng: {\n                  enabled: false,\n                },\n                pngquant: {\n                  quality: '65-90',\n                  speed: 4,\n                },\n                gifsicle: {\n                  interlaced: false,\n                },\n                // the webp option will enable WEBP\n                webp: {\n                  quality: 75,\n                },\n              },\n            },\n          ],\n        },\n        {\n          test: /\\.js$/,\n          // adding exception to libraries comming from @mediamonks namespace.\n          exclude: /(?!(node_modules\\/@mediamonks)|(node_modules\\\\@mediamonks))node_modules/,\n          use: {\n            loader: 'babel-loader',\n            options: {\n              presets: [\n                [\n                  '@babel/preset-env',\n                  {\n                    useBuiltIns: 'entry',\n                    targets: {\n                      browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],\n                    },\n                  },\n                ],\n              ],\n              plugins: [\n                `@babel/plugin-proposal-class-properties`,\n                `@babel/plugin-transform-async-to-generator`,\n              ],\n            },\n          },\n        },\n        {\n          test: /.richmediarc$/,\n          exclude: /node_modules/,\n          type: 'javascript/dynamic',\n          use: {\n            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),\n          },\n        },\n\n        {\n          test: /\\.html$/,\n          exclude: /node_modules/,\n          use: [\n            {\n              loader: 'html-loader',\n              options: {\n                minimize: false,\n\n                attrs: ['img:src', 'video:src', 'link:href'],\n              },\n            },\n          ],\n        },\n      ],\n    },\n    plugins: [\n      new HtmlWebPackPlugin({\n        template: filepathHtml,\n      }),\n\n      //\n      // new PreloadWebpackPlugin(),\n      new webpack.DefinePlugin({\n        PRODUCTION: JSON.stringify(false),\n      }),\n      //\n      new webpack.HotModuleReplacementPlugin(),\n      //\n      // new CircularDependencyPlugin({\n      //   // exclude detection of files based on a RegExp\n      //   exclude: /node_modules/,\n      //   // add errors to webpack instead of warnings\n      //   failOnError: true,\n      //   // set the current working directory for displaying module paths\n      //   cwd: process.cwd(),\n      // }),\n      //\n      // new Visualizer({\n      //   filename: './statistics.html',\n      // }),\n    ],\n    stats: {\n      colors: true,\n    },\n    devtool,\n  };\n\n  if (platform === 'monet') {\n    config.plugins.push(\n      new MonetJSONPlugin({\n        config: filepathRichmediaRC,\n        filePattern: '[hash].[ext]',\n      }),\n    );\n  }\n\n  if (mode === 'production') {\n    config.plugins.push(\n      new ZipPlugin({\n        // OPTIONAL: defaults to the Webpack output path (above)\n        // can be relative (to Webpack output path) or absolute\n        // path: '',\n\n        // OPTIONAL: defaults to the Webpack output filename (above) or,\n        // if not present, the basename of the path\n        filename: 'bundle.zip',\n\n        // OPTIONAL: defaults to 'zip'\n        // the file extension to use instead of 'zip'\n        // extension: 'ext',\n\n        // OPTIONAL: defaults to the empty string\n        // the prefix for the files included in the zip file\n        // pathPrefix: 'relative/path',\n\n        // OPTIONAL: defaults to the identity function\n        // a function mapping asset paths to new paths\n        // pathMapper: function(assetPath) {\n        //    // put all pngs in an `images` subdir\n        //    if (assetPath.endsWith('.png'))\n        //       return path.join(path.dirname(assetPath), 'images', path.basename(assetPath));\n        //    return assetPath;\n        // },\n\n        // OPTIONAL: defaults to including everything\n        // can be a string, a RegExp, or an array of strings and RegExps\n        // include: [/\\.js$/],\n\n        // OPTIONAL: defaults to excluding nothing\n        // can be a string, a RegExp, or an array of strings and RegExps\n        // if a file matches both include and exclude, exclude takes precedence\n        // exclude: [/\\.png$/, /\\.html$/],\n\n        // yazl Options\n\n        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#addfilerealpath-metadatapath-options\n        fileOptions: {\n          mtime: new Date(),\n          mode: 0o100664,\n          compress: true,\n          forceZip64Format: false,\n        },\n\n        // OPTIONAL: see https://github.com/thejoshwolfe/yazl#endoptions-finalsizecallback\n        zipOptions: {\n          forceZip64Format: false,\n        },\n      }),\n    );\n  }\n\n  return config;\n};\n",
+    "content": "const path = require('path');\nconst webpack = require('webpack');\nconst UglifyJsPlugin = require('uglifyjs-webpack-plugin');\nconst HtmlWebPackPlugin = require('html-webpack-plugin');\nconst MonetJSONPlugin = require('../plugin/MonetJSONPlugin');\nconst ZipPlugin = require('zip-webpack-plugin');\nconst SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');\nconst CopyWebpackPlugin = require('copy-webpack-plugin');\n\nconst PlatformEnum = require('../../data/PlatformEnum');\nconst DevEnum = require('../../data/DevEnum');\n\nconst nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;\n\n/**\n *\n * @param {object} options\n * @param {string} options.filepathJs\n * @param {string} options.filepathHtml\n * @param {string} options.filepathRichmediaRC\n * @param {string} options.outputPath\n * @param {string} options.mode\n * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}\n */\nmodule.exports = function createConfig({\n  filepathJs,\n  filepathHtml,\n  filepathRichmediaRC,\n  outputPath,\n  mode = 'production',\n  platform = 'unknown',\n}) {\n  let devtool = false;\n  const entry = [];\n\n  if (mode === DevEnum.PRODUCTION) {\n    devtool = false;\n  }\n\n  if (mode === DevEnum.DEVELOPMENT) {\n    devtool = 'inline-source-map';\n  }\n\n  // entry.push('@babel/polyfill');\n  entry.push('whatwg-fetch');\n  entry.push(filepathJs);\n\n  const config = {\n    mode,\n    entry: {\n      main: entry,\n    },\n\n    output: {\n      path: outputPath,\n      filename: './[name].js',\n    },\n    externals: {\n      // gsap external\n      TweenLite: 'TweenLite',\n      TweenMax: 'TweenMax',\n      TimelineLite: 'TimelineLite',\n      TimelineMax: 'TimelineMax',\n\n      // doubleclick and monet external\n      Enabler: 'Enabler',\n      Monet: 'Monet',\n    },\n    resolve: {\n      modules: ['node_modules', nodeModules],\n    },\n\n    resolveLoader: {\n      modules: ['node_modules', nodeModules],\n      symlinks: true,\n    },\n\n    module: {\n      rules: [\n        {\n          test: /\\.scss$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[name]_[sha512:hash:base64:7].css',\n              },\n            },\n            {\n              loader: 'extract-loader',\n            },\n            'css-loader', // translates CSS into CommonJS\n            'sass-loader', // compiles Sass to CSS, using Node Sass by default\n          ],\n        },\n        {\n          test: /\\.css$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[name]_[sha512:hash:base64:7].css',\n              },\n            },\n            {\n              loader: 'extract-loader',\n            },\n            'css-loader',\n            {\n              loader: 'postcss-loader',\n              options: {\n                ident: 'postcss',\n                plugins: loader => [\n                  require('postcss-import')({ root: loader.resourcePath }),\n                  require('postcss-preset-env')({\n                    stage: 2,\n                    features: {\n                      'nesting-rules': true,\n                    },\n                    browsers: ['defaults', 'ie 11'],\n                  }),\n                  require('postcss-nested')(),\n                  require('cssnano')(),\n                ],\n              },\n            },\n          ],\n        },\n        {\n          test: /\\.sketch$/,\n          use: [\n            {\n              loader: 'sketch-loader',\n            },\n          ],\n        },\n        {\n          test: /\\.(mp4|svg)$/,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[name]_[sha512:hash:base64:7].[ext]',\n              },\n            },\n          ],\n        },\n        {\n          test: /\\.(gif|png|jpe?g)$/i,\n          use: [\n            {\n              loader: 'file-loader',\n              options: {\n                name: '[name]_[sha512:hash:base64:7].[ext]',\n              },\n            },\n            {\n              loader: 'image-webpack-loader',\n              options: {\n                optipng: {\n                  enabled: true,\n                },\n                mozjpeg: {\n                  progressive: true,\n                  quality: 80,\n                },\n                pngquant: {\n                  quality: '65-90',\n                  speed: 4,\n                },\n                gifsicle: {\n                  interlaced: false,\n                },\n              },\n            },\n          ],\n        },\n\n        {\n          test: /\\.js$/,\n          // adding exception to libraries comming from @mediamonks namespace.\n          exclude: /(?!(node_modules\\/@mediamonks)|(node_modules\\\\@mediamonks))node_modules/,\n          use: {\n            loader: 'babel-loader',\n            options: {\n              presets: [\n                [\n                  '@babel/preset-env',\n                  {\n                    useBuiltIns: 'usage',\n                    targets: {\n                      browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],\n                    },\n                  },\n                ],\n              ],\n              plugins: [\n                `@babel/plugin-proposal-class-properties`,\n                `@babel/plugin-syntax-dynamic-import`,\n                `@babel/plugin-transform-async-to-generator`,\n              ],\n            },\n          },\n        },\n        {\n          test: /.richmediarc$/,\n          exclude: /node_modules/,\n          type: 'javascript/dynamic',\n          use: {\n            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),\n          },\n        },\n        {\n          test: /\\.(ttf|eot|woff|woff2)$/,\n          use: {\n            loader: 'file-loader',\n            options: {\n              name: '[name]_[sha512:hash:base64:7].[ext]',\n            },\n          },\n        },\n        {\n          test: /\\.html$/,\n          exclude: /node_modules/,\n          use: [\n            {\n              loader: 'html-loader',\n              options: {\n                minimize: false,\n\n                attrs: [':src', ':href', 'netflix-video:source', ':data-src'],\n              },\n            },\n          ],\n        },\n      ],\n    },\n    plugins: [\n      new HtmlWebPackPlugin({\n        template: filepathHtml,\n      }),\n\n      new webpack.DefinePlugin({\n        PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),\n      }),\n      // new CircularDependencyPlugin({\n      //   // exclude detection of files based on a RegExp\n      //   exclude: /node_modules/,\n      //   // add errors to webpack instead of warnings\n      //   failOnError: true,\n      //   // set the current working directory for displaying module paths\n      //   cwd: process.cwd(),\n      // }),\n      //\n      // new Visualizer({\n      //   filename: './statistics.html',\n      // }),\n      new CopyWebpackPlugin([\n        { from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }\n      ], {})\n    ],\n    stats: {\n      colors: true,\n    },\n    devtool,\n  };\n\n  if (platform === PlatformEnum.MONET) {\n    config.plugins.push(\n      new MonetJSONPlugin({\n        config: filepathRichmediaRC,\n        filePattern: '[hash].[ext]',\n      }),\n    );\n  }\n\n  if (mode === DevEnum.DEVELOPMENT) {\n    config.plugins.push(new webpack.HotModuleReplacementPlugin());\n  }\n\n  if (mode === DevEnum.PRODUCTION) {\n    config.plugins.push(\n      new ZipPlugin({\n        filename: 'bundle.zip',\n\n        fileOptions: {\n          mtime: new Date(),\n          mode: 0o100664,\n          compress: true,\n          forceZip64Format: false,\n        },\n\n        zipOptions: {\n          forceZip64Format: false,\n        },\n      }),\n    );\n\n    config.optimization = {\n      minimize: true,\n        minimizer: [\n        new UglifyJsPlugin({\n          uglifyOptions: {\n            comments: false,\n            mangle: false,\n            compress: false,\n          },\n        }),\n        new UglifyJsPlugin({\n          include: /\\.min\\.js$/,\n          sourceMap: false,\n          uglifyOptions: {\n            warnings: false,\n            parse: {},\n            compress: {},\n            mangle: true, // Note `mangle.properties` is `false` by default.\n            output: null,\n            toplevel: false,\n            nameCache: null,\n            ie8: false,\n            keep_fnames: false,\n          },\n        }),\n      ],\n    };\n  }\n\n  config.plugins.push(\n    new SimpleProgressWebpackPlugin({\n      format: 'compact',\n    }),\n  );\n\n  return config;\n};\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
     "access": "public",
@@ -2320,7 +2427,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 122,
+    "__docId__": 127,
     "kind": "variable",
     "name": "path",
     "memberof": "src/webpack/config/createConfig.js",
@@ -2341,7 +2448,7 @@
     "ignore": true
   },
   {
-    "__docId__": 123,
+    "__docId__": 128,
     "kind": "variable",
     "name": "webpack",
     "memberof": "src/webpack/config/createConfig.js",
@@ -2362,12 +2469,12 @@
     "ignore": true
   },
   {
-    "__docId__": 124,
+    "__docId__": 129,
     "kind": "variable",
-    "name": "HtmlWebPackPlugin",
+    "name": "UglifyJsPlugin",
     "memberof": "src/webpack/config/createConfig.js",
     "static": true,
-    "longname": "src/webpack/config/createConfig.js~HtmlWebPackPlugin",
+    "longname": "src/webpack/config/createConfig.js~UglifyJsPlugin",
     "access": "public",
     "export": false,
     "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
@@ -2383,7 +2490,28 @@
     "ignore": true
   },
   {
-    "__docId__": 125,
+    "__docId__": 130,
+    "kind": "variable",
+    "name": "HtmlWebPackPlugin",
+    "memberof": "src/webpack/config/createConfig.js",
+    "static": true,
+    "longname": "src/webpack/config/createConfig.js~HtmlWebPackPlugin",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 131,
     "kind": "variable",
     "name": "MonetJSONPlugin",
     "memberof": "src/webpack/config/createConfig.js",
@@ -2394,7 +2522,7 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 9,
+    "lineNumber": 5,
     "undocument": true,
     "type": {
       "types": [
@@ -2404,12 +2532,75 @@
     "ignore": true
   },
   {
-    "__docId__": 126,
+    "__docId__": 132,
     "kind": "variable",
     "name": "ZipPlugin",
     "memberof": "src/webpack/config/createConfig.js",
     "static": true,
     "longname": "src/webpack/config/createConfig.js~ZipPlugin",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 6,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 133,
+    "kind": "variable",
+    "name": "SimpleProgressWebpackPlugin",
+    "memberof": "src/webpack/config/createConfig.js",
+    "static": true,
+    "longname": "src/webpack/config/createConfig.js~SimpleProgressWebpackPlugin",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 7,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 134,
+    "kind": "variable",
+    "name": "CopyWebpackPlugin",
+    "memberof": "src/webpack/config/createConfig.js",
+    "static": true,
+    "longname": "src/webpack/config/createConfig.js~CopyWebpackPlugin",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 8,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 135,
+    "kind": "variable",
+    "name": "PlatformEnum",
+    "memberof": "src/webpack/config/createConfig.js",
+    "static": true,
+    "longname": "src/webpack/config/createConfig.js~PlatformEnum",
     "access": "public",
     "export": false,
     "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
@@ -2425,7 +2616,28 @@
     "ignore": true
   },
   {
-    "__docId__": 127,
+    "__docId__": 136,
+    "kind": "variable",
+    "name": "DevEnum",
+    "memberof": "src/webpack/config/createConfig.js",
+    "static": true,
+    "longname": "src/webpack/config/createConfig.js~DevEnum",
+    "access": "public",
+    "export": false,
+    "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 11,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 137,
     "kind": "variable",
     "name": "nodeModules",
     "memberof": "src/webpack/config/createConfig.js",
@@ -2436,7 +2648,7 @@
     "importPath": "@mediamonks/richmedia-temple-server/src/webpack/config/createConfig.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 12,
+    "lineNumber": 13,
     "undocument": true,
     "type": {
       "types": [
@@ -2446,7 +2658,7 @@
     "ignore": true
   },
   {
-    "__docId__": 128,
+    "__docId__": 138,
     "kind": "function",
     "name": "exports",
     "memberof": "src/webpack/config/createConfig.js",
@@ -2533,10 +2745,10 @@
     "ignore": true
   },
   {
-    "__docId__": 129,
+    "__docId__": 139,
     "kind": "file",
     "name": "src/webpack/config/createConfigByRichmediarcList.js",
-    "content": "const path = require('path');\nconst fs = require('fs-extra');\nconst Ajv = require('ajv');\nconst draft06 = require('ajv/lib/refs/json-schema-draft-06.json');\n\nconst formatErrorMessage = require('../../util/formatErrorMessage');\nconst createConfig = require('./createConfig');\nconst getPlatformByRichmediaRc = require('../../util/getPlatformByRichmediaRc');\n\nconst schema = require('../../schema/richmediarc.schema.json');\n\nconst ajv = new Ajv();\najv.addMetaSchema(draft06);\n\nconst schemaValidate = ajv.compile(schema);\n\n/**\n *\n * @param {string} location\n * @param {any} richmediaRc\n * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}\n */\nfunction validateSchemaAndCreatePaths(location, richmediaRc) {\n  // validate schema\n  const valid = schemaValidate(richmediaRc);\n\n  if (!valid) {\n    schemaValidate.errors.forEach(error => {\n      // eslint-disable-next-line\n      console.error(JSON.stringify(error));\n    });\n\n    throw new Error(formatErrorMessage(schemaValidate.errors[0]));\n  }\n\n  if (\n    !richmediaRc ||\n    !richmediaRc.settings ||\n    !richmediaRc.settings.entry ||\n    !richmediaRc.settings.entry.js ||\n    !richmediaRc.settings.entry.html\n  ) {\n    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);\n  }\n\n  const list = path.dirname(location).split(path.sep);\n  const outputPath = path.resolve(path.join('./build/', list[list.length - 1]));\n\n  const filepathHtml = path.resolve(\n    path.join(path.dirname(location), richmediaRc.settings.entry.html),\n  );\n\n  const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));\n  const filepathRichmediaRC = path.resolve(location);\n  const platform = getPlatformByRichmediaRc(richmediaRc);\n\n  return {\n    filepathHtml,\n    filepathJs,\n    filepathRichmediaRC,\n    outputPath,\n    platform\n  };\n}\n\n/**\n *\n * @param {Array<{location, data}>} richmediarcList\n * @param {string} mode\n * @return {Promise<any[]>}\n */\nfunction createConfigByRichmediarcList(richmediarcList, mode) {\n  const promiseList = richmediarcList.map(\n    ({ location, data }) => {\n      /**\n       * const {\n       *   filepathHtml,\n       *   filepathJs,\n       *   filepathRichmediaRC,\n       *   outputPath,\n       * } = validateSchemaAndCreatePaths(location, data);\n       */\n      const webpackConfig = createConfig({\n        ...validateSchemaAndCreatePaths(location, data),\n        mode,\n      });\n\n      const webpackFilepath = `${path.dirname(location)}/webpack.config.js`;\n\n      // check if webpackconfig exists\n      return fs.pathExists(webpackFilepath).then(exists => {\n        if (exists) {\n          // eslint-disable-next-line\n          const webpack = require(webpackFilepath);\n\n          if (typeof webpack === 'function') {\n            return webpack(webpackConfig);\n          }\n\n          return webpack;\n        }\n\n        return webpackConfig;\n      });\n    },\n    // projects can have there own webpack config. this will override the generated one.\n  );\n\n  return Promise.all(promiseList).then(webpackConfigs => webpackConfigs.filter(config => !!config));\n}\n\nmodule.exports = createConfigByRichmediarcList;\n",
+    "content": "const path = require('path');\nconst fs = require('fs-extra');\nconst Ajv = require('ajv');\nconst draft06 = require('ajv/lib/refs/json-schema-draft-06.json');\n\nconst formatErrorMessage = require('../../util/formatErrorMessage');\nconst createConfig = require('./createConfig');\nconst getPlatformByRichmediaRc = require('../../util/getPlatformByRichmediaRc');\n\nconst schema = require('../../schema/richmediarc.schema.json');\n\nconst ajv = new Ajv();\najv.addMetaSchema(draft06);\n\nconst schemaValidate = ajv.compile(schema);\n\n/**\n *\n * @param {string} location\n * @param {any} richmediaRc\n * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}\n */\nfunction validateSchemaAndCreatePaths(location, richmediaRc) {\n  // validate schema\n  const valid = schemaValidate(richmediaRc);\n\n  if (!valid) {\n    schemaValidate.errors.forEach(error => {\n      // eslint-disable-next-line\n      console.error(JSON.stringify(error));\n    });\n\n    throw new Error(formatErrorMessage(schemaValidate.errors[0]));\n  }\n\n  if (\n    !richmediaRc ||\n    !richmediaRc.settings ||\n    !richmediaRc.settings.entry ||\n    !richmediaRc.settings.entry.js ||\n    !richmediaRc.settings.entry.html\n  ) {\n    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);\n  }\n\n  const list = path.dirname(location).split(path.sep).filter(val => val[0] !== '.' );\n  const outputPath = path.resolve(path.join('./build/', list.join('_')));\n\n  const filepathHtml = path.resolve(\n    path.join(path.dirname(location), richmediaRc.settings.entry.html),\n  );\n\n  const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));\n  const filepathRichmediaRC = path.resolve(location);\n  const platform = getPlatformByRichmediaRc(richmediaRc);\n\n  return {\n    filepathHtml,\n    filepathJs,\n    filepathRichmediaRC,\n    outputPath,\n    platform\n  };\n}\n\n/**\n *\n * @param {Array<{location, data}>} richmediarcList\n * @param {string} mode\n * @return {Promise<any[]>}\n */\nfunction createConfigByRichmediarcList(richmediarcList, mode) {\n  const promiseList = richmediarcList.map(\n    ({ location, data }) => {\n      /**\n       * const {\n       *   filepathHtml,\n       *   filepathJs,\n       *   filepathRichmediaRC,\n       *   outputPath,\n       * } = validateSchemaAndCreatePaths(location, data);\n       */\n      const webpackConfig = createConfig({\n        ...validateSchemaAndCreatePaths(location, data),\n        mode,\n      });\n\n      const webpackFilepath = path.resolve(`${path.dirname(location)}/webpack.config.js`);\n\n      // check if webpackconfig exists\n      return fs.pathExists(webpackFilepath).then(exists => {\n        if (exists) {\n          // eslint-disable-next-line\n          const webpack = require(webpackFilepath);\n\n          if (typeof webpack === 'function') {\n            return webpack(webpackConfig);\n          }\n\n          return webpack;\n        }\n\n        return webpackConfig;\n      });\n    },\n    // projects can have there own webpack config. this will override the generated one.\n  );\n\n  return Promise.all(promiseList).then(webpackConfigs => webpackConfigs.filter(config => !!config));\n}\n\nmodule.exports = createConfigByRichmediarcList;\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/webpack/config/createConfigByRichmediarcList.js",
     "access": "public",
@@ -2544,7 +2756,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 130,
+    "__docId__": 140,
     "kind": "variable",
     "name": "path",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2565,7 +2777,7 @@
     "ignore": true
   },
   {
-    "__docId__": 131,
+    "__docId__": 141,
     "kind": "variable",
     "name": "fs",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2586,7 +2798,7 @@
     "ignore": true
   },
   {
-    "__docId__": 132,
+    "__docId__": 142,
     "kind": "variable",
     "name": "Ajv",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2607,7 +2819,7 @@
     "ignore": true
   },
   {
-    "__docId__": 133,
+    "__docId__": 143,
     "kind": "variable",
     "name": "draft06",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2628,7 +2840,7 @@
     "ignore": true
   },
   {
-    "__docId__": 134,
+    "__docId__": 144,
     "kind": "variable",
     "name": "formatErrorMessage",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2649,7 +2861,7 @@
     "ignore": true
   },
   {
-    "__docId__": 135,
+    "__docId__": 145,
     "kind": "variable",
     "name": "createConfig",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2670,7 +2882,7 @@
     "ignore": true
   },
   {
-    "__docId__": 136,
+    "__docId__": 146,
     "kind": "variable",
     "name": "getPlatformByRichmediaRc",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2691,7 +2903,7 @@
     "ignore": true
   },
   {
-    "__docId__": 137,
+    "__docId__": 147,
     "kind": "variable",
     "name": "schema",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2712,7 +2924,7 @@
     "ignore": true
   },
   {
-    "__docId__": 138,
+    "__docId__": 148,
     "kind": "variable",
     "name": "ajv",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2733,7 +2945,7 @@
     "ignore": true
   },
   {
-    "__docId__": 139,
+    "__docId__": 149,
     "kind": "variable",
     "name": "schemaValidate",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2754,7 +2966,7 @@
     "ignore": true
   },
   {
-    "__docId__": 140,
+    "__docId__": 150,
     "kind": "function",
     "name": "validateSchemaAndCreatePaths",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2801,7 +3013,7 @@
     "ignore": true
   },
   {
-    "__docId__": 141,
+    "__docId__": 151,
     "kind": "function",
     "name": "createConfigByRichmediarcList",
     "memberof": "src/webpack/config/createConfigByRichmediarcList.js",
@@ -2848,7 +3060,7 @@
     "ignore": true
   },
   {
-    "__docId__": 142,
+    "__docId__": 152,
     "kind": "file",
     "name": "src/webpack/loader/RichmediaRCLoader.js",
     "content": "const loaderUtils = require('loader-utils');\nconst isExternalURL = require('../../util/isExternalURL');\n\n/**\n * Allows you to import external files into a json value.\n * Can be used for any value, in an object or array.\n */\nmodule.exports = function RichmediaRCLoader(data) {\n  this.cacheable();\n  const loaderContext = this;\n  let content = typeof data === 'string' ? JSON.parse(data) : data;\n\n  let ruuid = Date.now();\n  const replaceItems = [];\n\n  if (content && content.content) {\n    Object.keys(content.content).forEach(key => {\n      const item = content.content[key];\n      if ((item.type === 'video' || item.type === 'image') && !isExternalURL(item.url)) {\n        ruuid += 1;\n        const id = `uuid_replace_${ruuid.toString(16)}`;\n        replaceItems.push({\n          key: loaderUtils.stringifyRequest(loaderContext, id),\n          value: `require(${loaderUtils.stringifyRequest(\n            loaderContext,\n            `file-loader!${item.url}`,\n          )})`,\n        });\n\n        item.url = id;\n      }\n    });\n  }\n\n  content = JSON.stringify(content)\n    .replace(/\\u2028/g, '\\\\u2028')\n    .replace(/\\u2029/g, '\\\\u2029');\n\n  content = replaceItems.reduce((prev, item) => prev.replace(item.key, item.value), content);\n\n  return `module.exports = ${content};`;\n};\n",
@@ -2859,7 +3071,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 143,
+    "__docId__": 153,
     "kind": "variable",
     "name": "loaderUtils",
     "memberof": "src/webpack/loader/RichmediaRCLoader.js",
@@ -2880,7 +3092,7 @@
     "ignore": true
   },
   {
-    "__docId__": 144,
+    "__docId__": 154,
     "kind": "variable",
     "name": "isExternalURL",
     "memberof": "src/webpack/loader/RichmediaRCLoader.js",
@@ -2901,7 +3113,7 @@
     "ignore": true
   },
   {
-    "__docId__": 145,
+    "__docId__": 155,
     "kind": "function",
     "name": "exports",
     "memberof": "src/webpack/loader/RichmediaRCLoader.js",
@@ -2931,10 +3143,10 @@
     "ignore": true
   },
   {
-    "__docId__": 146,
+    "__docId__": 156,
     "kind": "file",
     "name": "src/webpack/plugin/MonetJSONPlugin.js",
-    "content": "/* eslint no-param-reassign: 0 */\n/* eslint class-methods-use-this: 0 */\n\nconst fs = require('fs-extra');\nconst path = require('path');\nconst md5File = require('md5-file');\nconst isExternalURL = require('../../util/isExternalURL');\nconst getRichmediaRC = require('../../util/getRichmediaRC');\nconst richmediaRCToMonetBackupJSON = require('../../util/convert/richmediaRCToMonetBackupJSON');\nconst richmediaRCToMonetManifestJSON = require('../../util/convert/richmediaRCToMonetManifestJSON');\n\nclass MonetJSONPlugin {\n  constructor(options) {\n    this.config = options.config;\n  }\n\n  apply(compiler) {\n    compiler.hooks.emit.tapPromise('MonetJSONPlugin', async compilation => {\n      const json = await getRichmediaRC(this.config);\n\n      if (json.content) {\n        const result = Object.keys(json.content).map(key => {\n          const value = json.content[key];\n\n          if ((value.type === 'image' || value.type === 'video') && !isExternalURL(value.url)) {\n            const url = path.join(path.dirname(this.config), value.url);\n            const data = path.parse(url);\n            value.url = `${md5File.sync(url)}${data.ext}`;\n\n            return new Promise(resolve => {\n              fs.readFile(url, (err, source) => {\n                compilation.assets[value.url] = {\n                  source: () => source,\n                  size() {\n                    return Buffer.byteLength(this.source());\n                  },\n                };\n\n                resolve(compilation);\n              });\n            });\n          }\n\n          return null;\n        });\n\n        await Promise.all(result);\n        const backupResult = JSON.stringify(richmediaRCToMonetBackupJSON(json));\n        const manifestResult = JSON.stringify(richmediaRCToMonetManifestJSON(json));\n\n        // Insert this list into the Webpack build as a new file asset:\n        compilation.assets['backup.json'] = {\n          source: () => backupResult,\n          size() {\n            return this.source().length;\n          },\n        };\n\n        compilation.assets['manifest.json'] = {\n          source: () => manifestResult,\n          size() {\n            return this.source().length;\n          },\n        };\n\n        return compilation;\n      }\n\n      return compilation;\n    });\n  }\n\n  // apply_dadsa(compiler) {\n  //   compiler.hooks.emit.tapAsync('MonetJSONPlugin', (compilation, callback) => {});\n  // }\n}\n\nmodule.exports = MonetJSONPlugin;\n",
+    "content": "/* eslint no-param-reassign: 0 */\n/* eslint class-methods-use-this: 0 */\n\nconst fs = require('fs-extra');\nconst path = require('path');\nconst md5File = require('md5-file');\nconst isExternalURL = require('../../util/isExternalURL');\nconst getRichmediaRC = require('../../util/getRichmediaRC');\nconst richmediaRCToMonetBackupJSON = require('../../util/convert/richmediaRCToMonetBackupJSON');\nconst richmediaRCToMonetManifestJSON = require('../../util/convert/richmediaRCToMonetManifestJSON');\n\nclass MonetJSONPlugin {\n  constructor(options) {\n    this.config = options.config;\n  }\n\n  apply(compiler) {\n    compiler.hooks.emit.tapPromise('MonetJSONPlugin', async compilation => {\n      const json = await getRichmediaRC(this.config);\n\n      if (json.content) {\n        const result = Object.keys(json.content).map(key => {\n          const value = json.content[key];\n\n          if ((value.type === 'image' || value.type === 'video') && !isExternalURL(value.url)) {\n            const url = path.join(path.dirname(this.config), value.url);\n            const data = path.parse(url);\n            value.url = `${md5File.sync(url)}${data.ext}`;\n\n            return new Promise(resolve => {\n              fs.readFile(url, (err, source) => {\n                compilation.assets[value.url] = {\n                  source: () => source,\n                  size() {\n                    return Buffer.byteLength(this.source());\n                  },\n                };\n\n                resolve(compilation);\n              });\n            });\n          }\n\n          return null;\n        });\n\n        await Promise.all(result);\n        const backupResult = JSON.stringify(\n          richmediaRCToMonetBackupJSON(JSON.parse(JSON.stringify(json))),\n        );\n        const manifestResult = JSON.stringify(richmediaRCToMonetManifestJSON(json));\n\n        // Insert this list into the Webpack build as a new file asset:\n        compilation.assets['backup.json'] = {\n          source: () => backupResult,\n          size() {\n            return this.source().length;\n          },\n        };\n\n        compilation.assets['manifest.json'] = {\n          source: () => manifestResult,\n          size() {\n            return this.source().length;\n          },\n        };\n\n        return compilation;\n      }\n\n      return compilation;\n    });\n  }\n}\n\nmodule.exports = MonetJSONPlugin;\n",
     "static": true,
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/src/webpack/plugin/MonetJSONPlugin.js",
     "access": "public",
@@ -2942,7 +3154,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 147,
+    "__docId__": 157,
     "kind": "variable",
     "name": "fs",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -2963,7 +3175,7 @@
     "ignore": true
   },
   {
-    "__docId__": 148,
+    "__docId__": 158,
     "kind": "variable",
     "name": "path",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -2984,7 +3196,7 @@
     "ignore": true
   },
   {
-    "__docId__": 149,
+    "__docId__": 159,
     "kind": "variable",
     "name": "md5File",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3005,7 +3217,7 @@
     "ignore": true
   },
   {
-    "__docId__": 150,
+    "__docId__": 160,
     "kind": "variable",
     "name": "isExternalURL",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3026,7 +3238,7 @@
     "ignore": true
   },
   {
-    "__docId__": 151,
+    "__docId__": 161,
     "kind": "variable",
     "name": "getRichmediaRC",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3047,7 +3259,7 @@
     "ignore": true
   },
   {
-    "__docId__": 152,
+    "__docId__": 162,
     "kind": "variable",
     "name": "richmediaRCToMonetBackupJSON",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3068,7 +3280,7 @@
     "ignore": true
   },
   {
-    "__docId__": 153,
+    "__docId__": 163,
     "kind": "variable",
     "name": "richmediaRCToMonetManifestJSON",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3089,7 +3301,7 @@
     "ignore": true
   },
   {
-    "__docId__": 154,
+    "__docId__": 164,
     "kind": "class",
     "name": "MonetJSONPlugin",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js",
@@ -3106,7 +3318,7 @@
     "ignore": true
   },
   {
-    "__docId__": 155,
+    "__docId__": 165,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js~MonetJSONPlugin",
@@ -3120,7 +3332,7 @@
     "undocument": true
   },
   {
-    "__docId__": 156,
+    "__docId__": 166,
     "kind": "member",
     "name": "config",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js~MonetJSONPlugin",
@@ -3137,7 +3349,7 @@
     }
   },
   {
-    "__docId__": 157,
+    "__docId__": 167,
     "kind": "method",
     "name": "apply",
     "memberof": "src/webpack/plugin/MonetJSONPlugin.js~MonetJSONPlugin",
@@ -3161,7 +3373,7 @@
   },
   {
     "kind": "index",
-    "content": "# Richmedia Temple Server v1.0.0\n\nRichmedia Temple Server is used as a tool to build and develop richmedia units\n\n[![Travis](https://img.shields.io/travis/mediamonks/richmedia-temple-server.svg)](https://travis-ci.org/mediamonks/richmedia-temple-server)\n[![npm](https://img.shields.io/npm/v/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)\n[![npm](https://img.shields.io/npm/dm/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)\n<!-- [![Code Climate](https://img.shields.io/codeclimate/github/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://codeclimate.com/github/mediamonks/seng-boilerplate) -->\n<!-- [![Coveralls](https://img.shields.io/coveralls/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://coveralls.io/github/mediamonks/seng-boilerplate?branch=master) -->\n\n## Installation\n\n```sh\nyarn add @mediamonks/richmedia-temple-server\n```\n\n```sh\nnpm i -S @mediamonks/richmedia-temple-server\n```\n\n\n## Basic Usage\n\n```js\n// for building\nnode ./node_modules/@mediamonks/richmedia-temple-server/build.js\n\n// for developing\nnode ./node_modules/@mediamonks/richmedia-temple-server/dev.js\n```\n\n\nmaybe use [@mediamonks/generator-richmedia-temple](https://github.com/mediamonks/generator-richmedia-temple) for creating your setup automatically.\n\n## Documentation\n\nView the [documentation](http://mediamonks.github.io/richmedia-temple-server/).\n\n## Contribute\n\nView [CONTRIBUTING.md](./CONTRIBUTING.md)\n\n\n## Changelog\n\nView [CHANGELOG.md](./CHANGELOG.md)\n\n\n## Authors\n\nView [AUTHORS.md](./AUTHORS.md)\n\n\n## LICENSE\n\n[MIT](./LICENSE) © MediaMonks\n\n\n## About this boilerplate\n\n**Remove this section when cloning this boilerplate to a real project!**\n\n### Folders\n\nThis boilerplate contains the following folders:\n* **/coverage** - Contains the generated test code coverage, is sent to Code\nClimate and Coveral.io.\n* **/docs** - Contains the generated documentation by typedoc.\n* **/lib** - Contains the built code from `src/lib`, will be published to npm.\n* **/node_modules** - Contains the node modules generated by running `yarn`.\n* **/src** - Contains the source code.\n* **/test** - Contains the tests.\n* **/vendor** - Can contain 3rd party code used in this project, when not\navailable on npm.\n\n### Files\n\nThis boilerplate contains the following files:\n* **.babelrc** - Contains babel configuration.\n* **.codeclimate.yml** - The Code Climate configuration for this project.\n* **.editorconfig** - Defines general formatting rules.\n* **.eslintignore** - Lists patterns that should be ignored when running eslint.\n* **.eslintrc.js** - Contains eslint configuration.\n* **.gitignore** - These files should not end up in git.\n* **.npmignore** - These files should not end up in npm.\n* **.nvmrc** - Contains nodejs version to build this project with.\n* **.nycrc** - Contains nyc code coverage configuration.\n* **.prettierignore** - Lists patterns that should be ignored when running prettier.\n* **.prettierrc** - Contains prettier formatting configuration.\n* **.travis.yml** - Configuration for Travis CI.\n* **AUTHORS.md** - Contains a list of all the authors that worked on this module.\n* **CONTRIBUTING.md** - Contains information on how to contribute on this project.\n* **index.d.ts** - The built Typescript definitions, referenced in the package.json.\nWill be published to npm.\n* **index.d.ts** - The built Typescript index, referenced in the package.json.\nWill be published to npm.\n* **LICENSE** - Our license file.\n* **package.json** - To list the npm package information, all the dependencies,\nand contains all the scripts that can be run.\n* **README.MD** - This file, remove the about section when cloning this boilerplate.\n* **tsconfig.build.json** - The TypeScript configuration file for building definitions.\n* **tsconfig.json** - The TypeScript configuration file for this project.\n* **tslint.json** - The linting rules for our TypeScript code.\n* **yarn.lock** - Yarn lockfile to freeze module versions.\n\n### Travis\n\nThis project uses [Travis](https://travis-ci.org) to build, test and\npublish its code to npm. Travis is free for public Github repositories.\n\nIt runs on all commits, shows the build status for pull requests, and\npublishes to npm when a new tag/release is created.\n\nTravis only runs the `npm test` script, so have configured that script\nto run everything we want Travis to check. Besides the unit tests, we\nalso run our validations and linters.\n\nThe travis configuration is placed in a `.travis.yml` file, consisting\nof multiple sections.\n\n1.  Defines the `node_js` [language](https://docs.travis-ci.com/user/languages/javascript-with-nodejs),\n    and tells travis on which node versions to run the process.\n2.  Before running, it needs to install some global dependencies, and\n    when it processes some coverage results.\n3.  It can do a [npm deploy](https://docs.travis-ci.com/user/deployment/npm),\n    telling it to keep the generated artifacts and only publish when run\n    on node 8 and when a tag was committed. It also contains the email\n    address and api key of the npm user.\n4.  Code Climate has a [travis plugin](https://docs.travis-ci.com/user/code-climate/)\n    that automatically uploads the code coverage results.\n\nBecause we want to keep the npm api key secret, we add the token to the Travis Repo settings\nwhere it will be stored secure:\nhttps://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings\n\nBefore we can do this, we must make sure that the repository is added\nto Travis, because Travis needs the repository owner/name info to make\nsure the encrypted values only work for that repository.\n\n1.  Then make sure you are logged in to your npm account with the\n    [adduser](https://docs.npmjs.com/cli/adduser) command:\n\n    ```sh\n    $ npm adduser\n    ```\n\n    To verify that you are logged in correctly you can check:\n\n    ```sh\n    $ npm whoami\n    ```\n\n3.  Now we need to [create a new token](https://docs.npmjs.com/getting-started/working_with_tokens):\n\n    ```sh\n    npm token create\n    ```\n\n    Copy the token value from the output to the Travis Environment Variable settings, and\n    add it with the name `NPM_TOKEN`.\n",
+    "content": "# Richmedia Temple Server [![Travis](https://img.shields.io/travis/mediamonks/richmedia-temple-server.svg)](https://travis-ci.org/mediamonks/richmedia-temple-server) [![npm](https://img.shields.io/npm/v/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server) [![npm](https://img.shields.io/npm/dm/@mediamonks/richmedia-temple-server.svg?maxAge=2592000)](https://www.npmjs.com/package/@mediamonks/richmedia-temple-server)\nRichmedia Temple Server is used as a tool to build and develop richmedia units.\nSee documentation https://assets-at-scale.gitbook.io/temple-suite/\n\n\n<!-- [![Code Climate](https://img.shields.io/codeclimate/github/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://codeclimate.com/github/mediamonks/seng-boilerplate) -->\n<!-- [![Coveralls](https://img.shields.io/coveralls/mediamonks/seng-boilerplate.svg?maxAge=2592000)](https://coveralls.io/github/mediamonks/seng-boilerplate?branch=master) -->\n\n## Installation\n\n```sh\nyarn add @mediamonks/richmedia-temple-server\n```\n\n```sh\nnpm i -S @mediamonks/richmedia-temple-server\n```\n\n\n## Basic Usage\n\n```js\n// for building\nnode ./node_modules/@mediamonks/richmedia-temple-server/build.js\n\n// for developing\nnode ./node_modules/@mediamonks/richmedia-temple-server/dev.js\n```\n\n\nmaybe use [@mediamonks/generator-richmedia-temple](https://github.com/mediamonks/generator-richmedia-temple) for creating your setup automatically.\n\n## Documentation\n\nView the [documentation](http://mediamonks.github.io/richmedia-temple-server/).\n\n## Contribute\n\nView [CONTRIBUTING.md](./CONTRIBUTING.md)\n\n\n## Changelog\n\nView [CHANGELOG.md](./CHANGELOG.md)\n\n\n## Authors\n\nView [AUTHORS.md](./AUTHORS.md)\n\n\n## LICENSE\n\n[MIT](./LICENSE) © MediaMonks\n\n\n## About this boilerplate\n\n**Remove this section when cloning this boilerplate to a real project!**\n\n### Folders\n\nThis boilerplate contains the following folders:\n* **/coverage** - Contains the generated test code coverage, is sent to Code\nClimate and Coveral.io.\n* **/docs** - Contains the generated documentation by typedoc.\n* **/lib** - Contains the built code from `src/lib`, will be published to npm.\n* **/node_modules** - Contains the node modules generated by running `yarn`.\n* **/src** - Contains the source code.\n* **/test** - Contains the tests.\n* **/vendor** - Can contain 3rd party code used in this project, when not\navailable on npm.\n\n### Files\n\nThis boilerplate contains the following files:\n* **.babelrc** - Contains babel configuration.\n* **.codeclimate.yml** - The Code Climate configuration for this project.\n* **.editorconfig** - Defines general formatting rules.\n* **.eslintignore** - Lists patterns that should be ignored when running eslint.\n* **.eslintrc.js** - Contains eslint configuration.\n* **.gitignore** - These files should not end up in git.\n* **.npmignore** - These files should not end up in npm.\n* **.nvmrc** - Contains nodejs version to build this project with.\n* **.nycrc** - Contains nyc code coverage configuration.\n* **.prettierignore** - Lists patterns that should be ignored when running prettier.\n* **.prettierrc** - Contains prettier formatting configuration.\n* **.travis.yml** - Configuration for Travis CI.\n* **AUTHORS.md** - Contains a list of all the authors that worked on this module.\n* **CONTRIBUTING.md** - Contains information on how to contribute on this project.\n* **index.d.ts** - The built Typescript definitions, referenced in the package.json.\nWill be published to npm.\n* **index.d.ts** - The built Typescript index, referenced in the package.json.\nWill be published to npm.\n* **LICENSE** - Our license file.\n* **package.json** - To list the npm package information, all the dependencies,\nand contains all the scripts that can be run.\n* **README.MD** - This file, remove the about section when cloning this boilerplate.\n* **tsconfig.build.json** - The TypeScript configuration file for building definitions.\n* **tsconfig.json** - The TypeScript configuration file for this project.\n* **tslint.json** - The linting rules for our TypeScript code.\n* **yarn.lock** - Yarn lockfile to freeze module versions.\n\n### Travis\n\nThis project uses [Travis](https://travis-ci.org) to build, test and\npublish its code to npm. Travis is free for public Github repositories.\n\nIt runs on all commits, shows the build status for pull requests, and\npublishes to npm when a new tag/release is created.\n\nTravis only runs the `npm test` script, so have configured that script\nto run everything we want Travis to check. Besides the unit tests, we\nalso run our validations and linters.\n\nThe travis configuration is placed in a `.travis.yml` file, consisting\nof multiple sections.\n\n1.  Defines the `node_js` [language](https://docs.travis-ci.com/user/languages/javascript-with-nodejs),\n    and tells travis on which node versions to run the process.\n2.  Before running, it needs to install some global dependencies, and\n    when it processes some coverage results.\n3.  It can do a [npm deploy](https://docs.travis-ci.com/user/deployment/npm),\n    telling it to keep the generated artifacts and only publish when run\n    on node 8 and when a tag was committed. It also contains the email\n    address and api key of the npm user.\n4.  Code Climate has a [travis plugin](https://docs.travis-ci.com/user/code-climate/)\n    that automatically uploads the code coverage results.\n\nBecause we want to keep the npm api key secret, we add the token to the Travis Repo settings\nwhere it will be stored secure:\nhttps://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings\n\nBefore we can do this, we must make sure that the repository is added\nto Travis, because Travis needs the repository owner/name info to make\nsure the encrypted values only work for that repository.\n\n1.  Then make sure you are logged in to your npm account with the\n    [adduser](https://docs.npmjs.com/cli/adduser) command:\n\n    ```sh\n    $ npm adduser\n    ```\n\n    To verify that you are logged in correctly you can check:\n\n    ```sh\n    $ npm whoami\n    ```\n\n3.  Now we need to [create a new token](https://docs.npmjs.com/getting-started/working_with_tokens):\n\n    ```sh\n    npm token create\n    ```\n\n    Copy the token value from the output to the Travis Environment Variable settings, and\n    add it with the name `NPM_TOKEN`.\n",
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/README.md",
     "name": "./README.md",
     "static": true,
@@ -3169,7 +3381,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"@mediamonks/richmedia-temple-server\",\n  \"version\": \"1.1.0\",\n  \"description\": \"This is the Richmedia Temple, used for creating richmedia units for various vendors.\",\n  \"scripts\": {\n    \"test\": \"\",\n    \"doc\": \"node_modules/.bin/esdoc\",\n    \"lint\": \"npm-run-all lint:*\",\n    \"lint:js\": \"eslint src --ext .js --cache\",\n    \"prettify\": \"prettier --write \\\"src/**/*.{js,json}\\\"\"\n  },\n  \"main\": \"index.js\",\n  \"lint-staged\": {\n    \"linters\": {\n      \"src/**/*.{js,json}\": [\n        \"prettier --write\",\n        \"git add\"\n      ],\n      \"src/**/*.js\": [\n        \"npm run lint:js\"\n      ]\n    }\n  },\n  \"pre-push\": [\n    \"validate\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/mediamonks/temple.git\"\n  },\n  \"publishConfig\": {\n    \"access\": \"public\"\n  },\n  \"author\": \"Mient-jan Stelling\",\n  \"license\": \"MIT\",\n  \"bugs\": {\n    \"url\": \"https://github.com/mediamonks/temple/issues\"\n  },\n  \"homepage\": \"https://github.com/mediamonks/temple#readme\",\n  \"devDependencies\": {\n    \"@mediamonks/temple\": \"^0.1.3\",\n    \"@types/chai\": \"^4.0.10\",\n    \"@types/mocha\": \"^2.2.44\",\n    \"@types/sinon\": \"^4.1.2\",\n    \"@types/sinon-chai\": \"^2.7.29\",\n    \"babel-eslint\": \"^8.0.3\",\n    \"babel-plugin-istanbul\": \"^4.1.5\",\n    \"chai\": \"^4.1.2\",\n    \"coveralls\": \"^2.11.6\",\n    \"cross-env\": \"^5.2.0\",\n    \"esdoc\": \"^1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"^1.0.0\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^4.13.1\",\n    \"eslint-config-airbnb-base\": \"^12.1.0\",\n    \"eslint-config-prettier\": \"^2.9.0\",\n    \"eslint-friendly-formatter\": \"^3.0.0\",\n    \"eslint-import-resolver-typescript\": \"^1.0.2\",\n    \"eslint-plugin-import\": \"^2.8.0\",\n    \"eslint-plugin-prettier\": \"^2.4.0\",\n    \"husky\": \"^0.14.3\",\n    \"jsdom\": \"^11.5.1\",\n    \"jsdom-global\": \"^3.0.2\",\n    \"lint-staged\": \"^6.0.0\",\n    \"mocha\": \"^4.0.1\",\n    \"npm-run-all\": \"^4.1.3\",\n    \"nyc\": \"^11.3.0\",\n    \"prettier\": \"^1.13.7\",\n    \"shx\": \"^0.2.2\",\n    \"sinon\": \"^4.1.3\",\n    \"sinon-chai\": \"^2.14.0\"\n  },\n  \"dependencies\": {\n    \"@babel/cli\": \"^7.0.0\",\n    \"@babel/core\": \"^7.0.0\",\n    \"@babel/plugin-proposal-class-properties\": \"^7.0.0\",\n    \"@babel/plugin-transform-async-to-generator\": \"^7.1.0\",\n    \"@babel/polyfill\": \"^7.0.0\",\n    \"@babel/preset-env\": \"^7.0.0\",\n    \"@babel/register\": \"^7.0.0\",\n    \"@mediamonks/richmedia-temple-screenshot\": \"^1.1.1\",\n    \"ajv\": \"^6.5.2\",\n    \"babel-loader\": \"^8.0.0\",\n    \"circular-dependency-plugin\": \"^5.0.2\",\n    \"css-loader\": \"^1.0.0\",\n    \"cssnano\": \"^4.1.0\",\n    \"express\": \"^4.16.3\",\n    \"extract-loader\": \"^2.0.1\",\n    \"file-loader\": \"^1.1.11\",\n    \"fs-extra\": \"^6.0.1\",\n    \"glob\": \"^7.1.2\",\n    \"handlebars\": \"^4.0.11\",\n    \"html-loader\": \"^0.5.5\",\n    \"html-webpack-plugin\": \"^3.2.0\",\n    \"image-webpack-loader\": \"^4.3.1\",\n    \"inquirer\": \"^6.1.0\",\n    \"loader-utils\": \"^1.1.0\",\n    \"md5-file\": \"^4.0.0\",\n    \"node-sass\": \"^4.9.3\",\n    \"postcss-import\": \"^12.0.0\",\n    \"postcss-loader\": \"^3.0.0\",\n    \"postcss-nested\": \"^4.1.0\",\n    \"postcss-preset-env\": \"^5.3.0\",\n    \"promise-polyfill\": \"^8.1.0\",\n    \"sketch-loader\": \"^0.1.2\",\n    \"style-loader\": \"^0.23.0\",\n    \"tunnel-agent\": \"^0.6.0\",\n    \"webpack\": \"^4.16.5\",\n    \"webpack-dev-middleware\": \"^3.3.0\",\n    \"webpack-hot-middleware\": \"^2.23.1\",\n    \"webpack-visualizer-plugin\": \"^0.1.11\",\n    \"whatwg-fetch\": \"^2.0.4\",\n    \"zip-webpack-plugin\": \"^3.0.0\"\n  }\n}\n",
+    "content": "{\n  \"name\": \"@mediamonks/richmedia-temple-server\",\n  \"version\": \"1.4.4\",\n  \"description\": \"This is the Richmedia Temple, used for creating richmedia units for various vendors.\",\n  \"scripts\": {\n    \"dev\": \"node dev.js\",\n    \"build\": \"node build.js\",\n    \"doc\": \"node_modules/.bin/esdoc\",\n    \"lint\": \"npm-run-all lint:*\",\n    \"lint:js\": \"eslint src --ext .js --cache\",\n    \"prettify\": \"prettier --write \\\"src/**/*.{js,json}\\\"\"\n  },\n  \"main\": \"index.js\",\n  \"lint-staged\": {\n    \"linters\": {\n      \"src/**/*.{js,json}\": [\n        \"prettier --write\",\n        \"git add\"\n      ],\n      \"src/**/*.js\": [\n        \"npm run lint:js\"\n      ]\n    }\n  },\n  \"pre-push\": [\n    \"validate\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/mediamonks/temple.git\"\n  },\n  \"publishConfig\": {\n    \"access\": \"public\"\n  },\n  \"author\": \"Mient-jan Stelling\",\n  \"license\": \"MIT\",\n  \"bugs\": {\n    \"url\": \"https://github.com/mediamonks/temple/issues\"\n  },\n  \"homepage\": \"https://github.com/mediamonks/temple#readme\",\n  \"devDependencies\": {\n    \"@mediamonks/temple\": \"^0.1.3\",\n    \"@types/chai\": \"^4.0.10\",\n    \"@types/mocha\": \"^2.2.44\",\n    \"@types/sinon\": \"^4.1.2\",\n    \"@types/sinon-chai\": \"^2.7.29\",\n    \"babel-eslint\": \"^8.0.3\",\n    \"babel-plugin-istanbul\": \"^4.1.5\",\n    \"chai\": \"^4.1.2\",\n    \"coveralls\": \"^2.11.6\",\n    \"cross-env\": \"^5.2.0\",\n    \"esdoc\": \"^1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"^1.0.0\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^4.13.1\",\n    \"eslint-config-airbnb-base\": \"^12.1.0\",\n    \"eslint-config-prettier\": \"^2.9.0\",\n    \"eslint-friendly-formatter\": \"^3.0.0\",\n    \"eslint-import-resolver-typescript\": \"^1.0.2\",\n    \"eslint-plugin-import\": \"^2.8.0\",\n    \"eslint-plugin-prettier\": \"^2.4.0\",\n    \"husky\": \"^0.14.3\",\n    \"jsdom\": \"^11.5.1\",\n    \"jsdom-global\": \"^3.0.2\",\n    \"lint-staged\": \"^6.0.0\",\n    \"mocha\": \"^4.0.1\",\n    \"npm-run-all\": \"^4.1.3\",\n    \"nyc\": \"^11.3.0\",\n    \"prettier\": \"^1.13.7\",\n    \"shx\": \"^0.2.2\",\n    \"sinon\": \"^4.1.3\",\n    \"sinon-chai\": \"^2.14.0\",\n    \"svg-inline-loader\": \"^0.8.0\"\n  },\n  \"dependencies\": {\n    \"@babel/cli\": \"^7.1.2\",\n    \"@babel/core\": \"^7.1.2\",\n    \"@babel/plugin-proposal-class-properties\": \"^7.1.0\",\n    \"@babel/plugin-proposal-decorators\": \"^7.1.2\",\n    \"@babel/plugin-syntax-dynamic-import\": \"^7.2.0\",\n    \"@babel/plugin-transform-async-to-generator\": \"^7.1.0\",\n    \"@babel/polyfill\": \"^7.0.0\",\n    \"@babel/preset-env\": \"^7.1.2\",\n    \"@babel/register\": \"^7.0.0\",\n    \"@mediamonks/richmedia-temple-screenshot\": \"^1.1.1\",\n    \"ajv\": \"^6.5.2\",\n    \"babel-loader\": \"^8.0.0\",\n    \"chalk\": \"^2.4.2\",\n    \"circular-dependency-plugin\": \"^5.0.2\",\n    \"cli-spinner\": \"^0.2.8\",\n    \"copy-webpack-plugin\": \"^4.6.0\",\n    \"css-loader\": \"^1.0.0\",\n    \"cssnano\": \"^4.1.0\",\n    \"express\": \"^4.16.3\",\n    \"extract-loader\": \"^2.0.1\",\n    \"file-loader\": \"^1.1.11\",\n    \"fs-extra\": \"^6.0.1\",\n    \"glob\": \"^7.1.2\",\n    \"handlebars\": \"^4.0.11\",\n    \"html-loader\": \"^0.5.5\",\n    \"html-webpack-plugin\": \"^3.2.0\",\n    \"image-webpack-loader\": \"^4.3.1\",\n    \"inquirer\": \"^6.1.0\",\n    \"loader-utils\": \"^1.1.0\",\n    \"md5-file\": \"^4.0.0\",\n    \"mini-css-extract-plugin\": \"^0.5.0\",\n    \"node-sass\": \"^4.9.3\",\n    \"postcss-import\": \"^12.0.0\",\n    \"postcss-loader\": \"^3.0.0\",\n    \"postcss-nested\": \"^4.1.0\",\n    \"postcss-preset-env\": \"^5.3.0\",\n    \"promise-polyfill\": \"^8.1.0\",\n    \"sass-loader\": \"^7.1.0\",\n    \"simple-progress-webpack-plugin\": \"^1.1.2\",\n    \"sketch-loader\": \"^0.1.2\",\n    \"style-loader\": \"^0.23.0\",\n    \"svgo\": \"^1.1.1\",\n    \"svgo-loader\": \"^2.2.0\",\n    \"tunnel-agent\": \"^0.6.0\",\n    \"uglifyjs-webpack-plugin\": \"^2.0.1\",\n    \"url-loader\": \"^1.1.2\",\n    \"webpack\": \"^4.16.5\",\n    \"webpack-dev-middleware\": \"^3.3.0\",\n    \"webpack-hot-middleware\": \"^2.23.1\",\n    \"webpack-visualizer-plugin\": \"^0.1.11\",\n    \"whatwg-fetch\": \"^2.0.4\",\n    \"zip-webpack-plugin\": \"^3.0.0\"\n  }\n}\n",
     "longname": "/Volumes/projects/mediamonks/richmedia-temple-server/package.json",
     "name": "package.json",
     "static": true,

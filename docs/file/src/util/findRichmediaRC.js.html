@@ -45,9 +45,10 @@ const doesNestedExist = require(&apos;./doesNestedExists&apos;);
  * @return {Promise&lt;Array&lt;RCDto&gt;&gt;}
  */
 function findRichmediaRC(globQuery = &apos;**/.richmediarc&apos;, patterns = []) {
+
   return new Promise(resolve =&gt; {
     const cache = {};
-    glob(globQuery, {}, (err, files) =&gt; {
+    glob(globQuery, {ignore: [&apos;./node_modules/**/.richmediarc&apos;]}, (err, files) =&gt; {
       Promise.all(
         files.map(location =&gt;
           getRichmediaRC(location, &apos;./&apos;, true, cache).then(data =&gt; ({location, data})),
