@@ -45,7 +45,9 @@ class MonetJSONPlugin {
         });
 
         await Promise.all(result);
-        const backupResult = JSON.stringify(richmediaRCToMonetBackupJSON(json));
+        const backupResult = JSON.stringify(
+          richmediaRCToMonetBackupJSON(JSON.parse(JSON.stringify(json))),
+        );
         const manifestResult = JSON.stringify(richmediaRCToMonetManifestJSON(json));
 
         // Insert this list into the Webpack build as a new file asset:
