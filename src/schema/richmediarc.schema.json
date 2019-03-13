@@ -1,6 +1,6 @@
 {
-  "$schema": "http://json-schema.org/draft-06/schema#",
-
+  "$id": "https://raw.githubusercontent.com/mediamonks/richmedia-temple-server/master/src/schema/richmediarc.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "definitions": {
     "text": {
@@ -191,7 +191,6 @@
       },
       "required": ["creative", "agency"]
     }
-
   },
 
   "additionalProperties": false,

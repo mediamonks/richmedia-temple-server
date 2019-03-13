@@ -10,6 +10,7 @@ const screenshot = require('@mediamonks/richmedia-temple-screenshot');
 const util = require('util');
 const chalk = require('chalk');
 const readFile = util.promisify(fs.readFile);
+const opener = require("opener");
 
 const templatePromise = Promise.resolve(true).then(
   () =>
@@ -43,10 +44,15 @@ module.exports = async function devServer(configs) {
   const port = await portfinder.getPortPromise();
   const template = await templatePromise;
 
-  console.log(`${chalk.grey.bold('-')}
-${chalk.blue('i')} Server running. Please go to http://localhost:${port} } 
-${chalk.grey.bold('-')}
+  const httpLocation = `http://localhost:${port}`;
+
+  // opener
+  opener(httpLocation);
+
+  console.log(`${chalk.blue('i')} Server running. Please go to ${httpLocation}
+${chalk.grey.bold('-------------------------------------------------------')}
 `);
+
 
   const app = express();
 
@@ -128,12 +134,6 @@ ${chalk.grey.bold('-')}
         res.end(img, 'binary');
       });
   });
-
-  app.listen(port, () => {
-
-  });
-
-  // eslint-disable-next-line
 
   process.on('uncaughtException', e => {
     // eslint-disable-next-line

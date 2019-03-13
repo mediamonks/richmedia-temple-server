@@ -1,58 +1,48 @@
 const path = require('path');
 const fs = require('fs-extra');
 const Ajv = require('ajv');
-const draft06 = require('ajv/lib/refs/json-schema-draft-06.json');
+const draft07 = require('ajv/lib/refs/json-schema-draft-07.json');
 
-const formatErrorMessage = require('../../util/formatErrorMessage');
 const createConfig = require('./createConfig');
 const getPlatformByRichmediaRc = require('../../util/getPlatformByRichmediaRc');
 
 const schema = require('../../schema/richmediarc.schema.json');
 
-const ajv = new Ajv();
-ajv.addMetaSchema(draft06);
-
-const schemaValidate = ajv.compile(schema);
-
 /**
  *
- * @param {string} location
- * @param {any} richmediaRc
+ * @param {string} richmediaConfigLocation
+ * @param {any} richmediaConfig
  * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}
  */
-function validateSchemaAndCreatePaths(location, richmediaRc) {
-  // validate schema
-  const valid = schemaValidate(richmediaRc);
+function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) {
+  const ajv = new Ajv({allErrors: true});
+  const validate = ajv.compile(schema);
+  const valid = validate(richmediaConfig)
 
   if (!valid) {
-    schemaValidate.errors.forEach(error => {
-      // eslint-disable-next-line
-      console.error(JSON.stringify(error));
-    });
-
-    throw new Error(formatErrorMessage(schemaValidate.errors[0]));
+    throw new Error('Invalid: ' + ajv.errorsText(validate.errors));
   }
 
   if (
-    !richmediaRc ||
-    !richmediaRc.settings ||
-    !richmediaRc.settings.entry ||
-    !richmediaRc.settings.entry.js ||
-    !richmediaRc.settings.entry.html
+    !richmediaConfig ||
+    !richmediaConfig.settings ||
+    !richmediaConfig.settings.entry ||
+    !richmediaConfig.settings.entry.js ||
+    !richmediaConfig.settings.entry.html
   ) {
-    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);
+    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(richmediaConfigLocation)}`);
   }
 
-  const list = path.dirname(location).split('/').filter(val => val[0] !== '.' );
+  const list = path.dirname(richmediaConfigLocation).split('/').filter(val => val[0] !== '.' );
   const outputPath = path.resolve(path.join('./build/', list.join('_')));
 
   const filepathHtml = path.resolve(
-    path.join(path.dirname(location), richmediaRc.settings.entry.html),
+    path.join(path.dirname(richmediaConfigLocation), richmediaConfig.settings.entry.html),
   );
 
-  const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));
-  const filepathRichmediaRC = path.resolve(location);
-  const platform = getPlatformByRichmediaRc(richmediaRc);
+  const filepathJs = path.resolve(path.join(path.dirname(richmediaConfigLocation), richmediaConfig.settings.entry.js));
+  const filepathRichmediaRC = path.resolve(richmediaConfigLocation);
+  const platform = getPlatformByRichmediaRc(richmediaConfig);
 
   return {
     filepathHtml,

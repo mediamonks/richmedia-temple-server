@@ -1,5 +1,5 @@
 const findJSONConfigs = require('./util/findRichmediaRC');
-const configGeneratorByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
+const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const devServer = require('./dev-server');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
@@ -59,7 +59,7 @@ module.exports = async function dev(
     configsResult = configs.filter(({ location }) => answers.devLocation.indexOf(location) > -1);
   }
 
-  const result = await configGeneratorByRichmediarcList(configsResult, 'development');
+  const result = await createConfigByRichmediarcList(configsResult, 'development');
   const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));
 
   devServer(list);
