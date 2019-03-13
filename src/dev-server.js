@@ -135,6 +135,14 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       });
   });
 
+
+  app.listen(port, () => {
+
+  });
+
+  // eslint-disable-next-line
+
+
   process.on('uncaughtException', e => {
     // eslint-disable-next-line
     console.log(e);
