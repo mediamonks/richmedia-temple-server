@@ -60,7 +60,6 @@ module.exports = function createConfig({
     output: {
 
       filename: './[name].js',
-      chunkFilename: '[name].js',
       path: outputPath,
     },
     externals: {
@@ -322,39 +321,15 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
-      splitChunks: {
-        chunks: 'all',
-      },
       minimize: true,
       minimizer: [
         new UglifyJsPlugin({
           uglifyOptions: {
             comments: false,
             mangle: false,
-            compress: {
-              // remove warnings
-              warnings: false,
-
-              // Drop console statements
-              drop_console: true
-            },
+            compress: false
           },
-        }),
-        new UglifyJsPlugin({
-          include: /\.min\.js$/,
-          sourceMap: false,
-          uglifyOptions: {
-            warnings: false,
-            parse: {},
-            compress: {},
-            mangle: true, // Note `mangle.properties` is `false` by default.
-            output: null,
-            toplevel: false,
-            nameCache: null,
-            ie8: false,
-            keep_fnames: false,
-          },
-        }),
+        })
       ],
     };
   }
