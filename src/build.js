@@ -83,11 +83,27 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {
       if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve();
+        console.error(err.stack || err);
+        if (err.details) {
+          console.error(err.details);
+        }
+        return;
       }
+
+      const info = stats.toJson();
+
+      if (stats.hasErrors()) {
+        info.errors.forEach((item, index) => {
+          console.error(index, JSON.parse(item));
+        })
+      }
+
+      if (stats.hasWarnings()) {
+        console.warn(info.warnings);
+      }
+
+      resolve();
+
     });
   });
 };

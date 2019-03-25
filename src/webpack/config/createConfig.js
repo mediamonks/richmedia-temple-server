@@ -20,6 +20,7 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @param {string} options.filepathRichmediaRC
  * @param {string} options.outputPath
  * @param {string} options.mode
+ * @param {any} options.richmediarc
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
@@ -29,6 +30,7 @@ module.exports = function createConfig({
   outputPath,
   mode = 'production',
   platform = 'unknown',
+  richmediarc,
 }) {
   let devtool = false;
   const entry = [];
@@ -255,9 +257,10 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: './statistics.html',
       // }),
-      new CopyWebpackPlugin([
-        { from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }
-      ], {})
+      new CopyWebpackPlugin(
+        [{ from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }],
+        {},
+      ),
     ],
     stats: {
       colors: true,
@@ -279,9 +282,22 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.PRODUCTION) {
+
+    let bundleName = 'bundle.zip';
+
+    if(richmediarc
+      && richmediarc.settings
+      && richmediarc.settings.size
+      && richmediarc.settings.size.width
+      && richmediarc.settings.size.height)
+    {
+      bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`
+    }
+
+
     config.plugins.push(
       new ZipPlugin({
-        filename: 'bundle.zip',
+        filename: bundleName,
 
         fileOptions: {
           mtime: new Date(),
@@ -298,12 +314,14 @@ module.exports = function createConfig({
 
     config.optimization = {
       minimize: true,
-        minimizer: [
+      minimizer: [
         new UglifyJsPlugin({
           uglifyOptions: {
             comments: false,
             mangle: false,
-            compress: false,
+            compress: {
+              drop_console: true,
+            },
           },
         }),
         new UglifyJsPlugin({

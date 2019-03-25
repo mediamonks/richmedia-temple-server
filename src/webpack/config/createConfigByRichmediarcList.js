@@ -72,6 +72,7 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
        */
       const webpackConfig = createConfig({
         ...validateSchemaAndCreatePaths(location, data),
+        richmediarc: data,
         mode,
       });
 
