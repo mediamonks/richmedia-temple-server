@@ -5,12 +5,15 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const Spinner = require('cli-spinner').Spinner;
 
-module.exports = async function build(configPackages = null, buildTarget = './build') {
-  const spinner = new Spinner('processing.. %s');
-  spinner.setSpinnerString('⠋⠙⠚⠒⠂⠂⠒⠲⠴⠦⠖⠒⠐⠐⠒⠓⠋');
-  spinner.start();
+module.exports = async function build({
+  allConfigsSelector = './**/.richmediarc',
+  buildTarget = './build',
+  stats = false,
+}) {
 
-  const allConfigsSelector = './**/.richmediarc';
+  const spinner = new Spinner('processing.. %s');
+  spinner.setSpinnerString('/-\\|');
+  spinner.start();
 
   const configs = await findJSONConfigs(allConfigsSelector, [
     'settings.entry.js',
@@ -25,42 +28,42 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
     throw new Error('could not find a compatible .richmediarc with entry points configured');
   }
 
-  if (!configPackages || configPackages.length === 0) {
-    const questions = [];
 
-    if (configs.length > 1) {
-      questions.push({
-        type: 'checkbox',
-        name: 'build',
-        message: 'Please choose the current build to start.',
-        choices: [
-          { name: 'all', checked: false },
-          ...configs.map(({ location }) => ({ name: location, checked: false })),
-        ],
-        validate: function(answer) {
-          if (answer.length < 1) {
-            return 'You must choose at least one.';
-          }
-          return true;
-        },
-      });
-    } else {
-      console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
-      answers.build = [configs[0].location];
-    }
+  const questions = [];
 
+  if (configs.length > 1) {
     questions.push({
-      type: 'input',
-      name: 'buildTarget',
-      message: 'Please choose build location',
-      default: './build',
+      type: 'checkbox',
+      name: 'build',
+      message: 'Please choose the current build to start.',
+      choices: [
+        { name: 'all', checked: false },
+        ...configs.map(({ location }) => ({ name: location, checked: false })),
+      ],
+      validate: function(answer) {
+        if (answer.length < 1) {
+          return 'You must choose at least one.';
+        }
+        return true;
+      },
     });
-
-    answers = {
-      ...answers,
-      ...(await inquirer.prompt(questions)),
-    };
+  } else {
+    console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
+    answers.build = [configs[0].location];
   }
+
+  questions.push({
+    type: 'input',
+    name: 'buildTarget',
+    message: 'Please choose build location',
+    default: './build',
+  });
+
+  answers = {
+    ...answers,
+    ...(await inquirer.prompt(questions)),
+  };
+
 
   let configsResult = null;
 
@@ -78,14 +81,19 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
     configsResult = configs.filter(config => answers.build.indexOf(config.location) >= 0);
   }
 
-  const result = await createConfigByRichmediarcList(configsResult, 'production');
+  const result = await createConfigByRichmediarcList(configsResult, {
+    mode: 'production',
+    stats: stats,
+  });
 
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {
       if (err) {
         console.error(err.stack || err);
         if (err.details) {
-          console.error(err.details);
+          err.details.forEach((item, index) => {
+            console.error(index, item);
+          });
         }
         return;
       }
@@ -94,16 +102,18 @@ module.exports = async function build(configPackages = null, buildTarget = './bu
 
       if (stats.hasErrors()) {
         info.errors.forEach((item, index) => {
-          console.error(index, JSON.parse(item));
-        })
+          console.log(chalk.red(item));
+        });
       }
 
       if (stats.hasWarnings()) {
-        console.warn(info.warnings);
+        info.warnings.forEach(item => {
+          console.log(chalk.green(item));
+
+        })
       }
 
       resolve();
-
     });
   });
 };

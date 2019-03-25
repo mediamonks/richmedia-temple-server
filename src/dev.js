@@ -4,18 +4,14 @@ const devServer = require('./dev-server');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
-module.exports = async function dev(
-  packageLocationList = null,
-  allConfigsSelector = './**/.richmediarc',
-) {
-
+module.exports = async function dev({ allConfigsSelector = './**/.richmediarc' }) {
+  // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
   const configs = await findJSONConfigs(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
-
 
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
@@ -59,7 +55,10 @@ module.exports = async function dev(
     configsResult = configs.filter(({ location }) => answers.devLocation.indexOf(location) > -1);
   }
 
-  const result = await createConfigByRichmediarcList(configsResult, 'development');
+  const result = await createConfigByRichmediarcList(configsResult, {
+    mode: 'development',
+    stats: false,
+  });
   const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));
 
   devServer(list);

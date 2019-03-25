@@ -6,6 +6,7 @@ const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const PlatformEnum = require('../../data/PlatformEnum');
 const DevEnum = require('../../data/DevEnum');
@@ -28,9 +29,12 @@ module.exports = function createConfig({
   filepathHtml,
   filepathRichmediaRC,
   outputPath,
-  mode = 'production',
-  platform = 'unknown',
-  richmediarc,
+  richmediarc = null,
+  platform,
+  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
+    mode: DevEnum.DEVELOPMENT,
+    stats: false,
+  },
 }) {
   let devtool = false;
   const entry = [];
@@ -54,8 +58,10 @@ module.exports = function createConfig({
     },
 
     output: {
-      path: outputPath,
+
       filename: './[name].js',
+      chunkFilename: '[name].js',
+      path: outputPath,
     },
     externals: {
       // gsap external
@@ -277,23 +283,26 @@ module.exports = function createConfig({
     );
   }
 
+  if (stats === true) {
+    config.plugins.push(new BundleAnalyzerPlugin());
+  }
+
   if (mode === DevEnum.DEVELOPMENT) {
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
   if (mode === DevEnum.PRODUCTION) {
-
     let bundleName = 'bundle.zip';
 
-    if(richmediarc
-      && richmediarc.settings
-      && richmediarc.settings.size
-      && richmediarc.settings.size.width
-      && richmediarc.settings.size.height)
-    {
-      bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`
+    if (
+      richmediarc &&
+      richmediarc.settings &&
+      richmediarc.settings.size &&
+      richmediarc.settings.size.width &&
+      richmediarc.settings.size.height
+    ) {
+      bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`;
     }
-
 
     config.plugins.push(
       new ZipPlugin({
@@ -313,6 +322,9 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
+      splitChunks: {
+        chunks: 'all',
+      },
       minimize: true,
       minimizer: [
         new UglifyJsPlugin({
@@ -320,7 +332,11 @@ module.exports = function createConfig({
             comments: false,
             mangle: false,
             compress: {
-              drop_console: true,
+              // remove warnings
+              warnings: false,
+
+              // Drop console statements
+              drop_console: true
             },
           },
         }),
