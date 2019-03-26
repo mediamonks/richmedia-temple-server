@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
@@ -321,13 +322,20 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
-      minimize: true,
+
       minimizer: [
+        // new TerserPlugin()
         new UglifyJsPlugin({
           uglifyOptions: {
-            comments: false,
-            mangle: false,
-            compress: false
+            warnings: false,
+            parse: {},
+            compress: false,
+            mangle: true, // Note `mangle.properties` is `false` by default.
+            output: null,
+            toplevel: false,
+            nameCache: null,
+            ie8: false,
+            keep_fnames: true,
           },
         })
       ],

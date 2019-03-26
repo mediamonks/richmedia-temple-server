@@ -118,6 +118,7 @@
     "style-loader": "^0.23.0",
     "svgo": "^1.1.1",
     "svgo-loader": "^2.2.0",
+    "terser-webpack-plugin": "^1.2.3",
     "tunnel-agent": "^0.6.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "url-loader": "^1.1.2",
