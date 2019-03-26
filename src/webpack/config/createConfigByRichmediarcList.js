@@ -39,6 +39,7 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
     .dirname(richmediaConfigLocation)
     .split('/')
     .filter(val => val[0] !== '.');
+
   const outputPath = path.resolve(path.join('./build/', list.join('_')));
 
   const filepathHtml = path.resolve(

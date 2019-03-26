@@ -1,16 +1,19 @@
-const findJSONConfigs = require('./util/findRichmediaRC');
-const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const webpack = require('webpack');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const Spinner = require('cli-spinner').Spinner;
+const fs = require('fs-extra');
+
+const findJSONConfigs = require('./util/findRichmediaRC');
+const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
+const getNameFromSettings = require('./util/getNameFromSettings');
+const getTemplate = require('./util/getBuildTemplate');
 
 module.exports = async function build({
   allConfigsSelector = './**/.richmediarc',
   buildTarget = './build',
   stats = false,
 }) {
-
   const spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('/-\\|');
   spinner.start();
@@ -27,7 +30,6 @@ module.exports = async function build({
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
   }
-
 
   const questions = [];
 
@@ -52,18 +54,17 @@ module.exports = async function build({
     answers.build = [configs[0].location];
   }
 
-  questions.push({
-    type: 'input',
-    name: 'buildTarget',
-    message: 'Please choose build location',
-    default: './build',
-  });
+  // questions.push({
+  //   type: 'input',
+  //   name: 'buildTarget',
+  //   message: 'Please choose build location',
+  //   default: './build',
+  // });
 
   answers = {
     ...answers,
     ...(await inquirer.prompt(questions)),
   };
-
 
   let configsResult = null;
 
@@ -71,9 +72,9 @@ module.exports = async function build({
     answers.build = [...configPackages];
   }
 
-  if (!answers.buildTarget) {
-    answers.buildTarget = buildTarget;
-  }
+  // if (!answers.buildTarget) {
+  //   answers.buildTarget = buildTarget;
+  // }
 
   if (answers.build.find(item => item === 'all')) {
     configsResult = configs;
@@ -109,11 +110,27 @@ module.exports = async function build({
       if (stats.hasWarnings()) {
         info.warnings.forEach(item => {
           console.log(chalk.green(item));
-
-        })
+        });
       }
 
       resolve();
     });
+  }).then(async () => {
+    const template = await getTemplate();
+
+    const templateConfig = {
+      banner: configsResult.map(item => {
+        const name = getNameFromSettings(item);
+
+        return {
+          src: `./${name}/`,
+          name,
+          width: item.data.settings.size.width,
+          height: item.data.settings.size.height,
+        };
+      }),
+    };
+
+    fs.outputFile('./build/index.html', template(templateConfig), err => {});
   });
 };

@@ -9,30 +9,11 @@ const portfinder = require('portfinder');
 const screenshot = require('@mediamonks/richmedia-temple-screenshot');
 const util = require('util');
 const chalk = require('chalk');
+const opener = require('opener');
+
 const readFile = util.promisify(fs.readFile);
-const opener = require("opener");
-
-const templatePromise = Promise.resolve(true).then(
-  () =>
-    new Promise((resolve, reject) => {
-      fs.readFile(
-        path.join(__dirname, './data/template.hbs'),
-        { encoding: 'utf-8' },
-        (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(handlebars.compile(data));
-          }
-        },
-      );
-    }),
-);
-
-function getNameFromSettings(settings) {
-  const urls = path.dirname(settings.location).split('/').filter(val => val[0] !== '.' )
-  return urls.join('_');
-}
+const getTemplate = require('./util/getDevTemplate');
+const getNameFromSettings = require('./util/getNameFromSettings');
 
 /**
  *
@@ -42,7 +23,7 @@ module.exports = async function devServer(configs) {
   const webpackConfigList = configs.map(({ webpack }) => webpack);
   const settingsList = configs.map(({ settings }) => settings);
   const port = await portfinder.getPortPromise();
-  const template = await templatePromise;
+  const template = await getTemplate();
 
   const httpLocation = `http://localhost:${port}`;
 
@@ -53,11 +34,9 @@ module.exports = async function devServer(configs) {
 ${chalk.grey.bold('-------------------------------------------------------')}
 `);
 
-
   const app = express();
 
   webpackConfigList.forEach((config, index) => {
-
     const compiler = webpack(config);
     const name = getNameFromSettings(settingsList[index]);
 
@@ -135,13 +114,9 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       });
   });
 
-
-  app.listen(port, () => {
-
-  });
+  app.listen(port, () => {});
 
   // eslint-disable-next-line
-
 
   process.on('uncaughtException', e => {
     // eslint-disable-next-line
