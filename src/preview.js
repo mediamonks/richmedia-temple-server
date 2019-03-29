@@ -1,17 +1,10 @@
-const webpack = require('webpack');
 const inquirer = require('inquirer');
-const chalk = require('chalk');
-const Spinner = require('cli-spinner').Spinner;
 const fs = require('fs-extra');
 const uuid = require('uuidv4');
 const opener = require('opener');
 const Uploader = require('s3-batch-upload').default;
 
 const build = require('./build');
-const findJSONConfigs = require('./util/findRichmediaRC');
-const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
-const getNameFromSettings = require('./util/getNameFromSettings');
-const getTemplate = require('./util/getBuildTemplate');
 
 module.exports = async function preview() {
   await build({
