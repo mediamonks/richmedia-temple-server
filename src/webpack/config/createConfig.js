@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
@@ -59,7 +59,6 @@ module.exports = function createConfig({
     },
 
     output: {
-
       filename: './[name].js',
       path: outputPath,
     },
@@ -294,15 +293,15 @@ module.exports = function createConfig({
   if (mode === DevEnum.PRODUCTION) {
     let bundleName = 'bundle.zip';
 
-    if (
-      richmediarc &&
-      richmediarc.settings &&
-      richmediarc.settings.size &&
-      richmediarc.settings.size.width &&
-      richmediarc.settings.size.height
-    ) {
-      bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`;
-    }
+    // if (
+    //   richmediarc &&
+    //   richmediarc.settings &&
+    //   richmediarc.settings.size &&
+    //   richmediarc.settings.size.width &&
+    //   richmediarc.settings.size.height
+    // ) {
+    //   bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`;
+    // }
 
     config.plugins.push(
       new ZipPlugin({
@@ -322,7 +321,6 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
-
       minimizer: [
         // new TerserPlugin()
         new UglifyJsPlugin({
@@ -337,7 +335,7 @@ module.exports = function createConfig({
             ie8: false,
             keep_fnames: true,
           },
-        })
+        }),
       ],
     };
   }

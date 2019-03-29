@@ -114,6 +114,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       });
   });
 
+  app.post('/api/upload', (req, res) => {});
+
   app.listen(port, () => {});
 
   // eslint-disable-next-line
