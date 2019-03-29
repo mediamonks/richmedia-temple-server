@@ -60,7 +60,7 @@ module.exports = async function build({
   }
 
   if (configs.length > 1) {
-    if (answers.build instanceof Array) {
+    if (!(answers.build instanceof Array)) {
       questions.push({
         type: 'checkbox',
         name: 'build',
