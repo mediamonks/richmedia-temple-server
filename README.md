@@ -16,7 +16,6 @@ yarn add @mediamonks/richmedia-temple-server
 npm i -S @mediamonks/richmedia-temple-server
 ```
 
-
 ## Basic Usage
 
 ```js
@@ -25,6 +24,9 @@ node ./node_modules/@mediamonks/richmedia-temple-server/build.js
 
 // for developing
 node ./node_modules/@mediamonks/richmedia-temple-server/dev.js
+
+// for client preview
+node ./node_modules/@mediamonks/richmedia-temple-server/preview.js
 ```
 
 
