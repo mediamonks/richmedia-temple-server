@@ -9,13 +9,12 @@ const doesNestedExist = require('./doesNestedExists');
  * @return {Promise<Array<RCDto>>}
  */
 function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
-
   return new Promise(resolve => {
     const cache = {};
-    glob(globQuery, {ignore: ['./node_modules/**/.richmediarc']}, (err, files) => {
+    glob(globQuery, { ignore: ['./node_modules/**/.richmediarc'] }, (err, files) => {
       Promise.all(
         files.map(location =>
-          getRichmediaRC(location, './', true, cache).then(data => ({location, data})),
+          getRichmediaRC(location, './', true, cache).then(data => ({ location, data })),
         ),
       ).then(result => {
         const resolvedPatterns = patterns.map(pattern => pattern.split('.'));

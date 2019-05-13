@@ -10,5 +10,5 @@ program
 
 dev({
   allConfigsSelector: program.package,
-  stats: program.stats
+  stats: program.stats,
 });

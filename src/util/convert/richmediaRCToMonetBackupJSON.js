@@ -7,11 +7,11 @@ module.exports = function richmediaRCToMonetBackupJSON({ content }) {
   result.rootAssets = Object.keys(content).reduce((prev, name) => {
     const value = content[name];
 
-    if(value.type === 'monetVideo'){
+    if (value.type === 'monetVideo') {
       value.type = 'video';
       value.url = value.video.url;
 
-      delete value.video
+      delete value.video;
     }
 
     prev[`${value.type}.${name}`] = value;

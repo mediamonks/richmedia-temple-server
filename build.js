@@ -10,5 +10,5 @@ program
 
 build({
   allConfigsSelector: program.package,
-  stats: program.stats
+  stats: program.stats,
 });
