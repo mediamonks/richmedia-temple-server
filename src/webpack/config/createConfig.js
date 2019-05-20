@@ -195,6 +195,7 @@ module.exports = function createConfig({
                   '@babel/preset-env',
                   {
                     useBuiltIns: 'usage',
+                    corejs: 3,
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
