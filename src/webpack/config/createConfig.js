@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -263,16 +264,21 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: './statistics.html',
       // }),
-      new CopyWebpackPlugin(
-        [{ from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }],
-        {},
-      ),
     ],
     stats: {
       colors: true,
     },
     devtool,
   };
+
+  /**
+   * When there is a static folder use it in webpack config
+   */
+  const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
+
+  if (fs.existsSync(staticPath)) {
+    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: 'static' }], {}));
+  }
 
   if (platform === PlatformEnum.MONET) {
     config.plugins.push(
