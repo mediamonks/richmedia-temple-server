@@ -60,7 +60,7 @@ module.exports = async function getRichmediaRC(
   while (resolve) {
     filepath = path.join(filepath, '..');
     resolve = path.resolve(filepath) !== rootPath;
-    console.log({ filepath: `${filepath}/${data.name}${data.ext}` });
+
     const json = await readJson(`${filepath}/${data.name}${data.ext}`, cacheObject);
     if (json && json.content) {
       Object.keys(json.content).forEach(key => {
