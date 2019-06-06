@@ -6,6 +6,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const isExternalURL = require('../util/isExternalURL');
+const deepmerge = require('deepmerge');
 
 function readJson(filepath, cacheObject) {
   let promiseJson;
@@ -40,55 +41,47 @@ function readJson(filepath, cacheObject) {
  * @param {any} cacheObject
  * @return {Promise<void | never>}
  */
-module.exports = function getRichmediaRC(
+module.exports = async function getRichmediaRC(
   filepathRichmediarc,
   rootPath = './',
   inheritParentConfig = true,
   cacheObject = null,
 ) {
   let result = {};
+
   let filepath = path.resolve(filepathRichmediarc);
   const baseFilepath = filepath;
   const data = path.parse(baseFilepath);
 
   rootPath = path.resolve(rootPath);
 
-  let prom = Promise.resolve();
   let resolve = path.resolve(baseFilepath) !== rootPath;
 
   while (resolve) {
     filepath = path.join(filepath, '..');
     resolve = path.resolve(filepath) !== rootPath;
+    console.log({ filepath: `${filepath}/${data.name}${data.ext}` });
+    const json = await readJson(`${filepath}/${data.name}${data.ext}`, cacheObject);
+    if (json && json.content) {
+      Object.keys(json.content).forEach(key => {
+        const item = json.content[key];
+        if (
+          (item.type === 'image' || item.type === 'video') &&
+          item.url &&
+          !isExternalURL(item.url)
+        ) {
+          json.content[key].url = path.relative(
+            path.dirname(baseFilepath),
+            path.resolve(path.join(filepath, item.url)),
+          );
+        }
+      });
+    }
 
-    (function(scopedFilepath) {
-      prom = prom
-        .then(() => readJson(`${scopedFilepath}/${data.name}${data.ext}`, cacheObject))
-        .then(json => {
-          if (json && json.content) {
-            Object.keys(json.content).forEach(key => {
-              const item = json.content[key];
-              if (
-                (item.type === 'image' || item.type === 'video') &&
-                item.url &&
-                !isExternalURL(item.url)
-              ) {
-                json.content[key].url = path.relative(
-                  path.dirname(baseFilepath),
-                  path.resolve(path.join(scopedFilepath, item.url)),
-                );
-              }
-            });
-          }
-
-          if (json) {
-            result = {
-              ...json,
-              ...result,
-            };
-          }
-        });
-    })(filepath);
+    if (json) {
+      result = deepmerge(json, result);
+    }
   }
 
-  return prom.then(() => result);
+  return result;
 };
