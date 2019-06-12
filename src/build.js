@@ -24,7 +24,7 @@ const getTemplate = require('./util/getBuildTemplate');
 module.exports = async function build({
   allConfigsSelector = './**/.richmediarc',
   stats = false,
-  answers = {},
+  answers: options = {},
 }) {
   const buildTarget = './build';
 
@@ -48,7 +48,7 @@ module.exports = async function build({
   const filesBuild = await glob(`${buildTarget}/**/*`);
 
   if (filesBuild.length > 0) {
-    if (typeof answers.emptyBuildDir !== 'boolean') {
+    if (typeof options.emptyBuildDir !== 'boolean') {
       questions.push({
         type: 'confirm',
         name: 'emptyBuildDir',
@@ -60,7 +60,7 @@ module.exports = async function build({
   }
 
   if (configs.length > 1) {
-    if (!(answers.build instanceof Array)) {
+    if (!(options.build instanceof Array)) {
       questions.push({
         type: 'checkbox',
         name: 'build',
@@ -79,24 +79,24 @@ module.exports = async function build({
     }
   } else {
     console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
-    answers.build = [configs[0].location];
+    options.build = [configs[0].location];
   }
 
-  answers = {
-    ...answers,
+  options = {
+    ...options,
     ...(await inquirer.prompt(questions)),
   };
 
-  if (answers.emptyBuildDir) {
+  if (options.emptyBuildDir) {
     await fs.emptyDir(buildTarget);
   }
 
   let configsResult = null;
 
-  if (answers.build.find(item => item === 'all')) {
+  if (options.build.find(item => item === 'all')) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(config => answers.build.indexOf(config.location) >= 0);
+    configsResult = configs.filter(config => options.build.indexOf(config.location) >= 0);
   }
 
   const result = await createConfigByRichmediarcList(configsResult, {

@@ -355,14 +355,14 @@ module.exports = function createConfig({
               if_return: true,
               inline: true,
               join_vars: true,
-              keep_fargs: false || 'strict',
+              keep_fargs: 'strict',
               keep_fnames: false,
               keep_infinity: false,
               loops: true,
               negate_iife: true,
               passes: 1,
               properties: true,
-              pure_getters: true && 'strict',
+              pure_getters: 'strict',
               pure_funcs: null,
               reduce_funcs: true,
               reduce_vars: true,
@@ -391,6 +391,8 @@ module.exports = function createConfig({
         }),
       ],
     };
+
+    // delete config.optimization;
   }
 
   config.plugins.push(
