@@ -386,7 +386,7 @@ module.exports = function createConfig({
             toplevel: false,
             nameCache: null,
             ie8: false,
-            keep_fnames: false,
+            keep_fnames: true,
           },
         }),
       ],
