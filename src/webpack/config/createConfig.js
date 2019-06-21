@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -195,6 +196,7 @@ module.exports = function createConfig({
                   '@babel/preset-env',
                   {
                     useBuiltIns: 'usage',
+                    corejs: 3,
                     targets: {
                       browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
                     },
@@ -262,16 +264,21 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: './statistics.html',
       // }),
-      new CopyWebpackPlugin(
-        [{ from: path.resolve(path.dirname(filepathRichmediaRC), './static'), to: 'static' }],
-        {},
-      ),
     ],
     stats: {
       colors: true,
     },
     devtool,
   };
+
+  /**
+   * When there is a static folder use it in webpack config
+   */
+  const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
+
+  if (fs.existsSync(staticPath)) {
+    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: 'static' }], {}));
+  }
 
   if (platform === PlatformEnum.MONET) {
     config.plugins.push(
@@ -326,8 +333,54 @@ module.exports = function createConfig({
         new UglifyJsPlugin({
           uglifyOptions: {
             warnings: false,
-            parse: {},
-            compress: false,
+            // parse: {},
+            compress: {
+              arguments: true,
+              booleans: true,
+              collapse_vars: !true,
+              comparisons: true,
+              conditionals: true,
+              dead_code: true,
+              directives: true,
+              drop_console: false,
+              drop_debugger: true,
+              evaluate: true,
+              expression: false,
+              global_defs: false,
+              hoist_funs: false,
+              hoist_props: true,
+              hoist_vars: false,
+              ie8: false,
+
+              if_return: true,
+              inline: true,
+              join_vars: true,
+              keep_fargs: 'strict',
+              keep_fnames: false,
+              keep_infinity: false,
+              loops: true,
+              negate_iife: true,
+              passes: 1,
+              properties: true,
+              pure_getters: 'strict',
+              pure_funcs: null,
+              reduce_funcs: true,
+              reduce_vars: true,
+              sequences: true,
+              side_effects: true,
+              switches: true,
+              top_retain: null,
+              toplevel: false,
+              typeofs: true,
+              unsafe: false,
+              unsafe_comps: false,
+              unsafe_Function: false,
+              unsafe_math: false,
+              unsafe_proto: false,
+              unsafe_regexp: false,
+              unsafe_undefined: false,
+              unused: true,
+            },
             mangle: true, // Note `mangle.properties` is `false` by default.
             output: null,
             toplevel: false,
@@ -338,6 +391,8 @@ module.exports = function createConfig({
         }),
       ],
     };
+
+    // delete config.optimization;
   }
 
   config.plugins.push(

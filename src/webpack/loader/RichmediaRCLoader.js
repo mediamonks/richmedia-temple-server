@@ -21,10 +21,7 @@ module.exports = function RichmediaRCLoader(data) {
         const id = `uuid_replace_${ruuid.toString(16)}`;
         replaceItems.push({
           key: loaderUtils.stringifyRequest(loaderContext, id),
-          value: `require(${loaderUtils.stringifyRequest(
-            loaderContext,
-            `file-loader!${item.url}`,
-          )})`,
+          value: `require(${loaderUtils.stringifyRequest(loaderContext, `${item.url}`)})`,
         });
 
         item.url = id;
