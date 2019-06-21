@@ -85,6 +85,8 @@
     "@babel/register": "~7.0.0",
     "@mediamonks/henk": "^1.1.1",
     "@mediamonks/richmedia-temple-screenshot": "^1.1.1",
+    "browserslist": "4.6.2",
+    "caniuse-lite": "1.0.30000974",
     "ajv": "^6.10.0",
     "babel-loader": "^8.0.6",
     "chalk": "^2.4.2",
