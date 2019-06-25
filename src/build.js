@@ -139,12 +139,22 @@ module.exports = async function build({
       const templateConfig = {
         banner: configsResult.map(item => {
           const name = getNameFromSettings(item);
+          let width = item.data.settings.size.width;
+          let height = item.data.settings.size.height;
+          let title = width + "x" + height;
+
+          if(item.data.settings.expandable){
+            width = item.data.settings.expandable.width;
+            height = item.data.settings.expandable.height;
+            title += "_" + width + "x" + height;
+          }
 
           return {
             src: `./${name}/`,
             name,
-            width: item.data.settings.size.width,
-            height: item.data.settings.size.height,
+            title,
+            width,
+            height,
           };
         }),
       };
