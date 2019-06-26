@@ -65,12 +65,21 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const templateConfig = {
       banner: settingsList.map(value => {
         const name = getNameFromSettings(value);
+        let width = value.data.settings.size.width;
+        let height = value.data.settings.size.height;
+        let title = width + "x" + height;
 
+        if(value.data.settings.expandable){
+          width = value.data.settings.expandable.width;
+          height = value.data.settings.expandable.height;
+          title += "_" + width + "x" + height;
+        }
         return {
           src: `./${name}/`,
           name,
-          width: value.data.settings.size.width,
-          height: value.data.settings.size.height,
+          title,
+          width,
+          height,
         };
       }),
     };
