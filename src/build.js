@@ -141,12 +141,12 @@ module.exports = async function build({
           const name = getNameFromSettings(item);
           let width = item.data.settings.size.width;
           let height = item.data.settings.size.height;
-          let title = width + "x" + height;
+          let title = name;
 
           if(item.data.settings.expandable){
             width = item.data.settings.expandable.width;
             height = item.data.settings.expandable.height;
-            title += "_" + width + "x" + height;
+            title += "_EXP_" + width + "x" + height;
           }
 
           return {

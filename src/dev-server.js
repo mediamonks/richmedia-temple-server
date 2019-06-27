@@ -67,12 +67,12 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         const name = getNameFromSettings(value);
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
-        let title = width + "x" + height;
+        let title = name;
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
           height = value.data.settings.expandable.height;
-          title += "_" + width + "x" + height;
+          title += "_EXP_" + width + "x" + height;
         }
         return {
           src: `./${name}/`,
