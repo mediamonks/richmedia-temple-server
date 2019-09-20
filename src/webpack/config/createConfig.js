@@ -59,11 +59,14 @@ module.exports = function createConfig({
       imageNameHashing = '';
     }
 
-    if(richmediarc.settings.useOriginalName){
+    if(richmediarc.settings.useOriginalFileNames){
       namedHashing = '';
+      imageNameHashing = '';
     }
 
   }
+
+  console.log(richmediarc);
 
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
