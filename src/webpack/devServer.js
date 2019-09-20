@@ -12,8 +12,8 @@ const chalk = require('chalk');
 const opener = require('opener');
 
 const readFile = util.promisify(fs.readFile);
-const getTemplate = require('./util/getDevTemplate');
-const getNameFromSettings = require('./util/getNameFromSettings');
+const getTemplate = require('../util/getDevTemplate');
+const getNameFromSettings = require('../util/getNameFromSettings');
 
 /**
  *
