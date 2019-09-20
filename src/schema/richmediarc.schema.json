@@ -116,6 +116,8 @@
 
     "settings": {
       "properties": {
+        "useOriginalImageName": { "type": "boolean" },
+        "useOriginalName": { "type": "boolean" },
         "entry": {
           "description": "When entry is not specified the build script will ignore the config as a build point.",
           "properties": {
