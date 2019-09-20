@@ -27,17 +27,17 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-  filepathJs,
-  filepathHtml,
-  filepathRichmediaRC,
-  outputPath,
-  richmediarc = null,
-  platform,
-  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
-    mode: DevEnum.DEVELOPMENT,
-    stats: false,
-  },
-}) {
+                                         filepathJs,
+                                         filepathHtml,
+                                         filepathRichmediaRC,
+                                         outputPath,
+                                         richmediarc = null,
+                                         platform,
+                                         options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
+                                           mode: DevEnum.DEVELOPMENT,
+                                           stats: false,
+                                         },
+                                       }) {
   let devtool = false;
   const entry = [];
 
@@ -47,6 +47,22 @@ module.exports = function createConfig({
 
   if (mode === DevEnum.DEVELOPMENT) {
     devtool = 'inline-source-map';
+  }
+
+  let namedHashing = '_[sha512:hash:base64:7]';
+  let imageNameHashing = namedHashing;
+
+  if(richmediarc &&
+    richmediarc.settings){
+
+    if(richmediarc.settings.useOriginalImageName){
+      imageNameHashing = '';
+    }
+
+    if(richmediarc.settings.useOriginalName){
+      namedHashing = '';
+    }
+
   }
 
   // entry.push('@babel/polyfill');
@@ -91,7 +107,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]_[sha512:hash:base64:7].css',
+                name: `[name]${namedHashing}.css`,
               },
             },
             {
@@ -107,7 +123,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]_[sha512:hash:base64:7].css',
+                name: `[name]${namedHashing}.css`,
               },
             },
             {
@@ -148,7 +164,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]_[sha512:hash:base64:7].[ext]',
+                name: `[name]${namedHashing}.[ext]`,
               },
             },
           ],
@@ -159,7 +175,7 @@ module.exports = function createConfig({
             {
               loader: 'file-loader',
               options: {
-                name: '[name]_[sha512:hash:base64:7].[ext]',
+                name: `[name]${imageNameHashing}.[ext]`,
               },
             },
             {
@@ -220,11 +236,11 @@ module.exports = function createConfig({
           },
         },
         {
-          test: /\.(ttf|eot|woff|woff2|otf)$/,
+          test: /\.(ttf|eot|woff|woff2)$/,
           use: {
             loader: 'file-loader',
             options: {
-              name: '[name]_[sha512:hash:base64:7].[ext]',
+              name: `[name]${namedHashing}.[ext]`,
             },
           },
         },
@@ -328,6 +344,10 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
+      splitChunks: {
+        // include all types of chunks
+        chunks: 'async'
+      },
       minimizer: [
         // new TerserPlugin()
         new UglifyJsPlugin({
