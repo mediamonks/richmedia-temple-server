@@ -1,6 +1,7 @@
-const findJSONConfigs = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
-const devServer = require('./dev-server');
+const devServer = require('./webpack/devServer');
+
+const findJSONConfigs = require('./util/findRichmediaRC');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
