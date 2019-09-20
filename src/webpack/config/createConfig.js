@@ -277,7 +277,7 @@ module.exports = function createConfig({
   const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
 
   if (fs.existsSync(staticPath)) {
-    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: 'static' }], {}));
+    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: './' }], {}));
   }
 
   if (platform === PlatformEnum.MONET) {
