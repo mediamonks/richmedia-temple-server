@@ -27,17 +27,17 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-                                         filepathJs,
-                                         filepathHtml,
-                                         filepathRichmediaRC,
-                                         outputPath,
-                                         richmediarc = null,
-                                         platform,
-                                         options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
-                                           mode: DevEnum.DEVELOPMENT,
-                                           stats: false,
-                                         },
-                                       }) {
+  filepathJs,
+  filepathHtml,
+  filepathRichmediaRC,
+  outputPath,
+  richmediarc = null,
+  platform,
+  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
+    mode: DevEnum.DEVELOPMENT,
+    stats: false,
+  },
+}) {
   let devtool = false;
   const entry = [];
 
@@ -52,18 +52,15 @@ module.exports = function createConfig({
   let namedHashing = '_[sha512:hash:base64:7]';
   let imageNameHashing = namedHashing;
 
-  if(richmediarc &&
-    richmediarc.settings){
-
-    if(richmediarc.settings.useOriginalImageName){
+  if (richmediarc && richmediarc.settings) {
+    if (richmediarc.settings.useOriginalImageName) {
       imageNameHashing = '';
     }
 
-    if(richmediarc.settings.useOriginalFileNames){
+    if (richmediarc.settings.useOriginalFileNames) {
       namedHashing = '';
       imageNameHashing = '';
     }
-
   }
 
   console.log(richmediarc);
@@ -349,7 +346,7 @@ module.exports = function createConfig({
     config.optimization = {
       splitChunks: {
         // include all types of chunks
-        chunks: 'async'
+        chunks: 'async',
       },
       minimizer: [
         // new TerserPlugin()
