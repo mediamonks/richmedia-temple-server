@@ -11,6 +11,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 const DevEnum = require('../../data/DevEnum');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
+const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -292,6 +293,7 @@ module.exports = function createConfig({
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
         __RICHMEDIA_CONFIG: JSON.stringify(richmediarc),
       }),
+      new RichmediaRCPlugin()
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
