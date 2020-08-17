@@ -62,14 +62,7 @@ module.exports = function createConfig({
     }
   }
 
-  console.log('cssVariables');
-
   const cssVariables = flattenObjectToCSSVars(richmediarc);
-
-  console.log({
-    richmediarc,
-    cssVariables
-  });
 
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
