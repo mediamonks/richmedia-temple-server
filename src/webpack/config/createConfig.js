@@ -250,14 +250,14 @@ module.exports = function createConfig({
             },
           },
         },
-        {
-          test: /.richmediarc$/,
-          exclude: /node_modules/,
-          type: 'javascript/dynamic',
-          use: {
-            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
-          },
-        },
+        // {
+        //   test: /.richmediarc$/,
+        //   exclude: /node_modules/,
+        //   type: 'javascript/dynamic',
+        //   use: {
+        //     loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
+        //   },
+        // },
         {
           test: /\.(ttf|eot|woff|woff2)$/,
           use: {
@@ -293,7 +293,9 @@ module.exports = function createConfig({
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
         __RICHMEDIA_CONFIG: JSON.stringify(richmediarc),
       }),
-      new RichmediaRCPlugin()
+      new RichmediaRCPlugin({
+        config: filepathRichmediaRC
+      })
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
@@ -433,11 +435,11 @@ module.exports = function createConfig({
     // delete config.optimization;
   }
 
-  config.plugins.push(
-    new SimpleProgressWebpackPlugin({
-      format: 'compact',
-    }),
-  );
+  // config.plugins.push(
+  //   new SimpleProgressWebpackPlugin({
+  //     format: 'compact',
+  //   }),
+  // );
 
   return config;
 };
