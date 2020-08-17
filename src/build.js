@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const glob = require('glob-promise');
 
-const findJSONConfigs = require('./util/findRichmediaRC');
+const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const getNameFromSettings = require('./util/getNameFromSettings');
 const getTemplate = require('./util/getBuildTemplate');
@@ -22,17 +22,19 @@ const getTemplate = require('./util/getBuildTemplate');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-  allConfigsSelector = './**/.richmediarc',
-  stats = false,
-  answers: options = {},
-}) {
+                                        allConfigsSelector = './**/.richmediarc',
+                                        stats = false,
+                                        options = {},
+                                      }) {
   const buildTarget = './build';
 
   const spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('/-\\|');
   spinner.start();
 
-  const configs = await findJSONConfigs(allConfigsSelector, [
+
+
+  const configs = await findRichmediaRC(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
@@ -66,10 +68,10 @@ module.exports = async function build({
         name: 'build',
         message: 'Please choose the current build to start.',
         choices: [
-          { name: 'all', checked: false },
-          ...configs.map(({ location }) => ({ name: location, checked: false })),
+          {name: 'all', checked: false},
+          ...configs.map(({location}) => ({name: location, checked: false})),
         ],
-        validate: function(answer) {
+        validate: function (answer) {
           if (answer.length < 1) {
             return 'You must choose at least one.';
           }
@@ -143,11 +145,11 @@ module.exports = async function build({
           let height = item.data.settings.size.height;
           let title = name;
 
-          if(item.data.settings.expandable){
-            width = item.data.settings.expandable.width;
-            height = item.data.settings.expandable.height;
-            title += "_EXP_" + width + "x" + height;
-          }
+          // if (item.data.settings.expandable) {
+          //   width = item.data.settings.expandable.width;
+          //   height = item.data.settings.expandable.height;
+          //   title += "_EXP_" + width + "x" + height;
+          // }
 
           return {
             src: `./${name}/`,

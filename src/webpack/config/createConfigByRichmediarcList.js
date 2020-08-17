@@ -42,22 +42,15 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
 
   const outputPath = path.resolve(path.join('./build/', list.join('_')));
 
-  const filepathHtml = path.resolve(
-    path.join(path.dirname(richmediaConfigLocation), richmediaConfig.settings.entry.html),
-  );
-
-  const filepathJs = path.resolve(
-    path.join(path.dirname(richmediaConfigLocation), richmediaConfig.settings.entry.js),
-  );
+  const filepathHtml = richmediaConfig.settings.entry.html
+  const filepathJs = richmediaConfig.settings.entry.js;
   const filepathRichmediaRC = path.resolve(richmediaConfigLocation);
-  const platform = getPlatformByRichmediaRc(richmediaConfig);
 
   return {
     filepathHtml,
     filepathJs,
     filepathRichmediaRC,
     outputPath,
-    platform,
   };
 }
 
@@ -67,7 +60,8 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
  * @param {string} mode
  * @return {Promise<any[]>}
  */
-function createConfigByRichmediarcList(richmediarcList, { mode, stats }) {
+async function createConfigByRichmediarcList(richmediarcList, { mode, stats }) {
+
   const promiseList = richmediarcList.map(
     ({ location, data }) => {
       /**
@@ -109,7 +103,9 @@ function createConfigByRichmediarcList(richmediarcList, { mode, stats }) {
     // projects can have there own webpack config. this will override the generated one.
   );
 
-  return Promise.all(promiseList).then(webpackConfigs => webpackConfigs.filter(config => !!config));
+  const webpackConfigs = await Promise.all(promiseList);
+
+  return webpackConfigs.filter(config => !!config);
 }
 
 module.exports = createConfigByRichmediarcList;
