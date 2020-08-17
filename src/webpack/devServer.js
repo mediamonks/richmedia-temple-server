@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const webpackDevMiddleware = require('webpack-dev-middleware');
 const express = require('express');
 const handlebars = require('handlebars');
 const portfinder = require('portfinder');
@@ -37,13 +37,34 @@ ${chalk.grey.bold('-------------------------------------------------------')}
   const app = express();
 
   webpackConfigList.forEach((config, index) => {
-    const compiler = webpack(config);
+
     const name = getNameFromSettings(settingsList[index]);
+
+    config.entry.main = [
+      // `webpack-hot-middleware/client?path=/${name}/__webpack_hmr&timeout=20000`,
+      ...config.entry.main,
+    ];
+
+
+    config.output = {
+      ...config.output,
+      "hotUpdateChunkFilename": ".hot/[id].[hash].hot-update.js",
+      "hotUpdateMainFilename": ".hot/[hash].hot-update.json"
+    };
+
+
+
+    const compiler = webpack(config);
+
+    console.log('----------------------');
+    console.log(` ${name} `);
+    console.log(config.output.publicPath);
 
     app.use(
       webpackDevMiddleware(compiler, {
         noInfo: true,
         publicPath: `/${name}/`,
+        // publicPath: config.output.publicPath,
         // publicPath: config.output.path,
       }),
     );
@@ -52,7 +73,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       webpackHotMiddleware(compiler, {
         log: console.log,
         path: `/${name}/__webpack_hmr`,
-        heartbeat: 10 * 1000,
+        heartbeat: 2 * 1000,
       }),
     );
     //
@@ -74,6 +95,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           height = value.data.settings.expandable.height;
           title += "_EXP_" + width + "x" + height;
         }
+
         return {
           src: `./${name}/`,
           name,

@@ -5,7 +5,7 @@ const findJSONConfigs = require('./util/findRichmediaRC');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
-module.exports = async function dev({ allConfigsSelector = './**/.richmediarc' }) {
+module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' }) {
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
@@ -13,6 +13,7 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc' }
     'settings.entry.js',
     'settings.entry.html',
   ]);
+
 
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
@@ -36,7 +37,19 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc' }
         message: 'Please select config(s) build:',
         choices: [
           { name: 'all', checked: false },
-          ...configs.map(({ location }) => ({ name: location, checked: false })),
+          ...configs.map(config => {
+
+            let name = config.location;
+
+            if(config.data.name){
+              name += ` (${config.data.name})`
+            }
+
+            return {
+              name,
+              checked: false
+            };
+          }),
         ],
         validate(answer) {
           if (answer.length < 1) {
@@ -56,11 +69,18 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc' }
     configsResult = configs.filter(({ location }) => answers.devLocation.indexOf(location) > -1);
   }
 
-  const result = await createConfigByRichmediarcList(configsResult, {
+  let list = await createConfigByRichmediarcList(configsResult, {
     mode: 'development',
     stats: false,
   });
-  const list = result.map((webpack, index) => ({ webpack, settings: configsResult[index] }));
+
+
+  list = list.map((webpack, index) => {
+    return {
+      webpack,
+      settings: configsResult[index]
+    }
+  });
 
   devServer(list);
 };

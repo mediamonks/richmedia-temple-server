@@ -4,13 +4,11 @@ const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-const MonetJSONPlugin = require('../plugin/MonetJSONPlugin');
 const ZipPlugin = require('zip-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const PlatformEnum = require('../../data/PlatformEnum');
 const DevEnum = require('../../data/DevEnum');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
@@ -32,7 +30,7 @@ module.exports = function createConfig({
   filepathRichmediaRC,
   outputPath,
   richmediarc = null,
-  platform,
+
   options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
     mode: DevEnum.DEVELOPMENT,
     stats: false,
@@ -63,12 +61,14 @@ module.exports = function createConfig({
     }
   }
 
-  console.log(richmediarc);
-
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
 
+
+  console.log({
+    entry, outputPath
+  });
   const config = {
     mode,
     entry: {
@@ -101,8 +101,24 @@ module.exports = function createConfig({
 
     module: {
       rules: [
+        // {
+        //   test: /\.scss$/,
+        //   use: [
+        //     {
+        //       loader: 'file-loader',
+        //       options: {
+        //         name: `[name]${namedHashing}.css`,
+        //       },
+        //     },
+        //     {
+        //       loader: 'extract-loader',
+        //     },
+        //     'css-loader', // translates CSS into CommonJS
+        //     'sass-loader', // compiles Sass to CSS, using Node Sass by default
+        //   ],
+        // },
         {
-          test: /\.scss$/,
+          test: /\.s[ac]ss$/i,
           use: [
             {
               loader: 'file-loader',
@@ -113,8 +129,9 @@ module.exports = function createConfig({
             {
               loader: 'extract-loader',
             },
-            'css-loader', // translates CSS into CommonJS
-            'sass-loader', // compiles Sass to CSS, using Node Sass by default
+            'resolve-url-loader',
+            // Compiles Sass to CSS
+            'sass-loader',
           ],
         },
         {
@@ -202,7 +219,7 @@ module.exports = function createConfig({
 
         {
           test: /\.js$/,
-          // adding exception to libraries comming from @mediamonks namespace.
+          // adding exception to libraries coming from @mediamonks namespace.
           exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
             loader: 'babel-loader',
@@ -266,7 +283,9 @@ module.exports = function createConfig({
       }),
 
       new webpack.DefinePlugin({
+        DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
+        __RICHMEDIA_CONFIG: JSON.stringify(richmediarc),
       }),
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
@@ -296,19 +315,11 @@ module.exports = function createConfig({
     config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: './' }], {}));
   }
 
-  if (platform === PlatformEnum.MONET) {
-    config.plugins.push(
-      new MonetJSONPlugin({
-        config: filepathRichmediaRC,
-        filePattern: '[hash].[ext]',
-      }),
-    );
-  }
-
   if (stats === true) {
     config.plugins.push(new BundleAnalyzerPlugin());
   }
 
+  console.log(mode);
   if (mode === DevEnum.DEVELOPMENT) {
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }

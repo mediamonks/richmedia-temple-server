@@ -25,8 +25,8 @@ const {readJson} = require("fs-extra");
  */
 module.exports = async function getRichmediaRC(
   filepath,
-
 ) {
+
   filepath = path.resolve(filepath);
   const dirname = path.dirname(filepath);
 

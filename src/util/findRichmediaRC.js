@@ -11,17 +11,23 @@ const doesNestedExist = require('./doesNestedExists');
 module.exports = async function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
 
   const files = await glob(globQuery, {ignore: ['./node_modules/**/.richmediarc']});
-
-  const result = await Promise.all(
+  let result = await Promise.all(
     files.map(async function (location) {
-      return await getRichmediaRC(location);
+      return {
+        location,
+        data: await getRichmediaRC(location)
+      };
     })
   );
 
+
+  console.log(result);
+
   const resolvedPatterns = patterns.map(pattern => pattern.split('.'));
 
-
-  return result.filter(data =>
+  result = result.filter(({data}) =>
     resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),
   );
+
+  return result;
 };
