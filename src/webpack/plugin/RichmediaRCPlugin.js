@@ -16,7 +16,7 @@ class RichmediaRCPlugin {
 
   apply(compiler) {
     compiler.hooks.emit.tapPromise('RichmediaRCPlugin', async compilation => {
-      const json = await getRichmediaRC(this.config.filepath);
+      const json = await getRichmediaRC(this.config);
 
       const all = [];
       leafs(json.content, (value, obj, name) => {
@@ -39,8 +39,10 @@ class RichmediaRCPlugin {
         }
       });
 
-      await Promise.all(result);
+      await Promise.all(all);
       const result = JSON.stringify(json);
+
+      console.log(result);
 
       // Insert this list into the Webpack build as a new file asset:
       compilation.assets['.richmediarc'] = {
@@ -49,6 +51,8 @@ class RichmediaRCPlugin {
           return this.source().length;
         },
       };
+
+      console.log(Object.keys(compilation.assets));
 
       return compilation;
     });
