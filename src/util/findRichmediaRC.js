@@ -1,32 +1,27 @@
 const getRichmediaRC = require('./getRichmediaRC');
-const glob = require('glob');
+const glob = require('glob-promise');
 const doesNestedExist = require('./doesNestedExists');
 
 /**
  * @description will search for files with a pattern.
  * @param {string} globQuery
  * @param {Array<string>} patterns ['data.settings.entry.js', 'data.settings.entry.html']
- * @return {Promise<Array<RCDto>>}
+ * @return {Array<{data: (void|never), location: string}[]>}
  */
-function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
-  return new Promise(resolve => {
-    const cache = {};
-    glob(globQuery, { ignore: ['./node_modules/**/.richmediarc'] }, (err, files) => {
-      Promise.all(
-        files.map(location =>
-          getRichmediaRC(location, './', true, cache).then(data => ({ location, data })),
-        ),
-      ).then(result => {
-        const resolvedPatterns = patterns.map(pattern => pattern.split('.'));
+module.exports = async function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
 
-        resolve(
-          result.filter(({ data }) =>
-            resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),
-          ),
-        );
-      });
-    });
-  });
-}
+  const files = await glob(globQuery, {ignore: ['./node_modules/**/.richmediarc']});
 
-module.exports = findRichmediaRC;
+  const result = await Promise.all(
+    files.map(async function (location) {
+      return await getRichmediaRC(location);
+    })
+  );
+
+  const resolvedPatterns = patterns.map(pattern => pattern.split('.'));
+
+
+  return result.filter(data =>
+    resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),
+  );
+};

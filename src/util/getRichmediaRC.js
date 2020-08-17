@@ -5,83 +5,48 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const isExternalURL = require('../util/isExternalURL');
 const deepmerge = require('deepmerge');
+const leafs = require("./leafs");
+const isFile = require("./isFile");
+const {readJson} = require("fs-extra");
 
-function readJson(filepath, cacheObject) {
-  let promiseJson;
-  if (cacheObject && cacheObject[filepath]) {
-    promiseJson = Promise.resolve(cacheObject[filepath]);
-  } else {
-    promiseJson = fs.pathExists(filepath).then(val => {
-      if (val) {
-        return fs.readJson(filepath).then(json => {
-          if (cacheObject && !cacheObject[filepath]) {
-            cacheObject[filepath] = json;
-          }
 
-          return json;
-        });
-      }
 
-      return false;
-    });
-  }
 
-  return promiseJson;
-}
 
 /**
  * getJSONConfig retrieves a jsonConfig config file and will
  * also inherit configs from parent jsonConfig files
  *
- * @param {string} filepathRichmediarc
- * @param {string} rootPath
- * @param {boolean} inheritParentConfig
+ * @param {string} filepath
+ * @param {string} rootBasePath
  * @param {any} cacheObject
  * @return {Promise<void | never>}
  */
 module.exports = async function getRichmediaRC(
-  filepathRichmediarc,
-  rootPath = './',
-  inheritParentConfig = true,
-  cacheObject = null,
+  filepath,
+
 ) {
-  let result = {};
+  filepath = path.resolve(filepath);
+  const dirname = path.dirname(filepath);
 
-  let filepath = path.resolve(filepathRichmediarc);
-  const baseFilepath = filepath;
-  const data = path.parse(baseFilepath);
+  let richmediarc = await readJson(filepath);
 
-  rootPath = path.resolve(rootPath);
+  leafs(richmediarc, function(value, obj, name){
 
-  let resolve = path.resolve(baseFilepath) !== rootPath;
-
-  while (resolve) {
-    filepath = path.join(filepath, '..');
-    resolve = path.resolve(filepath) !== rootPath;
-
-    const json = await readJson(`${filepath}/${data.name}${data.ext}`, cacheObject);
-    if (json && json.content) {
-      Object.keys(json.content).forEach(key => {
-        const item = json.content[key];
-        if (
-          (item.type === 'image' || item.type === 'video') &&
-          item.url &&
-          !isExternalURL(item.url)
-        ) {
-          json.content[key].url = path.relative(
-            path.dirname(baseFilepath),
-            path.resolve(path.join(filepath, item.url)),
-          );
-        }
-      });
+    if(typeof value === 'string'
+      && !path.isAbsolute(value)
+      && isFile(value))
+    {
+      obj[name] = path.resolve(dirname, value);
     }
+  });
 
-    if (json) {
-      result = deepmerge(json, result);
-    }
+  let {parent} = richmediarc;
+  if(parent){
+    richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc)
+    delete richmediarc.parent;
   }
 
-  return result;
+  return richmediarc;
 };
