@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const DevEnum = require('../../data/DevEnum');
+const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -61,10 +62,18 @@ module.exports = function createConfig({
     }
   }
 
+  console.log('cssVariables');
+
+  const cssVariables = flattenObjectToCSSVars(richmediarc);
+
+  console.log({
+    richmediarc,
+    cssVariables
+  });
+
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
-
 
   console.log({
     entry, outputPath
@@ -152,6 +161,9 @@ module.exports = function createConfig({
               options: {
                 ident: 'postcss',
                 plugins: loader => [
+                  require('postcss-css-variables')({
+                    variables: cssVariables
+                  }),
                   require('postcss-import')({ root: loader.resourcePath }),
                   require('postcss-preset-env')({
                     stage: 2,

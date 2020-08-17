@@ -42,7 +42,7 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
             let name = config.location;
 
             if(config.data.name){
-              name += ` (${config.data.name})`
+              // name += ` (${config.data.name})`
             }
 
             return {
@@ -66,14 +66,14 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
   if (answers.devLocation.indexOf('all') > -1) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({ location }) => answers.devLocation.indexOf(location) > -1);
+    configsResult = configs.filter(({ location }) => {
+      return answers.devLocation.indexOf(location) > -1;
+    });
   }
-
   let list = await createConfigByRichmediarcList(configsResult, {
     mode: 'development',
     stats: false,
   });
-
 
   list = list.map((webpack, index) => {
     return {
