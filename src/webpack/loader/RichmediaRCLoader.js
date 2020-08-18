@@ -2,17 +2,24 @@ const loaderUtils = require('loader-utils');
 const isExternalURL = require('../../util/isExternalURL');
 const leafs = require("../../util/leafs");
 const isFile = require("../../util/isFile");
+const fs = require('fs');
 
 /**
  * Allows you to import external files into a json value.
  * Can be used for any value, in an object or array.
  */
 module.exports = function RichmediaRCLoader(data) {
-  console.log('RichmediaRCLoader', data);
+  const options = loaderUtils.getOptions(this);
+
 
   this.cacheable();
   const loaderContext = this;
-  data = typeof data === 'string' ? JSON.parse(data) : data;
+
+  if(options.config){
+    data = options.config;
+  } else {
+    data = typeof data === 'string' ? JSON.parse(data) : data;
+  }
 
   let ruuid = Date.now();
   const replaceItems = [];
@@ -32,13 +39,14 @@ module.exports = function RichmediaRCLoader(data) {
     });
   }
 
-  console.log({data});
-
   data = JSON.stringify(data)
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 
-  data = replaceItems.reduce((prev, item) => prev.replace(item.key, item.value), data);
+  data = replaceItems.reduce((prev, item) => {
+    prev = prev.replace(item.key, item.value);
+    return prev;
+  }, data);
 
   return `module.exports = ${data};`;
 };

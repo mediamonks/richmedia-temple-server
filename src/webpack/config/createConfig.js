@@ -12,6 +12,8 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const DevEnum = require('../../data/DevEnum');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
+const VirtualModulePlugin = require('virtual-module-webpack-plugin');
+const VirtualModulesPlugin = require("webpack-virtual-modules");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -250,14 +252,27 @@ module.exports = function createConfig({
             },
           },
         },
-        // {
-        //   test: /.richmediarc$/,
-        //   exclude: /node_modules/,
-        //   type: 'javascript/dynamic',
-        //   use: {
-        //     loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
-        //   },
-        // },
+        {
+          // test: /mediamonks\/temple\/src\/util\/getConfig/,
+          test: /richmediaconfig/,
+          // exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
+          use: {
+            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
+            options: {
+              config: richmediarc
+            }
+          },
+        },
+        {
+          test: /.richmediarc$/,
+          exclude: /node_modules/,
+          type: 'javascript/dynamic',
+          use: {
+            loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
+            options: {
+            }
+          },
+        },
         {
           test: /\.(ttf|eot|woff|woff2)$/,
           use: {
@@ -284,6 +299,9 @@ module.exports = function createConfig({
       ],
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        richmediaConfig: filepathRichmediaRC
+      }),
       new HtmlWebPackPlugin({
         template: filepathHtml,
       }),
@@ -291,12 +309,19 @@ module.exports = function createConfig({
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
-        __RICHMEDIA_CONFIG: JSON.stringify(richmediarc),
       }),
-      new RichmediaRCPlugin({
-        config: filepathRichmediaRC
+      // new RichmediaRCPlugin({
+      //   config: filepathRichmediaRC
+      // }),
+      // new VirtualModulePlugin({
+      //   moduleName: 'richmedia-config',
+      //   contents: JSON.stringify(richmediarc),
+      // }),
+      new VirtualModulesPlugin({
+        'node_modules/richmediaconfig': `module.exports = "DUDE"`
       })
-      // new CircularDependencyPlugin({
+
+  // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
       //   // add errors to webpack instead of warnings
