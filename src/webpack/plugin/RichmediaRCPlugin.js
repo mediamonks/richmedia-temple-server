@@ -45,7 +45,7 @@ class RichmediaRCPlugin {
       console.log(result);
 
       // Insert this list into the Webpack build as a new file asset:
-      compilation.assets['.richmediarc'] = {
+      compilation.assets['config.json'] = {
         source: () => result,
         size() {
           return this.source().length;

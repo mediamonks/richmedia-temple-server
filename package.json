@@ -136,10 +136,12 @@
     "uglifyjs-webpack-plugin": "2.1.2",
     "url-loader": "^1.1.2",
     "uuidv4": "^3.0.1",
+    "virtual-module-webpack-plugin": "^0.4.1",
     "webpack": "4.29.6",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-dev-middleware": "^3.7.0",
     "webpack-hot-middleware": "^2.25.0",
+    "webpack-virtual-modules": "^0.2.2",
     "webpack-visualizer-plugin": "^0.1.11",
     "whatwg-fetch": "^2.0.4",
     "zip-webpack-plugin": "^3.0.0"
