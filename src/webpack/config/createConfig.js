@@ -349,8 +349,6 @@ module.exports = function createConfig({
           { from: staticPath, to: rootPath }]
       })
     );
-
-    // console.log({ from: staticPath, to: rootPath });
   }
 
   if (stats === true) {
