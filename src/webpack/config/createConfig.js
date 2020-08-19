@@ -344,11 +344,11 @@ module.exports = function createConfig({
   const rootPath = path.resolve(path.dirname(filepathRichmediaRC), './');
 
   if (fs.existsSync(staticPath)) {
-    // config.plugins.push(new CopyWebpackPlugin({
-    //   patterns: [
-    //       { from: staticPath, to: rootPath }]
-    //   })
-    // );
+    config.plugins.push(new CopyWebpackPlugin({
+      patterns: [
+          { from: staticPath, to: rootPath }]
+      })
+    );
 
     // console.log({ from: staticPath, to: rootPath });
   }

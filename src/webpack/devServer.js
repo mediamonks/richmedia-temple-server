@@ -39,7 +39,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
   webpackConfigList.forEach((config, index) => {
 
     const name = getNameFromLocation(settingsList[index].location);
-    console.log(name);
+
     config.entry.main = [
       // `webpack-hot-middleware/client?path=/${name}/__webpack_hmr&timeout=20000`,
       ...config.entry.main,
