@@ -12,6 +12,6 @@
   },
   "content": {
     "text": "COPY 1",
-    "img": "./img/1x1_blank.png"
+    "bgimage": "./img/300x250.jpg"
   }
 }

@@ -8,6 +8,7 @@
     }
   },
   "content": {
-    "text": "COPY 2"
+    "text": "COPY 2",
+    "bgimage": "./img/300x600.jpg"
   }
 }

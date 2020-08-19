@@ -46,4 +46,6 @@ body {
   width: var(--settings-size-width)px;
   height: var(--settings-size-height)px;
   opacity: 0;
+
+  background-image: url(../img/var(--content-bgimage));
 }
