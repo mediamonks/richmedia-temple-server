@@ -1,0 +1,13 @@
+{
+  "name": "hello_moto 2",
+  "parent": "./.richmediarc",
+  "settings": {
+    "size": {
+      "width": 300,
+      "height": 600
+    }
+  },
+  "content": {
+    "text": "COPY 2"
+  }
+}

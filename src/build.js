@@ -22,7 +22,7 @@ const getTemplate = require('./util/getBuildTemplate');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-                                        allConfigsSelector = './**/.richmediarc',
+                                        allConfigsSelector = './**/.richmediarc*',
                                         stats = false,
                                         options = {},
                                       }) {
@@ -101,10 +101,12 @@ module.exports = async function build({
     configsResult = configs.filter(config => options.build.indexOf(config.location) >= 0);
   }
 
+
   const result = await createConfigByRichmediarcList(configsResult, {
     mode: 'production',
     stats: stats,
   });
+
 
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {

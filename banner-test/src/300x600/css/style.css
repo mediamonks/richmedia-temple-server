@@ -1,0 +1,49 @@
+:root {
+  --red: #d51b28;
+  --grey: #221f1f;
+  --white: #221f1f;
+}
+
+html {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+  user-select: none;
+}
+
+body {
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--settings-size-width)px;
+  height: var(--settings-size-height)px;
+}
+
+.cta {
+  left: var(--settings-size-width) - 10;
+}
+
+.border {
+  border: 1px solid #000000;
+}
+
+.banner {
+  position: relative;
+  overflow: hidden;
+  width: var(--settings-size-width)px;
+  height: var(--settings-size-height)px;
+  opacity: 0;
+}

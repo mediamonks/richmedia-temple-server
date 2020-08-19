@@ -70,6 +70,7 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
       return answers.devLocation.indexOf(location) > -1;
     });
   }
+
   let list = await createConfigByRichmediarcList(configsResult, {
     mode: 'development',
     stats: false,

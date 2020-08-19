@@ -13,7 +13,7 @@ const opener = require('opener');
 
 const readFile = util.promisify(fs.readFile);
 const getTemplate = require('../util/getDevTemplate');
-const getNameFromSettings = require('../util/getNameFromSettings');
+const getNameFromLocation = require('../util/getNameFromLocation');
 
 /**
  *
@@ -38,8 +38,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
   webpackConfigList.forEach((config, index) => {
 
-    const name = getNameFromSettings(settingsList[index]);
-
+    const name = getNameFromLocation(settingsList[index].location);
+    console.log(name);
     config.entry.main = [
       // `webpack-hot-middleware/client?path=/${name}/__webpack_hmr&timeout=20000`,
       ...config.entry.main,
@@ -48,8 +48,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
     config.output = {
       ...config.output,
-      "hotUpdateChunkFilename": ".hot/[id].[hash].hot-update.js",
-      "hotUpdateMainFilename": ".hot/[hash].hot-update.json"
+      // "hotUpdateChunkFilename": ".hot/[id].[hash].hot-update.js",
+      // "hotUpdateMainFilename": ".hot/[hash].hot-update.json"
     };
 
 
@@ -85,7 +85,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
   app.get('/', (req, res) => {
     const templateConfig = {
       banner: settingsList.map(value => {
-        const name = getNameFromSettings(value);
+        const name = getNameFromLocation(value.location);
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
         let title = name;

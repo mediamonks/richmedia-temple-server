@@ -71,9 +71,6 @@ module.exports = function createConfig({
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
 
-  console.log({
-    entry, outputPath
-  });
   const config = {
     mode,
     entry: {
@@ -259,7 +256,7 @@ module.exports = function createConfig({
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {
-              config: richmediarc
+              config: JSON.stringify(richmediarc)
             }
           },
         },
@@ -344,16 +341,22 @@ module.exports = function createConfig({
    * When there is a static folder use it in webpack config
    */
   const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
+  const rootPath = path.resolve(path.dirname(filepathRichmediaRC), './');
 
   if (fs.existsSync(staticPath)) {
-    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: './' }], {}));
+    // config.plugins.push(new CopyWebpackPlugin({
+    //   patterns: [
+    //       { from: staticPath, to: rootPath }]
+    //   })
+    // );
+
+    // console.log({ from: staticPath, to: rootPath });
   }
 
   if (stats === true) {
     config.plugins.push(new BundleAnalyzerPlugin());
   }
 
-  console.log(mode);
   if (mode === DevEnum.DEVELOPMENT) {
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
