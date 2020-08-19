@@ -8,7 +8,7 @@ const glob = require('glob-promise');
 
 const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
-const getNameFromSettings = require('./util/getNameFromSettings');
+const getNameFromLocation = require('./util/getNameFromLocation');
 const getTemplate = require('./util/getBuildTemplate');
 
 /**
@@ -142,7 +142,7 @@ module.exports = async function build({
 
       const templateConfig = {
         banner: configsResult.map(item => {
-          const name = getNameFromSettings(item);
+          const name = getNameFromLocation(item.location);
           let width = item.data.settings.size.width;
           let height = item.data.settings.size.height;
           let title = name;
