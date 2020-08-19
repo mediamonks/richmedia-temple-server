@@ -169,7 +169,7 @@ module.exports = function createConfig({
               options: {
                 ident: 'postcss',
                 plugins: loader => {
-                  const cssVariables = flattenObjectToCSSVars(richmediarc);
+                  const cssVariables = flattenObjectToCSSVars();
                   Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
                     if (isFile(val) && !isExternalURL(val)) {
