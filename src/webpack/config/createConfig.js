@@ -169,7 +169,7 @@ module.exports = function createConfig({
               options: {
                 ident: 'postcss',
                 plugins: loader => {
-                  const cssVariables = flattenObjectToCSSVars();
+                  const cssVariables = flattenObjectToCSSVars(richmediarc);
                   Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
                     if (isFile(val) && !isExternalURL(val)) {
@@ -190,6 +190,7 @@ module.exports = function createConfig({
                       browsers: ['defaults', 'ie 11'],
                     }),
                     require('postcss-nested')(),
+                    // require('postcss-media-variables')(),
                     require('cssnano')(),
                   ];
                 },
