@@ -276,9 +276,7 @@ module.exports = function createConfig({
           },
         },
         {
-          // test: /mediamonks\/temple\/src\/util\/getConfig/,
           test: /richmediaconfig/,
-          // exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {

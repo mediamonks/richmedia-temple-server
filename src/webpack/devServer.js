@@ -37,11 +37,12 @@ ${chalk.grey.bold('-------------------------------------------------------')}
   const app = express();
 
   webpackConfigList.forEach((config, index) => {
-
+    const hmrPath = '__webpack_hmr';
     const name = getNameFromLocation(settingsList[index].location);
 
+    config.mode =  'development';
     config.entry.main = [
-      // `webpack-hot-middleware/client?path=/${name}/__webpack_hmr&timeout=20000`,
+      `webpack-hot-middleware/client?path=/${name}/${hmrPath}&reload=true`,
       ...config.entry.main,
     ];
 
@@ -71,9 +72,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
     app.use(
       webpackHotMiddleware(compiler, {
-        log: console.log,
-        path: `/${name}/__webpack_hmr`,
-        heartbeat: 2 * 1000,
+        path: `/${name}/${hmrPath}`
       }),
     );
     //
