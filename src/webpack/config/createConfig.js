@@ -178,10 +178,10 @@ module.exports = function createConfig({
                   });
 
                   return [
+                    require('postcss-import')({root: loader.resourcePath}),
                     require('postcss-css-variables')({
                       variables: cssVariables
                     }),
-                    require('postcss-import')({root: loader.resourcePath}),
                     require('postcss-preset-env')({
                       stage: 2,
                       features: {
