@@ -4,7 +4,9 @@ const Ajv = require('ajv');
 const draft07 = require('ajv/lib/refs/json-schema-draft-07.json');
 
 const createConfig = require('./createConfig');
+const isGoogleSpreadsheetUrl = require('../../util/isGoogleSpreadsheetUrl');
 const getNameFromLocation = require('../../util/getNameFromLocation');
+const {GoogleSpreadsheet} = require("google-spreadsheet");
 
 const schema = require('../../schema/richmediarc.schema.json');
 

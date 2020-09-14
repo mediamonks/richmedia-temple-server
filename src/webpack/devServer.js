@@ -41,10 +41,10 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const name = getNameFromLocation(settingsList[index].location);
 
     config.mode =  'development';
-    config.entry.main = [
-      `webpack-hot-middleware/client?path=/${name}/${hmrPath}&reload=true`,
-      ...config.entry.main,
-    ];
+    // config.entry.main = [
+    //   `webpack-hot-middleware/client?path=/${name}/${hmrPath}&reload=true`,
+    //   ...config.entry.main,
+    // ];
 
 
     config.output = {

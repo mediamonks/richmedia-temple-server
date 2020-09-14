@@ -364,9 +364,10 @@ module.exports = function createConfig({
   const rootPath = path.resolve(path.dirname(filepathRichmediaRC), './');
 
   if (fs.existsSync(staticPath)) {
+
     config.plugins.push(new CopyWebpackPlugin({
         patterns: [
-          {from: staticPath, to: rootPath}]
+          {from:  staticPath, to: ''}]
       })
     );
   }
@@ -376,7 +377,7 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.DEVELOPMENT) {
-    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    // config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
   if (mode === DevEnum.PRODUCTION) {

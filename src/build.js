@@ -10,6 +10,7 @@ const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const getNameFromLocation = require('./util/getNameFromLocation');
 const getTemplate = require('./util/getBuildTemplate');
+const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 
 /**
  *
@@ -32,9 +33,7 @@ module.exports = async function build({
   spinner.setSpinnerString('/-\\|');
   spinner.start();
 
-
-
-  const configs = await findRichmediaRC(allConfigsSelector, [
+  let configs = await findRichmediaRC(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
@@ -44,6 +43,8 @@ module.exports = async function build({
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
   }
+
+  configs = await expandWithSpreadsheetData(configs);
 
   const questions = [];
 
