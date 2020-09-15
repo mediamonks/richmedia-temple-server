@@ -52,8 +52,6 @@
 
     .iconsContainer{
       display: inline-block;
-      right: 20px;
-      position: absolute;
     }
 
     .svg-logo-mm{
@@ -70,10 +68,25 @@
       background-color: #ffffff;
     }
 
+	.mdl-layout__drawer {
+		width: auto;
+		left: calc( 100% / -2);
+	}
+
+	.mdl-layout__drawer.is-visible {
+		left: 0;
+	}
+
+	.mdl-layout__drawer .mdl-layout-title {
+		padding-left: 20px;
+	}
+
     .mdl-layout__drawer .mdl-navigation .mdl-navigation__link {
       color: #757575;
       text-transform: uppercase;
       font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+	  font-size: 12px;
+	  padding: 16px 20px;
     }
 
     .mdl-layout__drawer-button {
@@ -95,6 +108,13 @@
     .mdl-shadow--2dp {
       box-shadow: 0px 0px 11px 3px rgba(0, 0, 0, 0.44);
     }
+
+	.action-new-page {	
+		height: auto;
+		word-break: break-word;
+		padding: 0 6px;
+		text-align: left;
+	}
 
     .openNewWindow{
       font-size: 20px;
