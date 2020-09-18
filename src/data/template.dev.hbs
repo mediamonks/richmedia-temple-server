@@ -41,10 +41,10 @@
       min-width: 800px;
     }
 
-		.banner-size-filter {
+		.filter-wrapper {
 			display: flex;
 			align-items: center;
-			padding: 0 20px;
+			padding-right: 40px;
 		}
 
 		.regular {
@@ -53,10 +53,6 @@
 			line-height: 1;
 			letter-spacing: .02em;
 			font-weight: 400;
-		}
-
-		.banner-size-filter {
-			padding: 0 20px;
 		}
 
     .page-content {
@@ -159,20 +155,30 @@
         Preview
       </span>
 
-	  <!-- Filter for banner size -->
-		<!-- TODO -->
-	  <div class="banner-size-filter regular">
-			<label for="banner-size-dropdown">Banner size:</label>
-			<select name="banner-size-dropdown" id="banner-size-dropdown" onchange="bannerSizeDropdownHandler()">
-				<option value="all">all</option>
-				{{#each banner}}
-					<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
-				{{/each}}
-			</select>
-	  </div>
-
-      <!-- Add spacer, to align navigation to the right -->
+			<!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
+
+			<!-- Filter for banner size -->
+			<div class="filter-wrapper regular">
+				<label for="banner-size-dropdown">Banner size:</label>
+				<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
+					<option value="all">all</option>
+					{{#each banner}}
+						<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
+					{{/each}}
+				</select>
+			</div>
+
+			<!-- Filter for language -->
+			<div class="filter-wrapper regular">
+				<label for="language-dropdown">Language:</label>
+				<select name="language-dropdown" class="filter language-dropdown" data-card-attribute="data-language" onchange="filterChangeHandler()">
+					<option value="all">all</option>
+					{{#each banner}}
+						<option value="{{language}}">{{language}}</option>
+					{{/each}}
+				</select>
+			</div>
 
       <!-- Navigation. We hide it in small screens. -->
       <!--<nav class="mdl-navigation mdl-layout&#45;&#45;large-screen-only">-->
@@ -210,7 +216,7 @@
     <div class="page-content">
 
       {{#each banner}}
-        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}">
+        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}" data-language="{{language}}">
 
           <div class="mdl-card__media" style="width: {{width}}px; height: {{height}}px;">
             <iframe class="visible" src="{{src}}index.html" width="{{width}}" height="{{height}}" frameborder="0"></iframe>
@@ -256,7 +262,9 @@
   var elementsActionNewPage = document.querySelectorAll('.action-new-page');
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
-	var bannerSizeDropdown = document.querySelector('#banner-size-dropdown');
+	var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
+	var languageDropdown = document.querySelector('.language-dropdown');
+	var filterDropdownArray = document.querySelectorAll('.filter');
 
   for (let index = 0; index < elementsActionRefresh.length; index++)
   {
@@ -301,9 +309,10 @@
     })();
   }
 
-	removeDuplicateOptions(bannerSizeDropdown);
+	removeDuplicateFromSelect(bannerSizeDropdown);
+	removeDuplicateFromSelect(languageDropdown);
 
-	function removeDuplicateOptions(dropdown) {
+	function removeDuplicateFromSelect(dropdown) {
 		[].slice.call(dropdown.options).map(function(option) {
     	if(this[option.value]) { 
       	dropdown.removeChild(option); 
@@ -312,23 +321,32 @@
     	} 
   	},{});
 	}
+	
+  // Event Listener
+	function filterChangeHandler() {
+		document.querySelectorAll('.mdl-card').forEach((card) => {
+			
+			let visible = true;
 
-	function bannerSizeDropdownHandler() {
-		console.log(event.target.value)
-		document.querySelectorAll('.mdl-card').forEach( (card) => {
+			// loop through filters
+			filterDropdownArray.forEach((filter) => {
+				if(!isCardVisible(card,filter)) {
+					visible = false;
+				}
+			});
 
-			if(event.target.value === 'all') {
-				card.style.display = '';
-				return;
-			}
-
-			if(card.dataset.bannerSize !== event.target.value) {
-				card.style.display = 'none';
-			} else {
-				card.style.display = '';
-			}
+			card.style.display = visible ? '' : 'none';
 		})
 	}
+
+	function isCardVisible(card, dropdown) {
+		let attributeToTest = dropdown.getAttribute('data-card-attribute');
+		let cardAttribute = card.getAttribute(attributeToTest);
+
+		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
+		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+	}
+
 </script>
 
 

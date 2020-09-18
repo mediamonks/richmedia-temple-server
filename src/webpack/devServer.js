@@ -87,20 +87,26 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         const name = getNameFromLocation(value.location);
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
-        let title = name;
+				let title = name;
+				let language = "en";
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
           height = value.data.settings.expandable.height;
           title += "_EXP_" + width + "x" + height;
-        }
+				}
+				
+				if(value.data.content.language) {
+					language = value.data.content.language;
+				}
 
         return {
           src: `./${name}/`,
           name,
           title,
           width,
-          height,
+					height,
+					language
         };
       }),
     };
