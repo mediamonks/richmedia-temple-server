@@ -106,7 +106,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           title,
           width,
 					height,
-					language
+					language,
         };
       }),
     };
@@ -116,7 +116,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
   app.get('/screenshot/:target', (req, res) => {
     const name = req.params.target;
-    const location = path.join(__dirname, '../tempfolder', 'screenshot.png');
+		const location = path.join(__dirname, '../tempfolder', 'screenshot.png');
     const result = settingsList.find(val => getNameFromSettings(val) === name);
 
     const data = {

@@ -41,6 +41,20 @@
       min-width: 800px;
     }
 
+		.filter-wrapper {
+			display: flex;
+			align-items: center;
+			padding-right: 40px;
+		}
+
+		.regular {
+			font-family: "Roboto","Helvetica","Arial",sans-serif;
+			font-size: 20px;
+			line-height: 1;
+			letter-spacing: .02em;
+			font-weight: 400;
+		}
+
     .page-content {
       flex-direction: row;
     }
@@ -68,25 +82,25 @@
       background-color: #ffffff;
     }
 
-	.mdl-layout__drawer {
-		width: auto;
-		left: calc( 100% / -2);
-	}
+		.mdl-layout__drawer {
+			width: auto;
+			left: calc( 100% / -2);
+		}
 
-	.mdl-layout__drawer.is-visible {
-		left: 0;
-	}
+		.mdl-layout__drawer.is-visible {
+			left: 0;
+		}
 
-	.mdl-layout__drawer .mdl-layout-title {
-		padding-left: 20px;
-	}
+		.mdl-layout__drawer .mdl-layout-title {
+			padding-left: 20px;
+		}
 
     .mdl-layout__drawer .mdl-navigation .mdl-navigation__link {
       color: #757575;
       text-transform: uppercase;
       font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-	  font-size: 12px;
-	  padding: 16px 20px;
+	  	font-size: 12px;
+	  	padding: 16px 20px;
     }
 
     .mdl-layout__drawer-button {
@@ -109,12 +123,12 @@
       box-shadow: 0px 0px 11px 3px rgba(0, 0, 0, 0.44);
     }
 
-	.action-new-page {	
-		height: auto;
-		word-break: break-word;
-		padding: 0 6px;
-		text-align: left;
-	}
+		.action-new-page {	
+			height: auto;
+			word-break: break-word;
+			padding: 0 6px;
+			text-align: left;
+		}
 
     .openNewWindow{
       font-size: 20px;
@@ -142,6 +156,29 @@
       </span>
       <!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
+
+			<!-- Filter for banner size -->
+			<div class="filter-wrapper regular">
+				<label for="banner-size-dropdown">Banner size:</label>
+				<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
+					<option value="all">all</option>
+					{{#each banner}}
+						<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
+					{{/each}}
+				</select>
+			</div>
+
+			<!-- Filter for language -->
+			<div class="filter-wrapper regular">
+				<label for="language-dropdown">Language:</label>
+				<select name="language-dropdown" class="filter language-dropdown" data-card-attribute="data-language" onchange="filterChangeHandler()">
+					<option value="all">all</option>
+					{{#each banner}}
+						<option value="{{language}}">{{language}}</option>
+					{{/each}}
+				</select>
+			</div>
+
       <!-- Navigation. We hide it in small screens. -->
       <!--<nav class="mdl-navigation mdl-layout&#45;&#45;large-screen-only">-->
       <!--<a class="mdl-navigation__link" href="">Link</a>-->
@@ -178,7 +215,7 @@
     <div class="page-content">
 
       {{#each banner}}
-        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;">
+        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}" data-language="{{language}}">
 
           <div class="mdl-card__media" style="width: {{width}}px; height: {{height}}px;">
             <iframe class="visible" src="{{src}}index.html" width="{{width}}" height="{{height}}" frameborder="0"></iframe>
@@ -222,6 +259,9 @@
   var elementsActionNewPage = document.querySelectorAll('.action-new-page');
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
+	var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
+	var languageDropdown = document.querySelector('.language-dropdown');
+	var filterDropdownArray = document.querySelectorAll('.filter');
 
   for (let index = 0; index < elementsActionRefresh.length; index++)
   {
@@ -265,6 +305,44 @@
       }
     })();
   }
+
+  removeDuplicateFromSelect(bannerSizeDropdown);
+	removeDuplicateFromSelect(languageDropdown);
+
+	function removeDuplicateFromSelect(dropdown) {
+		[].slice.call(dropdown.options).map(function(option) {
+    	if(this[option.value]) { 
+      	dropdown.removeChild(option); 
+    	} else { 
+      	this[option.value]=1; 
+    	} 
+  	},{});
+	}
+	
+    // Event Listener
+	function filterChangeHandler() {
+		document.querySelectorAll('.mdl-card').forEach((card) => {
+			
+			let visible = true;
+
+			// loop through filters
+			filterDropdownArray.forEach((filter) => {
+				if(!isCardVisible(card,filter)) {
+					visible = false;
+				}
+			});
+
+			card.style.display = visible ? '' : 'none';
+		})
+	}
+
+	function isCardVisible(card, dropdown) {
+		let attributeToTest = dropdown.getAttribute('data-card-attribute');
+		let cardAttribute = card.getAttribute(attributeToTest);
+
+		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
+		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+	}
 </script>
 
 

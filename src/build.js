@@ -138,35 +138,40 @@ module.exports = async function build({
       resolve();
     });
   })
-    .then(async () => {
-      const template = await getTemplate();
+	.then(async () => {
+		const template = await getTemplate();
 
-      const templateConfig = {
-        banner: configsResult.map(item => {
-          const name = getNameFromLocation(item.location);
-          let width = item.data.settings.size.width;
-          let height = item.data.settings.size.height;
-          let title = name;
+		const templateConfig = {
+			banner: configsResult.map(item => {
+				const name = getNameFromLocation(item.location);
+				let width = item.data.settings.size.width;
+				let height = item.data.settings.size.height;
+				let title = name;
+				let language = "en";
 
-          // if (item.data.settings.expandable) {
-          //   width = item.data.settings.expandable.width;
-          //   height = item.data.settings.expandable.height;
-          //   title += "_EXP_" + width + "x" + height;
-          // }
+				// if (item.data.settings.expandable) {
+				//   width = item.data.settings.expandable.width;
+				//   height = item.data.settings.expandable.height;
+				//   title += "_EXP_" + width + "x" + height;
+				// }
+				if(item.data.content.language) {
+					language = item.data.content.language;
+				}
 
-          return {
-            src: `./${name}/`,
-            name,
-            title,
-            width,
-            height,
-          };
-        }),
-      };
+				return {
+					src: `./${name}/`,
+					name,
+					title,
+					width,
+					height,
+					language,
+				};
+			}),
+		};
 
-      return fs.outputFile('./build/index.html', template(templateConfig));
-    })
-    .then(() => {
-      return glob(`${buildTarget}/**/*`);
-    });
+		return fs.outputFile('./build/index.html', template(templateConfig));
+	})
+	.then(() => {
+		return glob(`${buildTarget}/**/*`);
+	});
 };
