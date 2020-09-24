@@ -88,16 +88,11 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
 				let title = name;
-				let language = "en";
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
           height = value.data.settings.expandable.height;
           title += "_EXP_" + width + "x" + height;
-				}
-				
-				if(value.data.content.language) {
-					language = value.data.content.language;
 				}
 
         return {
@@ -106,7 +101,6 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           title,
           width,
 					height,
-					language,
         };
       }),
     };

@@ -168,17 +168,6 @@
 				</select>
 			</div>
 
-			<!-- Filter for language -->
-			<div class="filter-wrapper regular">
-				<label for="language-dropdown">Language:</label>
-				<select name="language-dropdown" class="filter language-dropdown" data-card-attribute="data-language" onchange="filterChangeHandler()">
-					<option value="all">all</option>
-					{{#each banner}}
-						<option value="{{language}}">{{language}}</option>
-					{{/each}}
-				</select>
-			</div>
-
       <!-- Navigation. We hide it in small screens. -->
       <!--<nav class="mdl-navigation mdl-layout&#45;&#45;large-screen-only">-->
       <!--<a class="mdl-navigation__link" href="">Link</a>-->
@@ -215,7 +204,7 @@
     <div class="page-content">
 
       {{#each banner}}
-        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}" data-language="{{language}}">
+        <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}">
 
           <div class="mdl-card__media" style="width: {{width}}px; height: {{height}}px;">
             <iframe class="visible" src="{{src}}index.html" width="{{width}}" height="{{height}}" frameborder="0"></iframe>
@@ -260,7 +249,6 @@
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
 	var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
-	var languageDropdown = document.querySelector('.language-dropdown');
 	var filterDropdownArray = document.querySelectorAll('.filter');
 
   for (let index = 0; index < elementsActionRefresh.length; index++)
@@ -307,7 +295,6 @@
   }
 
   removeDuplicateFromSelect(bannerSizeDropdown);
-	removeDuplicateFromSelect(languageDropdown);
 
 	function removeDuplicateFromSelect(dropdown) {
 		[].slice.call(dropdown.options).map(function(option) {

@@ -147,16 +147,12 @@ module.exports = async function build({
 				let width = item.data.settings.size.width;
 				let height = item.data.settings.size.height;
 				let title = name;
-				let language = "en";
 
 				// if (item.data.settings.expandable) {
 				//   width = item.data.settings.expandable.width;
 				//   height = item.data.settings.expandable.height;
 				//   title += "_EXP_" + width + "x" + height;
 				// }
-				if(item.data.content.language) {
-					language = item.data.content.language;
-				}
 
 				return {
 					src: `./${name}/`,
@@ -164,7 +160,6 @@ module.exports = async function build({
 					title,
 					width,
 					height,
-					language,
 				};
 			}),
 		};
