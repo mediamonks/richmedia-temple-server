@@ -18,13 +18,10 @@ npm i -S @mediamonks/richmedia-temple-server
 
 ```js
 // for building
-node ./node_modules/@mediamonks/richmedia-temple-server/build.js
+rds-build
 
 // for developing
-node ./node_modules/@mediamonks/richmedia-temple-server/dev.js
-
-// for client preview
-node ./node_modules/@mediamonks/richmedia-temple-server/preview.js
+rds-dev
 ```
 
 
