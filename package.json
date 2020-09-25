@@ -3,13 +3,17 @@
   "version": "4.0.15",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "scripts": {
-    "dev": "node dev.js",
-    "build": "node build.js",
+    "dev": "rds-dev",
+    "build": "rds-build",
     "doc": "node_modules/.bin/esdoc",
     "lint": "npm-run-all lint:*",
     "lint:js": "eslint src --ext .js --cache",
     "prettify": "prettier --write \"src/**/*.{js,json}\"",
     "test": "mocha"
+  },
+  "bin": {
+    "rds-dev": "dev.js",
+    "rds-build": "build.js"
   },
   "main": "index.js",
   "lint-staged": {

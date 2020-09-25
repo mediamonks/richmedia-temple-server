@@ -57,10 +57,6 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
     const compiler = webpack(config);
 
-    console.log('----------------------');
-    console.log(` ${name} `);
-    console.log(config.output.publicPath);
-
     app.use(
       webpackDevMiddleware(compiler, {
         noInfo: true,
