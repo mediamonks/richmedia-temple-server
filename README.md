@@ -4,8 +4,6 @@ Richmedia Temple Server is used as a tool to build and develop richmedia units.
 
 See documentation https://assets-at-scale.gitbook.io/temple-suite/
 
-
-
 ## Installation
 
 ```sh
