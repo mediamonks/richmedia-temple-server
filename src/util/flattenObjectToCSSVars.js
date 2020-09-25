@@ -1,4 +1,5 @@
 const leafs = require("./leafs");
+const isFile = require("./isFile");
 
 function flattenObjectToCSSVars(obj){
   const result = {};
@@ -8,6 +9,7 @@ function flattenObjectToCSSVars(obj){
 
     result[`--${path.join('-')}`] = val;
   });
+
 
   return result;
 }

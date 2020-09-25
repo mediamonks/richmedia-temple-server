@@ -10,10 +10,12 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const DevEnum = require('../../data/DevEnum');
+const isFile = require('../../util/isFile');
+const isExternalURL = require('../../util/isExternalURL');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
-const VirtualModulePlugin = require('virtual-module-webpack-plugin');
 const VirtualModulesPlugin = require("webpack-virtual-modules");
+const loaderUtils = require("loader-utils");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -29,17 +31,17 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-  filepathJs,
-  filepathHtml,
-  filepathRichmediaRC,
-  outputPath,
-  richmediarc = null,
+                                         filepathJs,
+                                         filepathHtml,
+                                         filepathRichmediaRC,
+                                         outputPath,
+                                         richmediarc = null,
 
-  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
-    mode: DevEnum.DEVELOPMENT,
-    stats: false,
-  },
-}) {
+                                         options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
+                                           mode: DevEnum.DEVELOPMENT,
+                                           stats: false,
+                                         },
+                                       }) {
   let devtool = false;
   const entry = [];
 
@@ -67,13 +69,23 @@ module.exports = function createConfig({
 
   const cssVariables = flattenObjectToCSSVars(richmediarc);
 
+  Object.keys(cssVariables).forEach(function (name) {
+    const val = cssVariables[name];
+    if (isFile(val) && !isExternalURL(val)) {
+
+      cssVariables[name] = '300x600.jpg';
+        // = loaderUtils.interpolateName({
+      //   resourcePath: val
+      // }, `[name]${namedHashing}.[ext]`, {
+      //   content: fs.readFileSync(val)
+      // })
+    }
+  });
+
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
 
-  console.log({
-    entry, outputPath
-  });
   const config = {
     mode,
     entry: {
@@ -156,21 +168,32 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: loader => [
-                  require('postcss-css-variables')({
-                    variables: cssVariables
-                  }),
-                  require('postcss-import')({ root: loader.resourcePath }),
-                  require('postcss-preset-env')({
-                    stage: 2,
-                    features: {
-                      'nesting-rules': true,
-                    },
-                    browsers: ['defaults', 'ie 11'],
-                  }),
-                  require('postcss-nested')(),
-                  require('cssnano')(),
-                ],
+                plugins: loader => {
+                  const cssVariables = flattenObjectToCSSVars(richmediarc);
+                  Object.keys(cssVariables).forEach(function (name) {
+                    const val = cssVariables[name];
+                    if (isFile(val) && !isExternalURL(val)) {
+                      cssVariables[name] = path.relative(path.dirname(loader.resourcePath), cssVariables[name]);
+                    }
+                  });
+
+                  return [
+                    require('postcss-import')({root: loader.resourcePath}),
+                    require('postcss-css-variables')({
+                      variables: cssVariables
+                    }),
+                    require('postcss-preset-env')({
+                      stage: 2,
+                      features: {
+                        'nesting-rules': true,
+                      },
+                      browsers: ['defaults', 'ie 11'],
+                    }),
+                    require('postcss-nested')(),
+                    // require('postcss-media-variables')(),
+                    require('cssnano')(),
+                  ];
+                },
               },
             },
           ],
@@ -253,13 +276,11 @@ module.exports = function createConfig({
           },
         },
         {
-          // test: /mediamonks\/temple\/src\/util\/getConfig/,
           test: /richmediaconfig/,
-          // exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {
-              config: richmediarc
+              config: JSON.stringify(richmediarc)
             }
           },
         },
@@ -269,8 +290,7 @@ module.exports = function createConfig({
           type: 'javascript/dynamic',
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
-            options: {
-            }
+            options: {}
           },
         },
         {
@@ -291,7 +311,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: [':src', ':href', 'netflix-video:source', ':data-src'],
+                attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data'],
               },
             },
           ],
@@ -299,9 +319,6 @@ module.exports = function createConfig({
       ],
     },
     plugins: [
-      new webpack.ProvidePlugin({
-        richmediaConfig: filepathRichmediaRC
-      }),
       new HtmlWebPackPlugin({
         template: filepathHtml,
       }),
@@ -321,7 +338,7 @@ module.exports = function createConfig({
         'node_modules/richmediaconfig': `module.exports = "DUDE"`
       })
 
-  // new CircularDependencyPlugin({
+      // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
       //   // add errors to webpack instead of warnings
@@ -344,18 +361,23 @@ module.exports = function createConfig({
    * When there is a static folder use it in webpack config
    */
   const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
+  const rootPath = path.resolve(path.dirname(filepathRichmediaRC), './');
 
   if (fs.existsSync(staticPath)) {
-    config.plugins.push(new CopyWebpackPlugin([{ from: staticPath, to: './' }], {}));
+
+    config.plugins.push(new CopyWebpackPlugin({
+        patterns: [
+          {from:  staticPath, to: ''}]
+      })
+    );
   }
 
   if (stats === true) {
     config.plugins.push(new BundleAnalyzerPlugin());
   }
 
-  console.log(mode);
   if (mode === DevEnum.DEVELOPMENT) {
-    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    // config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
   if (mode === DevEnum.PRODUCTION) {

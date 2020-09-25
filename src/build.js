@@ -8,8 +8,9 @@ const glob = require('glob-promise');
 
 const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
-const getNameFromSettings = require('./util/getNameFromSettings');
+const getNameFromLocation = require('./util/getNameFromLocation');
 const getTemplate = require('./util/getBuildTemplate');
+const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 
 /**
  *
@@ -22,7 +23,7 @@ const getTemplate = require('./util/getBuildTemplate');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-                                        allConfigsSelector = './**/.richmediarc',
+                                        allConfigsSelector = './**/.richmediarc*',
                                         stats = false,
                                         options = {},
                                       }) {
@@ -32,9 +33,7 @@ module.exports = async function build({
   spinner.setSpinnerString('/-\\|');
   spinner.start();
 
-
-
-  const configs = await findRichmediaRC(allConfigsSelector, [
+  let configs = await findRichmediaRC(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
@@ -44,6 +43,8 @@ module.exports = async function build({
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
   }
+
+  configs = await expandWithSpreadsheetData(configs);
 
   const questions = [];
 
@@ -101,10 +102,12 @@ module.exports = async function build({
     configsResult = configs.filter(config => options.build.indexOf(config.location) >= 0);
   }
 
+
   const result = await createConfigByRichmediarcList(configsResult, {
     mode: 'production',
     stats: stats,
   });
+
 
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {
@@ -140,7 +143,7 @@ module.exports = async function build({
 
       const templateConfig = {
         banner: configsResult.map(item => {
-          const name = getNameFromSettings(item);
+          const name = getNameFromLocation(item.location);
           let width = item.data.settings.size.width;
           let height = item.data.settings.size.height;
           let title = name;

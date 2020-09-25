@@ -1,5 +1,6 @@
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const devServer = require('./webpack/devServer');
+const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 
 const findJSONConfigs = require('./util/findRichmediaRC');
 const inquirer = require('inquirer');
@@ -9,7 +10,7 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
-  const configs = await findJSONConfigs(allConfigsSelector, [
+  let configs = await findJSONConfigs(allConfigsSelector, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
@@ -20,8 +21,10 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
   }
 
   console.log(`${chalk.green('✔')} Found ${configs.length} config(s)`);
+  console.log(`${chalk.green('✔')} Taking a look if it has Spreadsheets`);
 
-  const question = {};
+  configs = await expandWithSpreadsheetData(configs);
+
   let answers = {
     devLocation: 'all',
   };
@@ -70,6 +73,7 @@ module.exports = async function dev({ allConfigsSelector = './**/.richmediarc*' 
       return answers.devLocation.indexOf(location) > -1;
     });
   }
+
   let list = await createConfigByRichmediarcList(configsResult, {
     mode: 'development',
     stats: false,

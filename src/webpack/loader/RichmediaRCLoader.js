@@ -11,15 +11,13 @@ const fs = require('fs');
 module.exports = function RichmediaRCLoader(data) {
   const options = loaderUtils.getOptions(this);
 
-
-  this.cacheable();
   const loaderContext = this;
 
   if(options.config){
     data = options.config;
-  } else {
-    data = typeof data === 'string' ? JSON.parse(data) : data;
   }
+
+  data = typeof data === 'string' ? JSON.parse(data) : data;
 
   let ruuid = Date.now();
   const replaceItems = [];
@@ -38,6 +36,7 @@ module.exports = function RichmediaRCLoader(data) {
       }
     });
   }
+
 
   data = JSON.stringify(data)
     .replace(/\u2028/g, '\\u2028')

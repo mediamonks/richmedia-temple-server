@@ -20,9 +20,6 @@ module.exports = async function findRichmediaRC(globQuery = '**/.richmediarc', p
     })
   );
 
-
-  console.log(result);
-
   const resolvedPatterns = patterns.map(pattern => pattern.split('.'));
 
   result = result.filter(({data}) =>

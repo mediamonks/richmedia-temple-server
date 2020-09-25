@@ -4,7 +4,9 @@ const Ajv = require('ajv');
 const draft07 = require('ajv/lib/refs/json-schema-draft-07.json');
 
 const createConfig = require('./createConfig');
-const getPlatformByRichmediaRc = require('../../util/getPlatformByRichmediaRc');
+const isGoogleSpreadsheetUrl = require('../../util/isGoogleSpreadsheetUrl');
+const getNameFromLocation = require('../../util/getNameFromLocation');
+const {GoogleSpreadsheet} = require("google-spreadsheet");
 
 const schema = require('../../schema/richmediarc.schema.json');
 
@@ -35,12 +37,7 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
     );
   }
 
-  const list = path
-    .dirname(richmediaConfigLocation)
-    .split('/')
-    .filter(val => val[0] !== '.');
-
-  const outputPath = path.resolve(path.join('./build/', list.join('_')));
+  const outputPath = path.resolve(path.join('./build/', getNameFromLocation(richmediaConfigLocation)));
 
   const filepathHtml = richmediaConfig.settings.entry.html
   const filepathJs = richmediaConfig.settings.entry.js;
