@@ -1,14 +1,18 @@
+#! /usr/bin/env node
+
 const build = require('./src/build');
 const program = require('commander');
-const package = require('./package');
+const packageJson = require('./package');
 
 program
-  .version(package.version)
-  .option('-p, --package <type>', 'Globbing pattern like "-p ./src/**/.richmediarc"')
-  .option('-s, --stats', 'Show stats when building')
+  .version(packageJson.version)
+  .option('-g, --glob <data>', 'Globbing pattern like "-p ./src/**/.richmediarc"')
+  .option('-ss, --stats', 'Show stats when building')
+  .option('-c, --choices <data>', 'predetermined settings')
   .parse(process.argv);
 
 build({
-  allConfigsSelector: program.package,
+  glob: program.glob,
   stats: program.stats,
-});
+  choices: program.choices ? JSON.parse(program.choices) : null,
+}).then(r => console.log('done'));

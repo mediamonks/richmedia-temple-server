@@ -31,17 +31,17 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-                                         filepathJs,
-                                         filepathHtml,
-                                         filepathRichmediaRC,
-                                         outputPath,
-                                         richmediarc = null,
+   filepathJs,
+   filepathHtml,
+   filepathRichmediaRC,
+   outputPath,
+   richmediarc = null,
 
-                                         options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
-                                           mode: DevEnum.DEVELOPMENT,
-                                           stats: false,
-                                         },
-                                       }) {
+   options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
+     mode: DevEnum.DEVELOPMENT,
+     stats: false,
+   },
+ }) {
   let devtool = false;
   const entry = [];
 
@@ -67,24 +67,12 @@ module.exports = function createConfig({
     }
   }
 
-  const cssVariables = flattenObjectToCSSVars(richmediarc);
-
-  Object.keys(cssVariables).forEach(function (name) {
-    const val = cssVariables[name];
-    if (isFile(val) && !isExternalURL(val)) {
-
-      cssVariables[name] = '300x600.jpg';
-        // = loaderUtils.interpolateName({
-      //   resourcePath: val
-      // }, `[name]${namedHashing}.[ext]`, {
-      //   content: fs.readFileSync(val)
-      // })
-    }
-  });
-
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
   entry.push(filepathJs);
+
+  // check for trailing slash.
+  outputPath = outputPath.replace(/\/$/, "");
 
   const config = {
     mode,
@@ -108,32 +96,17 @@ module.exports = function createConfig({
       Monet: 'Monet',
     },
     resolve: {
+      symlinks: true,
       modules: ['node_modules', nodeModules],
     },
 
     resolveLoader: {
-      modules: ['node_modules', nodeModules],
       symlinks: true,
+      modules: ['node_modules', nodeModules],
     },
 
     module: {
       rules: [
-        // {
-        //   test: /\.scss$/,
-        //   use: [
-        //     {
-        //       loader: 'file-loader',
-        //       options: {
-        //         name: `[name]${namedHashing}.css`,
-        //       },
-        //     },
-        //     {
-        //       loader: 'extract-loader',
-        //     },
-        //     'css-loader', // translates CSS into CommonJS
-        //     'sass-loader', // compiles Sass to CSS, using Node Sass by default
-        //   ],
-        // },
         {
           test: /\.s[ac]ss$/i,
           use: [
@@ -361,7 +334,6 @@ module.exports = function createConfig({
    * When there is a static folder use it in webpack config
    */
   const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
-  const rootPath = path.resolve(path.dirname(filepathRichmediaRC), './');
 
   if (fs.existsSync(staticPath)) {
 
@@ -381,21 +353,13 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.PRODUCTION) {
-    let bundleName = 'bundle.zip';
-
-    // if (
-    //   richmediarc &&
-    //   richmediarc.settings &&
-    //   richmediarc.settings.size &&
-    //   richmediarc.settings.size.width &&
-    //   richmediarc.settings.size.height
-    // ) {
-    //   bundleName = `${richmediarc.settings.size.width}x${richmediarc.settings.size.height}.zip`;
-    // }
+    // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
+    let bundleName = /[^/]*$/.exec(outputPath)[0]
 
     config.plugins.push(
       new ZipPlugin({
-        filename: bundleName,
+        path: path.join(outputPath, '../'),
+        filename: `./${bundleName}`,
 
         fileOptions: {
           mtime: new Date(),

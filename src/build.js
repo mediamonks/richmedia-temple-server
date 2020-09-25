@@ -4,13 +4,14 @@ const chalk = require('chalk');
 const Spinner = require('cli-spinner').Spinner;
 const fs = require('fs-extra');
 const path = require('path');
-const glob = require('glob-promise');
+const globPromise = require('glob-promise');
 
 const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const getNameFromLocation = require('./util/getNameFromLocation');
 const getTemplate = require('./util/getBuildTemplate');
 const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
+const saveChoicesInPackageJson = require('./util/saveChoicesInPackageJson');
 
 /**
  *
@@ -23,9 +24,9 @@ const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-                                        allConfigsSelector = './**/.richmediarc*',
+                                        glob = './**/.richmediarc*',
                                         stats = false,
-                                        options = {},
+                                        choices = {},
                                       }) {
   const buildTarget = './build';
 
@@ -33,7 +34,7 @@ module.exports = async function build({
   spinner.setSpinnerString('/-\\|');
   spinner.start();
 
-  let configs = await findRichmediaRC(allConfigsSelector, [
+  let configs = await findRichmediaRC(glob, [
     'settings.entry.js',
     'settings.entry.html',
   ]);
@@ -48,58 +49,70 @@ module.exports = async function build({
 
   const questions = [];
 
-  const filesBuild = await glob(`${buildTarget}/**/*`);
+  const filesBuild = await globPromise(`${buildTarget}/**/*`);
 
-  if (filesBuild.length > 0) {
-    if (typeof options.emptyBuildDir !== 'boolean') {
-      questions.push({
-        type: 'confirm',
-        name: 'emptyBuildDir',
-        message: `Empty build dir? ${chalk.red(
-          `( ${filesBuild.length} files in ${path.resolve(buildTarget)})`,
-        )}`,
-      });
+  if(!choices){
+    let options = {};
+    if (filesBuild.length > 0) {
+      if (typeof options.emptyBuildDir !== 'boolean') {
+        questions.push({
+          type: 'confirm',
+          name: 'emptyBuildDir',
+          message: `Empty build dir? ${chalk.red(
+            `( ${filesBuild.length} files in ${path.resolve(buildTarget)})`,
+          )}`,
+        });
+      }
     }
+
+    if (configs.length > 1) {
+      if (!(options.build instanceof Array)) {
+        questions.push({
+          type: 'checkbox',
+          name: 'build',
+          message: 'Please choose the current build to start.',
+          choices: [
+            {name: 'all', checked: false},
+            ...configs.map(({location}) => ({name: location, checked: false})),
+          ],
+          validate: function (answer) {
+            if (answer.length < 1) {
+              return 'You must choose at least one.';
+            }
+            return true;
+          },
+        });
+      }
+    } else {
+      console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
+      options.build = [configs[0].location];
+    }
+
+    options = {
+      ...options,
+      ...(await inquirer.prompt(questions)),
+    };
+
+    choices = options;
+
+    await saveChoicesInPackageJson('build', {
+      glob,
+      choices,
+      stats,
+    });
+
   }
 
-  if (configs.length > 1) {
-    if (!(options.build instanceof Array)) {
-      questions.push({
-        type: 'checkbox',
-        name: 'build',
-        message: 'Please choose the current build to start.',
-        choices: [
-          {name: 'all', checked: false},
-          ...configs.map(({location}) => ({name: location, checked: false})),
-        ],
-        validate: function (answer) {
-          if (answer.length < 1) {
-            return 'You must choose at least one.';
-          }
-          return true;
-        },
-      });
-    }
-  } else {
-    console.log(`${chalk.green('✔')} One config found ${configs[0].location}`);
-    options.build = [configs[0].location];
-  }
-
-  options = {
-    ...options,
-    ...(await inquirer.prompt(questions)),
-  };
-
-  if (options.emptyBuildDir) {
+  if (choices.emptyBuildDir) {
     await fs.emptyDir(buildTarget);
   }
 
   let configsResult = null;
 
-  if (options.build.find(item => item === 'all')) {
+  if (choices.build.find(item => item === 'all')) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(config => options.build.indexOf(config.location) >= 0);
+    configsResult = configs.filter(config => choices.build.indexOf(config.location) >= 0);
   }
 
 
@@ -138,6 +151,7 @@ module.exports = async function build({
       resolve();
     });
   })
+
 	.then(async () => {
 		const template = await getTemplate();
 
