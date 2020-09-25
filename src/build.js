@@ -151,35 +151,36 @@ module.exports = async function build({
       resolve();
     });
   })
-    .then(async () => {
-      const template = await getTemplate();
 
-      const templateConfig = {
-        banner: configsResult.map(item => {
-          const name = getNameFromLocation(item.location);
-          let width = item.data.settings.size.width;
-          let height = item.data.settings.size.height;
-          let title = name;
+	.then(async () => {
+		const template = await getTemplate();
 
-          // if (item.data.settings.expandable) {
-          //   width = item.data.settings.expandable.width;
-          //   height = item.data.settings.expandable.height;
-          //   title += "_EXP_" + width + "x" + height;
-          // }
+		const templateConfig = {
+			banner: configsResult.map(item => {
+				const name = getNameFromLocation(item.location);
+				let width = item.data.settings.size.width;
+				let height = item.data.settings.size.height;
+				let title = name;
 
-          return {
-            src: `./${name}/`,
-            name,
-            title,
-            width,
-            height,
-          };
-        }),
-      };
+				// if (item.data.settings.expandable) {
+				//   width = item.data.settings.expandable.width;
+				//   height = item.data.settings.expandable.height;
+				//   title += "_EXP_" + width + "x" + height;
+				// }
 
-      return fs.outputFile('./build/index.html', template(templateConfig));
-    })
-    .then(() => {
-      return globPromise(`${buildTarget}/**/*`);
-    });
+				return {
+					src: `./${name}/`,
+					name,
+					title,
+					width,
+					height,
+				};
+			}),
+		};
+
+		return fs.outputFile('./build/index.html', template(templateConfig));
+	})
+	.then(() => {
+		return glob(`${buildTarget}/**/*`);
+	});
 };

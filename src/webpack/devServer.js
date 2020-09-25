@@ -83,20 +83,20 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         const name = getNameFromLocation(value.location);
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
-        let title = name;
+				let title = name;
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
           height = value.data.settings.expandable.height;
           title += "_EXP_" + width + "x" + height;
-        }
+				}
 
         return {
           src: `./${name}/`,
           name,
           title,
           width,
-          height,
+					height,
         };
       }),
     };
@@ -106,6 +106,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
   app.get('/screenshot/:target', (req, res) => {
     const name = req.params.target;
+
     const folder = path.join(process.cwd(), 'tmpFolder');
     if (!fs.existsSync(folder)){
       fs.mkdirSync(folder);
