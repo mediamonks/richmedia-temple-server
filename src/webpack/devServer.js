@@ -118,7 +118,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const data = {
       config: {},
       url: `http://localhost:${port}/${name}/`,
-      location,
+			location,
+			selector: '.banner',
     };
 
     if (
