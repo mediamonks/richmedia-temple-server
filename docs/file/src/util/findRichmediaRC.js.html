@@ -35,38 +35,35 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/util/findRichmediaRC.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const getRichmediaRC = require(&apos;./getRichmediaRC&apos;);
-const glob = require(&apos;glob&apos;);
+const glob = require(&apos;glob-promise&apos;);
 const doesNestedExist = require(&apos;./doesNestedExists&apos;);
 
 /**
  * @description will search for files with a pattern.
  * @param {string} globQuery
  * @param {Array&lt;string&gt;} patterns [&apos;data.settings.entry.js&apos;, &apos;data.settings.entry.html&apos;]
- * @return {Promise&lt;Array&lt;RCDto&gt;&gt;}
+ * @return {Array&lt;{data: (void|never), location: string}[]&gt;}
  */
-function findRichmediaRC(globQuery = &apos;**/.richmediarc&apos;, patterns = []) {
+module.exports = async function findRichmediaRC(globQuery = &apos;**/.richmediarc&apos;, patterns = []) {
 
-  return new Promise(resolve =&gt; {
-    const cache = {};
-    glob(globQuery, {ignore: [&apos;./node_modules/**/.richmediarc&apos;]}, (err, files) =&gt; {
-      Promise.all(
-        files.map(location =&gt;
-          getRichmediaRC(location, &apos;./&apos;, true, cache).then(data =&gt; ({location, data})),
-        ),
-      ).then(result =&gt; {
-        const resolvedPatterns = patterns.map(pattern =&gt; pattern.split(&apos;.&apos;));
+  const files = await glob(globQuery, {ignore: [&apos;./node_modules/**/.richmediarc&apos;]});
+  let result = await Promise.all(
+    files.map(async function (location) {
+      return {
+        location,
+        data: await getRichmediaRC(location)
+      };
+    })
+  );
 
-        resolve(
-          result.filter(({ data }) =&gt;
-            resolvedPatterns.every(pattern =&gt; doesNestedExist(data, pattern)),
-          ),
-        );
-      });
-    });
-  });
-}
+  const resolvedPatterns = patterns.map(pattern =&gt; pattern.split(&apos;.&apos;));
 
-module.exports = findRichmediaRC;
+  result = result.filter(({data}) =&gt;
+    resolvedPatterns.every(pattern =&gt; doesNestedExist(data, pattern)),
+  );
+
+  return result;
+};
 </code></pre>
 
 </div>

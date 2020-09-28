@@ -35,16 +35,23 @@
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/webpack/config/createConfig.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const fs = require(&apos;fs&apos;);
 const webpack = require(&apos;webpack&apos;);
 const UglifyJsPlugin = require(&apos;uglifyjs-webpack-plugin&apos;);
+const TerserPlugin = require(&apos;terser-webpack-plugin&apos;);
 const HtmlWebPackPlugin = require(&apos;html-webpack-plugin&apos;);
-const MonetJSONPlugin = require(&apos;../plugin/MonetJSONPlugin&apos;);
 const ZipPlugin = require(&apos;zip-webpack-plugin&apos;);
 const SimpleProgressWebpackPlugin = require(&apos;simple-progress-webpack-plugin&apos;);
 const CopyWebpackPlugin = require(&apos;copy-webpack-plugin&apos;);
+const BundleAnalyzerPlugin = require(&apos;webpack-bundle-analyzer&apos;).BundleAnalyzerPlugin;
 
-const PlatformEnum = require(&apos;../../data/PlatformEnum&apos;);
 const DevEnum = require(&apos;../../data/DevEnum&apos;);
+const isFile = require(&apos;../../util/isFile&apos;);
+const isExternalURL = require(&apos;../../util/isExternalURL&apos;);
+const flattenObjectToCSSVars = require(&quot;../../util/flattenObjectToCSSVars&quot;);
+const RichmediaRCPlugin = require(&quot;../plugin/RichmediaRCPlugin&quot;);
+const VirtualModulesPlugin = require(&quot;webpack-virtual-modules&quot;);
+const loaderUtils = require(&quot;loader-utils&quot;);
 
 const nodeModules = `${path.resolve(__dirname, &apos;../../../node_modules&apos;)}/`;
 
@@ -56,16 +63,21 @@ const nodeModules = `${path.resolve(__dirname, &apos;../../../node_modules&apos;
  * @param {string} options.filepathRichmediaRC
  * @param {string} options.outputPath
  * @param {string} options.mode
+ * @param {any} options.richmediarc
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-  filepathJs,
-  filepathHtml,
-  filepathRichmediaRC,
-  outputPath,
-  mode = &apos;production&apos;,
-  platform = &apos;unknown&apos;,
-}) {
+   filepathJs,
+   filepathHtml,
+   filepathRichmediaRC,
+   outputPath,
+   richmediarc = null,
+
+   options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
+     mode: DevEnum.DEVELOPMENT,
+     stats: false,
+   },
+ }) {
   let devtool = false;
   const entry = [];
 
@@ -77,9 +89,26 @@ module.exports = function createConfig({
     devtool = &apos;inline-source-map&apos;;
   }
 
+  let namedHashing = &apos;_[sha512:hash:base64:7]&apos;;
+  let imageNameHashing = namedHashing;
+
+  if (richmediarc &amp;&amp; richmediarc.settings) {
+    if (richmediarc.settings.useOriginalImageName) {
+      imageNameHashing = &apos;&apos;;
+    }
+
+    if (richmediarc.settings.useOriginalFileNames) {
+      namedHashing = &apos;&apos;;
+      imageNameHashing = &apos;&apos;;
+    }
+  }
+
   // entry.push(&apos;@babel/polyfill&apos;);
   entry.push(&apos;whatwg-fetch&apos;);
   entry.push(filepathJs);
+
+  // check for trailing slash.
+  outputPath = outputPath.replace(/\/$/, &quot;&quot;);
 
   const config = {
     mode,
@@ -88,8 +117,8 @@ module.exports = function createConfig({
     },
 
     output: {
-      path: outputPath,
       filename: &apos;./[name].js&apos;,
+      path: outputPath,
     },
     externals: {
       // gsap external
@@ -103,30 +132,32 @@ module.exports = function createConfig({
       Monet: &apos;Monet&apos;,
     },
     resolve: {
+      symlinks: true,
       modules: [&apos;node_modules&apos;, nodeModules],
     },
 
     resolveLoader: {
-      modules: [&apos;node_modules&apos;, nodeModules],
       symlinks: true,
+      modules: [&apos;node_modules&apos;, nodeModules],
     },
 
     module: {
       rules: [
         {
-          test: /\.scss$/,
+          test: /\.s[ac]ss$/i,
           use: [
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[name]_[sha512:hash:base64:7].css&apos;,
+                name: `[name]${namedHashing}.css`,
               },
             },
             {
               loader: &apos;extract-loader&apos;,
             },
-            &apos;css-loader&apos;, // translates CSS into CommonJS
-            &apos;sass-loader&apos;, // compiles Sass to CSS, using Node Sass by default
+            &apos;resolve-url-loader&apos;,
+            // Compiles Sass to CSS
+            &apos;sass-loader&apos;,
           ],
         },
         {
@@ -135,7 +166,7 @@ module.exports = function createConfig({
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[name]_[sha512:hash:base64:7].css&apos;,
+                name: `[name]${namedHashing}.css`,
               },
             },
             {
@@ -146,18 +177,32 @@ module.exports = function createConfig({
               loader: &apos;postcss-loader&apos;,
               options: {
                 ident: &apos;postcss&apos;,
-                plugins: loader =&gt; [
-                  require(&apos;postcss-import&apos;)({ root: loader.resourcePath }),
-                  require(&apos;postcss-preset-env&apos;)({
-                    stage: 2,
-                    features: {
-                      &apos;nesting-rules&apos;: true,
-                    },
-                    browsers: [&apos;defaults&apos;, &apos;ie 11&apos;],
-                  }),
-                  require(&apos;postcss-nested&apos;)(),
-                  require(&apos;cssnano&apos;)(),
-                ],
+                plugins: loader =&gt; {
+                  const cssVariables = flattenObjectToCSSVars(richmediarc);
+                  Object.keys(cssVariables).forEach(function (name) {
+                    const val = cssVariables[name];
+                    if (isFile(val) &amp;&amp; !isExternalURL(val)) {
+                      cssVariables[name] = path.relative(path.dirname(loader.resourcePath), cssVariables[name]);
+                    }
+                  });
+
+                  return [
+                    require(&apos;postcss-import&apos;)({root: loader.resourcePath}),
+                    require(&apos;postcss-css-variables&apos;)({
+                      variables: cssVariables
+                    }),
+                    require(&apos;postcss-preset-env&apos;)({
+                      stage: 2,
+                      features: {
+                        &apos;nesting-rules&apos;: true,
+                      },
+                      browsers: [&apos;defaults&apos;, &apos;ie 11&apos;],
+                    }),
+                    require(&apos;postcss-nested&apos;)(),
+                    // require(&apos;postcss-media-variables&apos;)(),
+                    require(&apos;cssnano&apos;)(),
+                  ];
+                },
               },
             },
           ],
@@ -176,7 +221,7 @@ module.exports = function createConfig({
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
+                name: `[name]${namedHashing}.[ext]`,
               },
             },
           ],
@@ -187,7 +232,7 @@ module.exports = function createConfig({
             {
               loader: &apos;file-loader&apos;,
               options: {
-                name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
+                name: `[name]${imageNameHashing}.[ext]`,
               },
             },
             {
@@ -214,7 +259,7 @@ module.exports = function createConfig({
 
         {
           test: /\.js$/,
-          // adding exception to libraries comming from @mediamonks namespace.
+          // adding exception to libraries coming from @mediamonks namespace.
           exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
           use: {
             loader: &apos;babel-loader&apos;,
@@ -224,6 +269,7 @@ module.exports = function createConfig({
                   &apos;@babel/preset-env&apos;,
                   {
                     useBuiltIns: &apos;usage&apos;,
+                    corejs: 3,
                     targets: {
                       browsers: [&apos;ie 11&apos;, &apos;last 2 versions&apos;, &apos;safari &gt;= 7&apos;],
                     },
@@ -239,11 +285,21 @@ module.exports = function createConfig({
           },
         },
         {
+          test: /richmediaconfig/,
+          use: {
+            loader: path.resolve(path.join(__dirname, &apos;../loader/RichmediaRCLoader.js&apos;)),
+            options: {
+              config: JSON.stringify(richmediarc)
+            }
+          },
+        },
+        {
           test: /.richmediarc$/,
           exclude: /node_modules/,
           type: &apos;javascript/dynamic&apos;,
           use: {
             loader: path.resolve(path.join(__dirname, &apos;../loader/RichmediaRCLoader.js&apos;)),
+            options: {}
           },
         },
         {
@@ -251,7 +307,7 @@ module.exports = function createConfig({
           use: {
             loader: &apos;file-loader&apos;,
             options: {
-              name: &apos;[name]_[sha512:hash:base64:7].[ext]&apos;,
+              name: `[name]${namedHashing}.[ext]`,
             },
           },
         },
@@ -264,7 +320,7 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: [&apos;:src&apos;, &apos;:href&apos;, &apos;netflix-video:source&apos;, &apos;:data-src&apos;],
+                attrs: [&apos;:src&apos;, &apos;:href&apos;, &apos;netflix-video:source&apos;, &apos;:data-src&apos;, &apos;:data&apos;],
               },
             },
           ],
@@ -277,8 +333,20 @@ module.exports = function createConfig({
       }),
 
       new webpack.DefinePlugin({
+        DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
       }),
+      // new RichmediaRCPlugin({
+      //   config: filepathRichmediaRC
+      // }),
+      // new VirtualModulePlugin({
+      //   moduleName: &apos;richmedia-config&apos;,
+      //   contents: JSON.stringify(richmediarc),
+      // }),
+      new VirtualModulesPlugin({
+        &apos;node_modules/richmediaconfig&apos;: `module.exports = &quot;DUDE&quot;`
+      })
+
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
       //   exclude: /node_modules/,
@@ -291,9 +359,6 @@ module.exports = function createConfig({
       // new Visualizer({
       //   filename: &apos;./statistics.html&apos;,
       // }),
-      new CopyWebpackPlugin([
-        { from: path.resolve(path.dirname(filepathRichmediaRC), &apos;./static&apos;), to: &apos;static&apos; }
-      ], {})
     ],
     stats: {
       colors: true,
@@ -301,23 +366,36 @@ module.exports = function createConfig({
     devtool,
   };
 
-  if (platform === PlatformEnum.MONET) {
-    config.plugins.push(
-      new MonetJSONPlugin({
-        config: filepathRichmediaRC,
-        filePattern: &apos;[hash].[ext]&apos;,
-      }),
+  /**
+   * When there is a static folder use it in webpack config
+   */
+  const staticPath = path.resolve(path.dirname(filepathRichmediaRC), &apos;./static&apos;);
+
+  if (fs.existsSync(staticPath)) {
+
+    config.plugins.push(new CopyWebpackPlugin({
+        patterns: [
+          {from:  staticPath, to: &apos;&apos;}]
+      })
     );
   }
 
+  if (stats === true) {
+    config.plugins.push(new BundleAnalyzerPlugin());
+  }
+
   if (mode === DevEnum.DEVELOPMENT) {
-    config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    // config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
   if (mode === DevEnum.PRODUCTION) {
+    // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
+    let bundleName = /[^/]*$/.exec(outputPath)[0]
+
     config.plugins.push(
       new ZipPlugin({
-        filename: &apos;bundle.zip&apos;,
+        path: path.join(outputPath, &apos;../&apos;),
+        filename: `./${bundleName}`,
 
         fileOptions: {
           mtime: new Date(),
@@ -333,39 +411,82 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
-      minimize: true,
-        minimizer: [
+      splitChunks: {
+        // include all types of chunks
+        chunks: &apos;async&apos;,
+      },
+      minimizer: [
+        // new TerserPlugin()
         new UglifyJsPlugin({
-          uglifyOptions: {
-            comments: false,
-            mangle: false,
-            compress: false,
-          },
-        }),
-        new UglifyJsPlugin({
-          include: /\.min\.js$/,
-          sourceMap: false,
           uglifyOptions: {
             warnings: false,
-            parse: {},
-            compress: {},
+            // parse: {},
+            compress: {
+              arguments: true,
+              booleans: true,
+              collapse_vars: !true,
+              comparisons: true,
+              conditionals: true,
+              dead_code: true,
+              directives: true,
+              drop_console: false,
+              drop_debugger: true,
+              evaluate: true,
+              expression: false,
+              global_defs: false,
+              hoist_funs: false,
+              hoist_props: true,
+              hoist_vars: false,
+              ie8: false,
+
+              if_return: true,
+              inline: true,
+              join_vars: true,
+              keep_fargs: &apos;strict&apos;,
+              keep_fnames: false,
+              keep_infinity: false,
+              loops: true,
+              negate_iife: true,
+              passes: 1,
+              properties: true,
+              pure_getters: &apos;strict&apos;,
+              pure_funcs: null,
+              reduce_funcs: true,
+              reduce_vars: true,
+              sequences: true,
+              side_effects: true,
+              switches: true,
+              top_retain: null,
+              toplevel: false,
+              typeofs: true,
+              unsafe: false,
+              unsafe_comps: false,
+              unsafe_Function: false,
+              unsafe_math: false,
+              unsafe_proto: false,
+              unsafe_regexp: false,
+              unsafe_undefined: false,
+              unused: true,
+            },
             mangle: true, // Note `mangle.properties` is `false` by default.
             output: null,
             toplevel: false,
             nameCache: null,
             ie8: false,
-            keep_fnames: false,
+            keep_fnames: true,
           },
         }),
       ],
     };
+
+    // delete config.optimization;
   }
 
-  config.plugins.push(
-    new SimpleProgressWebpackPlugin({
-      format: &apos;compact&apos;,
-    }),
-  );
+  // config.plugins.push(
+  //   new SimpleProgressWebpackPlugin({
+  //     format: &apos;compact&apos;,
+  //   }),
+  // );
 
   return config;
 };

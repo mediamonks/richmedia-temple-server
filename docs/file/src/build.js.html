@@ -34,26 +34,46 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/build.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const findJSONConfigs = require(&apos;./util/findRichmediaRC&apos;);
-const createConfigByRichmediarcList = require(&apos;./webpack/config/createConfigByRichmediarcList&apos;);
-const webpack = require(&apos;webpack&apos;);
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const webpack = require(&apos;webpack&apos;);
 const inquirer = require(&apos;inquirer&apos;);
 const chalk = require(&apos;chalk&apos;);
 const Spinner = require(&apos;cli-spinner&apos;).Spinner;
+const fs = require(&apos;fs-extra&apos;);
+const path = require(&apos;path&apos;);
+const globPromise = require(&apos;glob-promise&apos;);
 
-module.exports = async function build(configPackages = null, buildTarget = &apos;./build&apos;) {
+const findRichmediaRC = require(&apos;./util/findRichmediaRC&apos;);
+const createConfigByRichmediarcList = require(&apos;./webpack/config/createConfigByRichmediarcList&apos;);
+const getNameFromLocation = require(&apos;./util/getNameFromLocation&apos;);
+const getTemplate = require(&apos;./util/getBuildTemplate&apos;);
+const expandWithSpreadsheetData = require(&apos;./util/expandWithSpreadsheetData&apos;);
+const saveChoicesInPackageJson = require(&apos;./util/saveChoicesInPackageJson&apos;);
+
+/**
+ *
+ * @param {object} options
+ * @param {string} options.allConfigsSelector
+ * @param {boolean} options.stats
+ * @param {object} options.answers
+ * @param {boolean} options.answers.emptyBuildDir
+ * @param {Array&lt;string&gt;} options.answers.build
+ * @return {Promise&lt;any | never&gt;}
+ */
+module.exports = async function build({
+                                        glob = &apos;./**/.richmediarc*&apos;,
+                                        stats = false,
+                                        choices = {},
+                                      }) {
+  const buildTarget = &apos;./build&apos;;
+
   const spinner = new Spinner(&apos;processing.. %s&apos;);
-  spinner.setSpinnerString(&apos;&#x280B;&#x2819;&#x281A;&#x2812;&#x2802;&#x2802;&#x2812;&#x2832;&#x2834;&#x2826;&#x2816;&#x2812;&#x2810;&#x2810;&#x2812;&#x2813;&#x280B;&apos;);
+  spinner.setSpinnerString(&apos;/-\\|&apos;);
   spinner.start();
 
-  const allConfigsSelector = &apos;./**/.richmediarc&apos;;
-
-  const configs = await findJSONConfigs(allConfigsSelector, [
+  let configs = await findRichmediaRC(glob, [
     &apos;settings.entry.js&apos;,
     &apos;settings.entry.html&apos;,
   ]);
-
-  let answers = {};
 
   spinner.stop(true);
 
@@ -61,71 +81,144 @@ module.exports = async function build(configPackages = null, buildTarget = &apos
     throw new Error(&apos;could not find a compatible .richmediarc with entry points configured&apos;);
   }
 
-  if (!configPackages || configPackages.length === 0) {
-    const questions = [];
+  configs = await expandWithSpreadsheetData(configs);
 
-    if (configs.length &gt; 1) {
-      questions.push({
-        type: &apos;checkbox&apos;,
-        name: &apos;build&apos;,
-        message: &apos;Please choose the current build to start.&apos;,
-        choices: [
-          { name: &apos;all&apos;, checked: false },
-          ...configs.map(({ location }) =&gt; ({ name: location, checked: false })),
-        ],
-        validate: function(answer) {
-          if (answer.length &lt; 1) {
-            return &apos;You must choose at least one.&apos;;
-          }
-          return true;
-        },
-      });
-    } else {
-      console.log(`${chalk.green(&apos;&#x2714;&apos;)} One config found ${configs[0].location}`);
-      answers.build = [configs[0].location];
+  const questions = [];
+
+  const filesBuild = await globPromise(`${buildTarget}/**/*`);
+
+  if(!choices){
+    let options = {};
+    if (filesBuild.length &gt; 0) {
+      if (typeof options.emptyBuildDir !== &apos;boolean&apos;) {
+        questions.push({
+          type: &apos;confirm&apos;,
+          name: &apos;emptyBuildDir&apos;,
+          message: `Empty build dir? ${chalk.red(
+            `( ${filesBuild.length} files in ${path.resolve(buildTarget)})`,
+          )}`,
+        });
+      }
     }
 
-    questions.push({
-      type: &apos;input&apos;,
-      name: &apos;buildTarget&apos;,
-      message: &apos;Please choose build location&apos;,
-      default: &apos;./build&apos;,
-    });
+    if (configs.length &gt; 1) {
+      if (!(options.build instanceof Array)) {
+        questions.push({
+          type: &apos;checkbox&apos;,
+          name: &apos;build&apos;,
+          message: &apos;Please choose the current build to start.&apos;,
+          choices: [
+            {name: &apos;all&apos;, checked: false},
+            ...configs.map(({location}) =&gt; ({name: location, checked: false})),
+          ],
+          validate: function (answer) {
+            if (answer.length &lt; 1) {
+              return &apos;You must choose at least one.&apos;;
+            }
+            return true;
+          },
+        });
+      }
+    } else {
+      console.log(`${chalk.green(&apos;&#x2714;&apos;)} One config found ${configs[0].location}`);
+      options.build = [configs[0].location];
+    }
 
-    answers = {
-      ...answers,
+    options = {
+      ...options,
       ...(await inquirer.prompt(questions)),
     };
+
+    choices = options;
+
+    await saveChoicesInPackageJson(&apos;build&apos;, {
+      glob,
+      choices,
+      stats,
+    });
+
+  }
+
+  if (choices.emptyBuildDir) {
+    await fs.emptyDir(buildTarget);
   }
 
   let configsResult = null;
 
-  if (!answers.build) {
-    answers.build = [...configPackages];
-  }
-
-  if (!answers.buildTarget) {
-    answers.buildTarget = buildTarget;
-  }
-
-  if (answers.build.find(item =&gt; item === &apos;all&apos;)) {
+  if (choices.build.find(item =&gt; item === &apos;all&apos;)) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(config =&gt; answers.build.indexOf(config.location) &gt;= 0);
+    configsResult = configs.filter(config =&gt; choices.build.indexOf(config.location) &gt;= 0);
   }
 
-  const result = await createConfigByRichmediarcList(configsResult, &apos;production&apos;);
+
+  const result = await createConfigByRichmediarcList(configsResult, {
+    mode: &apos;production&apos;,
+    stats: stats,
+  });
+
 
   return new Promise((resolve, reject) =&gt; {
     webpack(result).run((err, stats) =&gt; {
       if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve();
+        console.error(err.stack || err);
+        if (err.details) {
+          err.details.forEach((item, index) =&gt; {
+            console.error(index, item);
+          });
+        }
+        return;
       }
+
+      const info = stats.toJson();
+
+      if (stats.hasErrors()) {
+        info.errors.forEach((item, index) =&gt; {
+          console.log(chalk.red(item));
+        });
+      }
+
+      if (stats.hasWarnings()) {
+        info.warnings.forEach(item =&gt; {
+          console.log(chalk.green(item));
+        });
+      }
+
+      resolve();
     });
-  });
+  })
+
+	.then(async () =&gt; {
+		const template = await getTemplate();
+
+		const templateConfig = {
+			banner: configsResult.map(item =&gt; {
+				const name = getNameFromLocation(item.location);
+				let width = item.data.settings.size.width;
+				let height = item.data.settings.size.height;
+				let title = name;
+
+				// if (item.data.settings.expandable) {
+				//   width = item.data.settings.expandable.width;
+				//   height = item.data.settings.expandable.height;
+				//   title += &quot;_EXP_&quot; + width + &quot;x&quot; + height;
+				// }
+
+				return {
+					src: `./${name}/`,
+					name,
+					title,
+					width,
+					height,
+				};
+			}),
+		};
+
+		return fs.outputFile(&apos;./build/index.html&apos;, template(templateConfig));
+	})
+	.then(() =&gt; {
+		return globPromise(`${buildTarget}/**/*`);
+	});
 };
 </code></pre>
 

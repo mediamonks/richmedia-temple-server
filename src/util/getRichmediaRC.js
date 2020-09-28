@@ -19,8 +19,6 @@ const {readJson} = require("fs-extra");
  * also inherit configs from parent jsonConfig files
  *
  * @param {string} filepath
- * @param {string} rootBasePath
- * @param {any} cacheObject
  * @return {Promise<void | never>}
  */
 module.exports = async function getRichmediaRC(

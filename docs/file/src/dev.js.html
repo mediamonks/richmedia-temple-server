@@ -34,71 +34,106 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/dev.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const findJSONConfigs = require(&apos;./util/findRichmediaRC&apos;);
-const configGeneratorByRichmediarcList = require(&apos;./webpack/config/createConfigByRichmediarcList&apos;);
-const devServer = require(&apos;./dev-server&apos;);
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">
+const createConfigByRichmediarcList = require(&apos;./webpack/config/createConfigByRichmediarcList&apos;);
+const devServer = require(&apos;./webpack/devServer&apos;);
+const expandWithSpreadsheetData = require(&apos;./util/expandWithSpreadsheetData&apos;);
+
+const saveChoicesInPackageJson = require(&quot;./util/saveChoicesInPackageJson&quot;);
+const findJSONConfigs = require(&apos;./util/findRichmediaRC&apos;);
 const inquirer = require(&apos;inquirer&apos;);
 const chalk = require(&apos;chalk&apos;);
 
-module.exports = async function dev(
-  packageLocationList = null,
-  allConfigsSelector = &apos;./**/.richmediarc&apos;,
-) {
-
+module.exports = async function dev({ glob = &apos;./**/.richmediarc*&apos;, choices = null, stats = null }) {
+  // start with showing search message
   console.log(`${chalk.blue(&apos;i&apos;)} Searching for configs`);
 
-  const configs = await findJSONConfigs(allConfigsSelector, [
+  let configs = await findJSONConfigs(glob, [
     &apos;settings.entry.js&apos;,
     &apos;settings.entry.html&apos;,
   ]);
-
 
   if (configs.length === 0) {
     throw new Error(&apos;could not find a compatible .richmediarc with entry points configured&apos;);
   }
 
   console.log(`${chalk.green(&apos;&#x2714;&apos;)} Found ${configs.length} config(s)`);
+  console.log(`${chalk.green(&apos;&#x2714;&apos;)} Taking a look if it has Spreadsheets`);
 
-  const question = {};
-  let answers = {
-    devLocation: &apos;all&apos;,
-  };
+  configs = await expandWithSpreadsheetData(configs);
 
-  if (configs.length === 1) {
-    console.log(`  Choosing ${configs[0].location}`);
-    answers.devLocation = configs[0].location;
-  } else {
-    answers = await inquirer.prompt([
-      {
-        type: &apos;checkbox&apos;,
-        name: &apos;devLocation&apos;,
-        message: &apos;Please select config(s) build:&apos;,
-        choices: [
-          { name: &apos;all&apos;, checked: false },
-          ...configs.map(({ location }) =&gt; ({ name: location, checked: false })),
-        ],
-        validate(answer) {
-          if (answer.length &lt; 1) {
-            return `${chalk.red(&apos;&#x2716; You must choose at least one.&apos;)} `;
-          }
-          return true;
+  if(!choices) {
+    let answers = {
+      location: &apos;all&apos;,
+    };
+
+    if (configs.length === 1) {
+      console.log(`  Choosing ${configs[0].location}`);
+      answers.location = configs[0].location;
+    } else {
+      answers = await inquirer.prompt([
+        {
+          type: &apos;checkbox&apos;,
+          name: &apos;location&apos;,
+          message: &apos;Please select config(s) build:&apos;,
+          choices: [
+            {name: &apos;all&apos;, checked: false},
+            ...configs.map(config =&gt; {
+
+              let name = config.location;
+
+              if (config.data.name) {
+                // name += ` (${config.data.name})`
+              }
+
+              return {
+                name,
+                checked: false
+              };
+            }),
+          ],
+          validate(answer) {
+            if (answer.length &lt; 1) {
+              return `${chalk.red(&apos;&#x2716; You must choose at least one.&apos;)} `;
+            }
+            return true;
+          },
         },
-      },
-    ]);
+      ]);
+    }
+
+    await saveChoicesInPackageJson(&apos;dev&apos;, {
+      glob,
+      choices: answers,
+      stats,
+    });
+
+    choices = answers;
   }
 
   let configsResult = null;
 
-  if (answers.devLocation.indexOf(&apos;all&apos;) &gt; -1) {
+  if (choices.location.indexOf(&apos;all&apos;) &gt; -1) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({ location }) =&gt; answers.devLocation.indexOf(location) &gt; -1);
+    configsResult = configs.filter(({location}) =&gt; {
+      return choices.location.indexOf(location) &gt; -1;
+    });
   }
 
-  const result = await configGeneratorByRichmediarcList(configsResult, &apos;development&apos;);
-  const list = result.map((webpack, index) =&gt; ({ webpack, settings: configsResult[index] }));
+  let list = await createConfigByRichmediarcList(configsResult, {
+    mode: &apos;development&apos;,
+    stats: false,
+  });
 
-  devServer(list);
+  list = list.map((webpack, index) =&gt; {
+    return {
+      webpack,
+      settings: configsResult[index]
+    }
+  });
+
+  await devServer(list);
 };
 </code></pre>
 

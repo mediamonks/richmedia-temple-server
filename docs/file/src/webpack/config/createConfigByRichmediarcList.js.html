@@ -37,65 +37,53 @@
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
 const fs = require(&apos;fs-extra&apos;);
 const Ajv = require(&apos;ajv&apos;);
-const draft06 = require(&apos;ajv/lib/refs/json-schema-draft-06.json&apos;);
+const draft07 = require(&apos;ajv/lib/refs/json-schema-draft-07.json&apos;);
 
-const formatErrorMessage = require(&apos;../../util/formatErrorMessage&apos;);
 const createConfig = require(&apos;./createConfig&apos;);
-const getPlatformByRichmediaRc = require(&apos;../../util/getPlatformByRichmediaRc&apos;);
+const isGoogleSpreadsheetUrl = require(&apos;../../util/isGoogleSpreadsheetUrl&apos;);
+const getNameFromLocation = require(&apos;../../util/getNameFromLocation&apos;);
+const {GoogleSpreadsheet} = require(&quot;google-spreadsheet&quot;);
 
 const schema = require(&apos;../../schema/richmediarc.schema.json&apos;);
 
-const ajv = new Ajv();
-ajv.addMetaSchema(draft06);
-
-const schemaValidate = ajv.compile(schema);
-
 /**
  *
- * @param {string} location
- * @param {any} richmediaRc
+ * @param {string} richmediaConfigLocation
+ * @param {any} richmediaConfig
  * @return {{filepathHtml: string, filepathJs: string, filepathRichmediaRC: string, outputPath: string}}
  */
-function validateSchemaAndCreatePaths(location, richmediaRc) {
-  // validate schema
-  const valid = schemaValidate(richmediaRc);
+function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) {
+  const ajv = new Ajv({ allErrors: true });
+  const validate = ajv.compile(schema);
+  const valid = validate(richmediaConfig);
 
   if (!valid) {
-    schemaValidate.errors.forEach(error =&gt; {
-      // eslint-disable-next-line
-      console.error(JSON.stringify(error));
-    });
-
-    throw new Error(formatErrorMessage(schemaValidate.errors[0]));
+    throw new Error(&apos;Invalid: &apos; + ajv.errorsText(validate.errors));
   }
 
   if (
-    !richmediaRc ||
-    !richmediaRc.settings ||
-    !richmediaRc.settings.entry ||
-    !richmediaRc.settings.entry.js ||
-    !richmediaRc.settings.entry.html
+    !richmediaConfig ||
+    !richmediaConfig.settings ||
+    !richmediaConfig.settings.entry ||
+    !richmediaConfig.settings.entry.js ||
+    !richmediaConfig.settings.entry.html
   ) {
-    throw new Error(`missing js or/and html in settings.entry in file ${path.resolve(location)}`);
+    throw new Error(
+      `missing js or/and html in settings.entry in file ${path.resolve(richmediaConfigLocation)}`,
+    );
   }
 
-  const list = path.dirname(location).split(path.sep).filter(val =&gt; val[0] !== &apos;.&apos; );
-  const outputPath = path.resolve(path.join(&apos;./build/&apos;, list.join(&apos;_&apos;)));
+  const outputPath = path.resolve(path.join(&apos;./build/&apos;, getNameFromLocation(richmediaConfigLocation)));
 
-  const filepathHtml = path.resolve(
-    path.join(path.dirname(location), richmediaRc.settings.entry.html),
-  );
-
-  const filepathJs = path.resolve(path.join(path.dirname(location), richmediaRc.settings.entry.js));
-  const filepathRichmediaRC = path.resolve(location);
-  const platform = getPlatformByRichmediaRc(richmediaRc);
+  const filepathHtml = richmediaConfig.settings.entry.html
+  const filepathJs = richmediaConfig.settings.entry.js;
+  const filepathRichmediaRC = path.resolve(richmediaConfigLocation);
 
   return {
     filepathHtml,
     filepathJs,
     filepathRichmediaRC,
     outputPath,
-    platform
   };
 }
 
@@ -105,7 +93,8 @@ function validateSchemaAndCreatePaths(location, richmediaRc) {
  * @param {string} mode
  * @return {Promise&lt;any[]&gt;}
  */
-function createConfigByRichmediarcList(richmediarcList, mode) {
+async function createConfigByRichmediarcList(richmediarcList, { mode, stats }) {
+
   const promiseList = richmediarcList.map(
     ({ location, data }) =&gt; {
       /**
@@ -114,11 +103,16 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
        *   filepathJs,
        *   filepathRichmediaRC,
        *   outputPath,
+       *   platform
        * } = validateSchemaAndCreatePaths(location, data);
        */
       const webpackConfig = createConfig({
         ...validateSchemaAndCreatePaths(location, data),
-        mode,
+        richmediarc: data,
+        options: {
+          mode,
+          stats,
+        },
       });
 
       const webpackFilepath = path.resolve(`${path.dirname(location)}/webpack.config.js`);
@@ -142,7 +136,9 @@ function createConfigByRichmediarcList(richmediarcList, mode) {
     // projects can have there own webpack config. this will override the generated one.
   );
 
-  return Promise.all(promiseList).then(webpackConfigs =&gt; webpackConfigs.filter(config =&gt; !!config));
+  const webpackConfigs = await Promise.all(promiseList);
+
+  return webpackConfigs.filter(config =&gt; !!config);
 }
 
 module.exports = createConfigByRichmediarcList;

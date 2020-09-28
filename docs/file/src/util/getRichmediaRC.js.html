@@ -41,92 +41,48 @@
 
 const fs = require(&apos;fs-extra&apos;);
 const path = require(&apos;path&apos;);
-const isExternalURL = require(&apos;../util/isExternalURL&apos;);
+const deepmerge = require(&apos;deepmerge&apos;);
+const leafs = require(&quot;./leafs&quot;);
+const isFile = require(&quot;./isFile&quot;);
+const {readJson} = require(&quot;fs-extra&quot;);
 
-function readJson(filepath, cacheObject) {
-  let promiseJson;
-  if (cacheObject &amp;&amp; cacheObject[filepath]) {
-    promiseJson = Promise.resolve(cacheObject[filepath]);
-  } else {
-    promiseJson = fs.pathExists(filepath).then(val =&gt; {
-      if (val) {
-        return fs.readJson(filepath).then(json =&gt; {
-          if (cacheObject &amp;&amp; !cacheObject[filepath]) {
-            cacheObject[filepath] = json;
-          }
 
-          return json;
-        });
-      }
 
-      return false;
-    });
-  }
 
-  return promiseJson;
-}
 
 /**
  * getJSONConfig retrieves a jsonConfig config file and will
  * also inherit configs from parent jsonConfig files
  *
- * @param {string} filepathRichmediarc
- * @param {string} rootPath
- * @param {boolean} inheritParentConfig
- * @param {any} cacheObject
+ * @param {string} filepath
  * @return {Promise&lt;void | never&gt;}
  */
-module.exports = function getRichmediaRC(
-  filepathRichmediarc,
-  rootPath = &apos;./&apos;,
-  inheritParentConfig = true,
-  cacheObject = null,
+module.exports = async function getRichmediaRC(
+  filepath,
 ) {
-  let result = {};
-  let filepath = path.resolve(filepathRichmediarc);
-  const baseFilepath = filepath;
-  const data = path.parse(baseFilepath);
 
-  rootPath = path.resolve(rootPath);
+  filepath = path.resolve(filepath);
+  const dirname = path.dirname(filepath);
 
-  let prom = Promise.resolve();
-  let resolve = path.resolve(baseFilepath) !== rootPath;
+  let richmediarc = await readJson(filepath);
 
-  while (resolve) {
-    filepath = path.join(filepath, &apos;..&apos;);
-    resolve = path.resolve(filepath) !== rootPath;
+  leafs(richmediarc, function(value, obj, name){
 
-    (function(scopedFilepath) {
-      prom = prom
-        .then(() =&gt; readJson(`${scopedFilepath}/${data.name}${data.ext}`, cacheObject))
-        .then(json =&gt; {
-          if (json &amp;&amp; json.content) {
-            Object.keys(json.content).forEach(key =&gt; {
-              const item = json.content[key];
-              if (
-                (item.type === &apos;image&apos; || item.type === &apos;video&apos;) &amp;&amp;
-                item.url &amp;&amp;
-                !isExternalURL(item.url)
-              ) {
-                json.content[key].url = path.relative(
-                  path.dirname(baseFilepath),
-                  path.resolve(path.join(scopedFilepath, item.url)),
-                );
-              }
-            });
-          }
+    if(typeof value === &apos;string&apos;
+      &amp;&amp; !path.isAbsolute(value)
+      &amp;&amp; isFile(value))
+    {
+      obj[name] = path.resolve(dirname, value);
+    }
+  });
 
-          if (json) {
-            result = {
-              ...json,
-              ...result,
-            };
-          }
-        });
-    })(filepath);
+  let {parent} = richmediarc;
+  if(parent){
+    richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc)
+    delete richmediarc.parent;
   }
 
-  return prom.then(() =&gt; result);
+  return richmediarc;
 };
 </code></pre>
 

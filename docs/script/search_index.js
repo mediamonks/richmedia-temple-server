@@ -300,15 +300,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/dev-server.js",
-    "file/src/dev-server.js.html",
-    "src/dev-server.js",
-    "file"
-  ],
-  [
     "src/dev.js",
     "file/src/dev.js.html",
     "src/dev.js",
+    "file"
+  ],
+  [
+    "src/preview.js",
+    "file/src/preview.js.html",
+    "src/preview.js",
     "file"
   ],
   [
@@ -318,21 +318,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/util/convert/richmediarctomonetbackupjson.js",
-    "file/src/util/convert/richmediaRCToMonetBackupJSON.js.html",
-    "src/util/convert/richmediaRCToMonetBackupJSON.js",
-    "file"
-  ],
-  [
-    "src/util/convert/richmediarctomonetmanifestjson.js",
-    "file/src/util/convert/richmediaRCToMonetManifestJSON.js.html",
-    "src/util/convert/richmediaRCToMonetManifestJSON.js",
-    "file"
-  ],
-  [
     "src/util/doesnestedexists.js",
     "file/src/util/doesNestedExists.js.html",
     "src/util/doesNestedExists.js",
+    "file"
+  ],
+  [
+    "src/util/expandwithspreadsheetdata.js",
+    "file/src/util/expandWithSpreadsheetData.js.html",
+    "src/util/expandWithSpreadsheetData.js",
     "file"
   ],
   [
@@ -342,9 +336,39 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/util/flattenobjecttocssvars.js",
+    "file/src/util/flattenObjectToCSSVars.js.html",
+    "src/util/flattenObjectToCSSVars.js",
+    "file"
+  ],
+  [
     "src/util/formaterrormessage.js",
     "file/src/util/formatErrorMessage.js.html",
     "src/util/formatErrorMessage.js",
+    "file"
+  ],
+  [
+    "src/util/getbuildtemplate.js",
+    "file/src/util/getBuildTemplate.js.html",
+    "src/util/getBuildTemplate.js",
+    "file"
+  ],
+  [
+    "src/util/getdevtemplate.js",
+    "file/src/util/getDevTemplate.js.html",
+    "src/util/getDevTemplate.js",
+    "file"
+  ],
+  [
+    "src/util/getgooglesheetidfromurl.js",
+    "file/src/util/getGoogleSheetIdFromUrl.js.html",
+    "src/util/getGoogleSheetIdFromUrl.js",
+    "file"
+  ],
+  [
+    "src/util/getnamefromlocation.js",
+    "file/src/util/getNameFromLocation.js.html",
+    "src/util/getNameFromLocation.js",
     "file"
   ],
   [
@@ -366,6 +390,30 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/util/isfile.js",
+    "file/src/util/isFile.js.html",
+    "src/util/isFile.js",
+    "file"
+  ],
+  [
+    "src/util/isgooglespreadsheeturl.js",
+    "file/src/util/isGoogleSpreadsheetUrl.js.html",
+    "src/util/isGoogleSpreadsheetUrl.js",
+    "file"
+  ],
+  [
+    "src/util/leafs.js",
+    "file/src/util/leafs.js.html",
+    "src/util/leafs.js",
+    "file"
+  ],
+  [
+    "src/util/savechoicesinpackagejson.js",
+    "file/src/util/saveChoicesInPackageJson.js.html",
+    "src/util/saveChoicesInPackageJson.js",
+    "file"
+  ],
+  [
     "src/util/validateschema.js",
     "file/src/util/validateSchema.js.html",
     "src/util/validateSchema.js",
@@ -384,15 +432,21 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/webpack/devserver.js",
+    "file/src/webpack/devServer.js.html",
+    "src/webpack/devServer.js",
+    "file"
+  ],
+  [
     "src/webpack/loader/richmediarcloader.js",
     "file/src/webpack/loader/RichmediaRCLoader.js.html",
     "src/webpack/loader/RichmediaRCLoader.js",
     "file"
   ],
   [
-    "src/webpack/plugin/monetjsonplugin.js",
-    "file/src/webpack/plugin/MonetJSONPlugin.js.html",
-    "src/webpack/plugin/MonetJSONPlugin.js",
+    "src/webpack/plugin/richmediarcplugin.js",
+    "file/src/webpack/plugin/RichmediaRCPlugin.js.html",
+    "src/webpack/plugin/RichmediaRCPlugin.js",
     "file"
   ]
 ]

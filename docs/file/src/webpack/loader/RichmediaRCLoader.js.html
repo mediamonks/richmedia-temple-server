@@ -36,45 +36,54 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/webpack/loader/RichmediaRCLoader.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const loaderUtils = require(&apos;loader-utils&apos;);
 const isExternalURL = require(&apos;../../util/isExternalURL&apos;);
+const leafs = require(&quot;../../util/leafs&quot;);
+const isFile = require(&quot;../../util/isFile&quot;);
+const fs = require(&apos;fs&apos;);
 
 /**
  * Allows you to import external files into a json value.
  * Can be used for any value, in an object or array.
  */
 module.exports = function RichmediaRCLoader(data) {
-  this.cacheable();
+  const options = loaderUtils.getOptions(this);
+
   const loaderContext = this;
-  let content = typeof data === &apos;string&apos; ? JSON.parse(data) : data;
+
+  if(options.config){
+    data = options.config;
+  }
+
+  data = typeof data === &apos;string&apos; ? JSON.parse(data) : data;
 
   let ruuid = Date.now();
   const replaceItems = [];
 
-  if (content &amp;&amp; content.content) {
-    Object.keys(content.content).forEach(key =&gt; {
-      const item = content.content[key];
-      if ((item.type === &apos;video&apos; || item.type === &apos;image&apos;) &amp;&amp; !isExternalURL(item.url)) {
-        ruuid += 1;
+  if (data &amp;&amp; data.content) {
+    leafs(data.content, (value, obj, name) =&gt; {
+      if(isFile(value) &amp;&amp; !isExternalURL(value)){
         const id = `uuid_replace_${ruuid.toString(16)}`;
+
         replaceItems.push({
           key: loaderUtils.stringifyRequest(loaderContext, id),
-          value: `require(${loaderUtils.stringifyRequest(
-            loaderContext,
-            `file-loader!${item.url}`,
-          )})`,
+          value: `require(${loaderUtils.stringifyRequest(loaderContext, `${value}`)})`,
         });
 
-        item.url = id;
+        obj[name] = id;
       }
     });
   }
 
-  content = JSON.stringify(content)
+
+  data = JSON.stringify(data)
     .replace(/\u2028/g, &apos;\\u2028&apos;)
     .replace(/\u2029/g, &apos;\\u2029&apos;);
 
-  content = replaceItems.reduce((prev, item) =&gt; prev.replace(item.key, item.value), content);
+  data = replaceItems.reduce((prev, item) =&gt; {
+    prev = prev.replace(item.key, item.value);
+    return prev;
+  }, data);
 
-  return `module.exports = ${content};`;
+  return `module.exports = ${data};`;
 };
 </code></pre>
 

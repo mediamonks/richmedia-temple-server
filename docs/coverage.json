@@ -1,23 +1,10 @@
 {
-  "coverage": "8.91%",
-  "expectCount": 101,
-  "actualCount": 9,
+  "coverage": "7.94%",
+  "expectCount": 151,
+  "actualCount": 12,
   "files": {
     "src/build.js": {
-      "expectCount": 7,
-      "actualCount": 0,
-      "undocumentLines": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        8
-      ]
-    },
-    "src/dev-server.js": {
-      "expectCount": 15,
+      "expectCount": 14,
       "actualCount": 1,
       "undocumentLines": [
         1,
@@ -27,25 +14,35 @@
         5,
         6,
         7,
-        8,
         9,
         10,
         11,
         12,
-        14,
-        31
+        13,
+        14
       ]
     },
     "src/dev.js": {
-      "expectCount": 6,
+      "expectCount": 8,
+      "actualCount": 0,
+      "undocumentLines": [
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        11
+      ]
+    },
+    "src/preview.js": {
+      "expectCount": 3,
       "actualCount": 0,
       "undocumentLines": [
         1,
         2,
-        3,
-        4,
-        5,
-        7
+        4
       ]
     },
     "src/util/OptionsValidationError.js": {
@@ -68,24 +65,21 @@
         160
       ]
     },
-    "src/util/convert/richmediaRCToMonetBackupJSON.js": {
-      "expectCount": 1,
-      "actualCount": 0,
-      "undocumentLines": [
-        1
-      ]
-    },
-    "src/util/convert/richmediaRCToMonetManifestJSON.js": {
-      "expectCount": 1,
-      "actualCount": 0,
-      "undocumentLines": [
-        1
-      ]
-    },
     "src/util/doesNestedExists.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
+    },
+    "src/util/expandWithSpreadsheetData.js": {
+      "expectCount": 5,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ]
     },
     "src/util/findRichmediaRC.js": {
       "expectCount": 4,
@@ -96,10 +90,52 @@
         3
       ]
     },
+    "src/util/flattenObjectToCSSVars.js": {
+      "expectCount": 3,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        2,
+        4
+      ]
+    },
     "src/util/formatErrorMessage.js": {
       "expectCount": 1,
       "actualCount": 1,
       "undocumentLines": []
+    },
+    "src/util/getBuildTemplate.js": {
+      "expectCount": 4,
+      "actualCount": 1,
+      "undocumentLines": [
+        1,
+        2,
+        3
+      ]
+    },
+    "src/util/getDevTemplate.js": {
+      "expectCount": 4,
+      "actualCount": 1,
+      "undocumentLines": [
+        1,
+        2,
+        3
+      ]
+    },
+    "src/util/getGoogleSheetIdFromUrl.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/util/getNameFromLocation.js": {
+      "expectCount": 2,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3
+      ]
     },
     "src/util/getPlatformByRichmediaRc.js": {
       "expectCount": 1,
@@ -109,13 +145,15 @@
       ]
     },
     "src/util/getRichmediaRC.js": {
-      "expectCount": 5,
+      "expectCount": 7,
       "actualCount": 1,
       "undocumentLines": [
         6,
         7,
         8,
-        10
+        9,
+        10,
+        11
       ]
     },
     "src/util/isExternalURL.js": {
@@ -124,6 +162,39 @@
       "undocumentLines": [
         1,
         3
+      ]
+    },
+    "src/util/isFile.js": {
+      "expectCount": 2,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3
+      ]
+    },
+    "src/util/isGoogleSpreadsheetUrl.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/util/leafs.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/util/saveChoicesInPackageJson.js": {
+      "expectCount": 5,
+      "actualCount": 0,
+      "undocumentLines": [
+        2,
+        3,
+        4,
+        5,
+        7
       ]
     },
     "src/util/validateSchema.js": {
@@ -138,7 +209,7 @@
       ]
     },
     "src/webpack/config/createConfig.js": {
-      "expectCount": 12,
+      "expectCount": 19,
       "actualCount": 1,
       "undocumentLines": [
         1,
@@ -149,13 +220,20 @@
         6,
         7,
         8,
+        9,
         10,
-        11,
-        13
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20
       ]
     },
     "src/webpack/config/createConfigByRichmediarcList.js": {
-      "expectCount": 12,
+      "expectCount": 11,
       "actualCount": 2,
       "undocumentLines": [
         1,
@@ -165,20 +243,43 @@
         6,
         7,
         8,
-        10,
-        12,
-        15
+        9,
+        11
       ]
     },
-    "src/webpack/loader/RichmediaRCLoader.js": {
-      "expectCount": 3,
+    "src/webpack/devServer.js": {
+      "expectCount": 16,
       "actualCount": 1,
       "undocumentLines": [
         1,
-        2
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        15,
+        16
       ]
     },
-    "src/webpack/plugin/MonetJSONPlugin.js": {
+    "src/webpack/loader/RichmediaRCLoader.js": {
+      "expectCount": 6,
+      "actualCount": 1,
+      "undocumentLines": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "src/webpack/plugin/RichmediaRCPlugin.js": {
       "expectCount": 11,
       "actualCount": 0,
       "undocumentLines": [
