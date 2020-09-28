@@ -14,7 +14,7 @@ yarn add @mediamonks/richmedia-temple-server
 npm i -S @mediamonks/richmedia-temple-server
 ```
 
-## Basic Usage
+## Basic Usasage
 
 ```js
 // for building

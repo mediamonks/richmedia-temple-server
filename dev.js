@@ -2,6 +2,7 @@
 
 const dev = require('./src/dev');
 const program = require('commander');
+const chalk = require('chalk');
 const packageJson = require('./package.json');
 
 program
@@ -15,4 +16,4 @@ dev({
   glob: program.glob,
   stats: program.stats,
   choices: program.choices ? JSON.parse(program.choices) : null,
-}).then(r => console.log('done'));
+}).then(r => console.log(`${chalk.green('✔')} done `));

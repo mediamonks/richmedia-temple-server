@@ -181,6 +181,6 @@ module.exports = async function build({
 		return fs.outputFile('./build/index.html', template(templateConfig));
 	})
 	.then(() => {
-		return glob(`${buildTarget}/**/*`);
+		return globPromise(`${buildTarget}/**/*`);
 	});
 };
