@@ -122,22 +122,6 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 			selector: '.banner',
     };
 
-    if (
-      result &&
-      result.data &&
-      result.data.settings &&
-      result.data.settings.size &&
-      result.data.settings.size.width &&
-      result.data.settings.size.height
-    ) {
-      data.clip = {
-        x: 0,
-        y: 0,
-        width: result.data.settings.size.width,
-        height: result.data.settings.size.height,
-      };
-    }
-
     screenshot
       .fromUrl(data)
       .then(() => readFile(location))
