@@ -19,7 +19,7 @@ const getNameFromLocation = require('../util/getNameFromLocation');
  *
  * @param {Array<{webpack: *, settings: {location, data}}>} configs
  */
-module.exports = async function devServer(configs) {
+module.exports = async function devServer(configs, openLocation = true) {
   const webpackConfigList = configs.map(({ webpack }) => webpack);
   const settingsList = configs.map(({ settings }) => settings);
   const port = await portfinder.getPortPromise();
@@ -27,8 +27,10 @@ module.exports = async function devServer(configs) {
 
   const httpLocation = `http://localhost:${port}`;
 
-  // opener
-  opener(httpLocation);
+  if(openLocation){
+    // opener
+    opener(httpLocation);
+  }
 
   console.log(`${chalk.blue('i')} Server running. Please go to ${httpLocation}
 ${chalk.grey.bold('-------------------------------------------------------')}

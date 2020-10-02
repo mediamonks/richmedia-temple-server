@@ -63,6 +63,12 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
             return true;
           },
         },
+        {
+          type: 'confirm',
+          name: 'openLocation',
+          message: 'Do you want a browser to open to your dev location?',
+          default: true,
+        }
       ]);
     }
 
@@ -97,5 +103,5 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
     }
   });
 
-  await devServer(list);
+  await devServer(list, choices.openLocation);
 };
