@@ -141,8 +141,11 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: loader => {
-                  const cssVariables = flattenObjectToCSSVars(richmediarc);
+                plugins: function(loader){
+                  loader.addDependency(filepathRichmediaRC);
+
+                  const data = JSON.parse(fs.readFileSync(filepathRichmediaRC, 'utf-8'));
+                  const cssVariables = flattenObjectToCSSVars(data);
                   Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
                     if (isFile(val) && !isExternalURL(val)) {
@@ -163,9 +166,9 @@ module.exports = function createConfig({
                       browsers: ['defaults', 'ie 11'],
                     }),
                     require('postcss-nested')(),
-                    // require('postcss-media-variables')(),
                     require('cssnano')(),
                   ];
+
                 },
               },
             },
