@@ -18,6 +18,7 @@ const getNameFromLocation = require('../util/getNameFromLocation');
 /**
  *
  * @param {Array<{webpack: *, settings: {location, data}}>} configs
+ * @param {boolean} openLocation
  */
 module.exports = async function devServer(configs, openLocation = true) {
   const webpackConfigList = configs.map(({ webpack }) => webpack);
@@ -51,8 +52,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
     config.output = {
       ...config.output,
-      // "hotUpdateChunkFilename": ".hot/[id].[hash].hot-update.js",
-      // "hotUpdateMainFilename": ".hot/[hash].hot-update.json"
+      "hotUpdateChunkFilename": ".hot/.hot-update.js",
+      "hotUpdateMainFilename": ".hot/.hot-update.json"
     };
 
 

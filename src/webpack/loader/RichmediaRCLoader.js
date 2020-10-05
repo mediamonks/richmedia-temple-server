@@ -9,43 +9,47 @@ const fs = require('fs');
  * Can be used for any value, in an object or array.
  */
 module.exports = function RichmediaRCLoader(data) {
+  const callback = this.async();
   const options = loaderUtils.getOptions(this);
-
   const loaderContext = this;
 
-  if(options.config){
-    data = options.config;
-  }
+  this.addDependency(options.configFilepath);
 
-  data = typeof data === 'string' ? JSON.parse(data) : data;
+  fs.readFile(options.configFilepath, 'utf-8', function(err, data) {
+    if(err) return callback(err);
 
-  let ruuid = Date.now();
-  const replaceItems = [];
+    data = typeof data === 'string' ? JSON.parse(data) : data;
 
-  if (data && data.content) {
-    leafs(data.content, (value, obj, name) => {
-      if(isFile(value) && !isExternalURL(value)){
-        const id = `uuid_replace_${ruuid.toString(16)}`;
+    let ruuid = Date.now();
+    const replaceItems = [];
 
-        replaceItems.push({
-          key: loaderUtils.stringifyRequest(loaderContext, id),
-          value: `require(${loaderUtils.stringifyRequest(loaderContext, `${value}`)})`,
-        });
+    if (data && data.content) {
+      leafs(data.content, (value, obj, name) => {
+        if(isFile(value) && !isExternalURL(value)){
+          const id = `uuid_replace_${ruuid.toString(16)}`;
 
-        obj[name] = id;
-      }
-    });
-  }
+          replaceItems.push({
+            key: loaderUtils.stringifyRequest(loaderContext, id),
+            value: `require(${loaderUtils.stringifyRequest(loaderContext, `${value}`)})`,
+          });
+
+          this.addDependency(value);
+
+          obj[name] = id;
+        }
+      });
+    }
 
 
-  data = JSON.stringify(data)
-    .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029');
+    data = JSON.stringify(data)
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
 
-  data = replaceItems.reduce((prev, item) => {
-    prev = prev.replace(item.key, item.value);
-    return prev;
-  }, data);
+    data = replaceItems.reduce((prev, item) => {
+      prev = prev.replace(item.key, item.value);
+      return prev;
+    }, data);
 
-  return `module.exports = ${data};`;
+    callback(null, `module.exports = ${data};`)
+  });
 };

@@ -253,7 +253,7 @@ module.exports = function createConfig({
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {
-              config: JSON.stringify(richmediarc)
+              configFilepath: filepathRichmediaRC
             }
           },
         },
@@ -349,6 +349,7 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.DEVELOPMENT) {
+    config.watch = true;
     // config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
