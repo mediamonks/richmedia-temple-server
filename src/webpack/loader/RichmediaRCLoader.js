@@ -13,11 +13,24 @@ module.exports = function RichmediaRCLoader(data) {
   const options = loaderUtils.getOptions(this);
   const loaderContext = this;
 
-  this.addDependency(options.configFilepath);
+  const {configFilepath, config, isVirtual} = options;
 
-  fs.readFile(options.configFilepath, 'utf-8', function(err, data) {
-    if(err) return callback(err);
+  const prom = Promise.resolve(config)
 
+  if(!isVirtual){
+    this.addDependency(configFilepath);
+
+    prom.then(() => {
+      return new Promise((resolve, reject) => {
+        fs.readFile(configFilepath, 'utf-8', function(err, data) {
+          if(err) return reject(err);
+          resolve(data);
+        });
+      })
+    })
+  }
+
+  prom.then(data => {
     data = typeof data === 'string' ? JSON.parse(data) : data;
 
     let ruuid = Date.now();
@@ -51,5 +64,7 @@ module.exports = function RichmediaRCLoader(data) {
     }, data);
 
     callback(null, `module.exports = ${data};`)
-  });
+  })
+
+
 };

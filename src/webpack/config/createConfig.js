@@ -53,6 +53,11 @@ module.exports = function createConfig({
     devtool = 'inline-source-map';
   }
 
+  let isVirtual = true;
+  if(fs.existsSync(filepathRichmediaRC)){
+    isVirtual = false;
+  }
+
   let namedHashing = '_[sha512:hash:base64:7]';
   let imageNameHashing = namedHashing;
 
@@ -142,9 +147,14 @@ module.exports = function createConfig({
               options: {
                 ident: 'postcss',
                 plugins: function(loader){
-                  loader.addDependency(filepathRichmediaRC);
+                  let data;
+                  if(isVirtual === false){
+                    loader.addDependency(filepathRichmediaRC);
+                    data = JSON.parse(fs.readFileSync(filepathRichmediaRC, 'utf-8'));
+                  } else {
+                    data = richmediarc
+                  }
 
-                  const data = JSON.parse(fs.readFileSync(filepathRichmediaRC, 'utf-8'));
                   const cssVariables = flattenObjectToCSSVars(data);
                   Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
@@ -256,7 +266,9 @@ module.exports = function createConfig({
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {
-              configFilepath: filepathRichmediaRC
+              configFilepath: filepathRichmediaRC,
+              config: richmediarc,
+              isVirtual
             }
           },
         },
