@@ -12,6 +12,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const DevEnum = require('../../data/DevEnum');
 const isFile = require('../../util/isFile');
 const isExternalURL = require('../../util/isExternalURL');
+const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 const VirtualModulesPlugin = require("webpack-virtual-modules");
@@ -149,8 +150,9 @@ module.exports = function createConfig({
                 plugins: function(loader){
                   let data;
                   if(isVirtual === false){
-                    loader.addDependency(filepathRichmediaRC);
-                    data = JSON.parse(fs.readFileSync(filepathRichmediaRC, 'utf-8'));
+                    data = getRichmediaRCSync(filepathRichmediaRC, filePath => {
+                      loader.addDependency(filePath);
+                    });
                   } else {
                     data = richmediarc
                   }
