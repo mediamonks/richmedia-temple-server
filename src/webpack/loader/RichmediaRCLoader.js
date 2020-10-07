@@ -1,5 +1,6 @@
 const loaderUtils = require('loader-utils');
 const isExternalURL = require('../../util/isExternalURL');
+const getRichmediaRC = require('../../util/getRichmediaRC');
 const leafs = require("../../util/leafs");
 const isFile = require("../../util/isFile");
 const fs = require('fs');
@@ -18,20 +19,16 @@ module.exports = function RichmediaRCLoader(data) {
   const prom = Promise.resolve(config)
 
   if(!isVirtual){
-    this.addDependency(configFilepath);
-
     prom.then(() => {
-      return new Promise((resolve, reject) => {
-        fs.readFile(configFilepath, 'utf-8', function(err, data) {
-          if(err) return reject(err);
-          resolve(data);
-        });
+      return getRichmediaRC(configFilepath, filepath => {
+        this.addDependency(filepath);
       })
     })
   }
 
   prom.then(data => {
     data = typeof data === 'string' ? JSON.parse(data) : data;
+    data = JSON.parse(JSON.stringify(data));
 
     let ruuid = Date.now();
     const replaceItems = [];
