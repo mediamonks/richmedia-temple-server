@@ -21,6 +21,7 @@ module.exports = async function saveChoicesInPackageJson(type, {
   let result = await prompt({
     type: 'confirm',
     name: 'saveSettings',
+    default: false,
     message: `save this as a separate command in package.json`,
   });
 

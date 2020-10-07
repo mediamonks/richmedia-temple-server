@@ -41,7 +41,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
           name: 'location',
           message: 'Please select config(s) build:',
           choices: [
-            {name: 'all', checked: false},
+            {name: 'all', checked: true},
             ...configs.map(config => {
 
               let name = config.location;
