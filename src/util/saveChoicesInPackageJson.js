@@ -53,7 +53,7 @@ No special chars, spaces, dashes just a single word.`,
 
     const command = [`rds-${type}`];
     command.push(`--glob '${glob}'`);
-    command.push(`--choices '${JSON.stringify(choices)}'`);
+    command.push(`--choices '${JSON.stringify(JSON.stringify(choices))}'`);
 
     if(stats){
       command.push(`--stats`)

@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 const build = require('./src/build');
+const jsonParseDeep = require('./src/util/jsonParseDeep');
 const program = require('commander');
 const packageJson = require('./package');
 const chalk = require('chalk');
@@ -15,5 +16,5 @@ program
 build({
   glob: program.glob,
   stats: program.stats,
-  choices: program.choices ? JSON.parse(program.choices) : null,
+  choices: program.choices ? jsonParseDeep(program.choices) : null,
 }).then(r => console.log('done'));

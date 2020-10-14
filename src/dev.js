@@ -9,6 +9,7 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 
 module.exports = async function dev({ glob = './**/.richmediarc*', choices = null, stats = null }) {
+
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
@@ -41,7 +42,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
           name: 'location',
           message: 'Please select config(s) build:',
           choices: [
-            {name: 'all', checked: true},
+            {name: 'all', checked: false},
             ...configs.map(config => {
 
               let name = config.location;

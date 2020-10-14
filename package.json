@@ -9,7 +9,9 @@
     "lint": "npm-run-all lint:*",
     "lint:js": "eslint src --ext .js --cache",
     "prettify": "prettier --write \"src/**/*.{js,json}\"",
-    "test": "mocha"
+    "test": "mocha",
+    "build:all": "rds-build --glob './**/.richmediarc*' --choices '\"{\\\"build\\\":[\\\"all\\\"]}\"'",
+    "build:all2": "rds-build --glob './**/.richmediarc*' --choices '\"{\\\"emptyBuildDir\\\":true,\\\"build\\\":[\\\"./preview/300x250/.richmediarc.en\\\",\\\"./preview/300x250/.richmediarc.nl\\\",\\\"./preview/300x250/.richmediarc.es\\\",\\\"./preview/300x250/.richmediarc.de\\\",\\\"./preview/300x250/.richmediarc.car\\\"]}\"'"
   },
   "bin": {
     "rds-dev": "dev.js",
