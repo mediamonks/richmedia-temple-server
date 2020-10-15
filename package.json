@@ -10,8 +10,7 @@
     "lint:js": "eslint src --ext .js --cache",
     "prettify": "prettier --write \"src/**/*.{js,json}\"",
     "test": "mocha",
-    "build:all": "rds-build --glob './**/.richmediarc*' --choices '\"{\\\"build\\\":[\\\"all\\\"]}\"'",
-    "build:all2": "rds-build --glob './**/.richmediarc*' --choices '\"{\\\"emptyBuildDir\\\":true,\\\"build\\\":[\\\"./preview/300x250/.richmediarc.en\\\",\\\"./preview/300x250/.richmediarc.nl\\\",\\\"./preview/300x250/.richmediarc.es\\\",\\\"./preview/300x250/.richmediarc.de\\\",\\\"./preview/300x250/.richmediarc.car\\\"]}\"'"
+    "build:all_all": "rds-build --glob './**/.richmediarc*' --choices 'eyJlbXB0eUJ1aWxkRGlyIjp0cnVlLCJidWlsZCI6WyIuL3ByZXZpZXcvMzAweDI1MC8ucmljaG1lZGlhcmMuZW4iLCIuL3ByZXZpZXcvMzAweDI1MC8ucmljaG1lZGlhcmMubmwiLCIuL3ByZXZpZXcvMzAweDI1MC8ucmljaG1lZGlhcmMuZXMiLCIuL3ByZXZpZXcvMzAweDI1MC8ucmljaG1lZGlhcmMuZGUiLCIuL3ByZXZpZXcvMzAweDI1MC8ucmljaG1lZGlhcmMuY2FyIl19'"
   },
   "bin": {
     "rds-dev": "dev.js",

@@ -5,6 +5,7 @@ const jsonParseDeep = require('./src/util/jsonParseDeep');
 const program = require('commander');
 const chalk = require('chalk');
 const packageJson = require('./package.json');
+const base64 = require("./src/util/base64");
 
 program
   .version(packageJson.version)
@@ -16,5 +17,5 @@ program
 dev({
   glob: program.glob,
   stats: program.stats,
-  choices: program.choices ? JSON.parse(program.choices) : null,
+  choices: program.choices ? JSON.parse(base64.decode(program.choices)) : null,
 }).then(r => console.log(`${chalk.green('✔')} done`));

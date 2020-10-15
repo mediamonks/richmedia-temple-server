@@ -3,6 +3,7 @@ const { prompt } = require('inquirer');
 const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
+const base64 = require('./base64');
 
 module.exports = async function saveChoicesInPackageJson(type, {
   glob,
@@ -53,7 +54,7 @@ No special chars, spaces, dashes just a single word.`,
 
     const command = [`rds-${type}`];
     command.push(`--glob '${glob}'`);
-    command.push(`--choices '${JSON.stringify(choices)}'`);
+    command.push(`--choices '${base64.encode(JSON.stringify(choices))}'`);
 
     if(stats){
       command.push(`--stats`)
