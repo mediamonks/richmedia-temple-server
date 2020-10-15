@@ -53,8 +53,8 @@ No special chars, spaces, dashes just a single word.`,
     },);
 
     const command = [`rds-${type}`];
-    command.push(`--glob '${glob}'`);
-    command.push(`--choices '${base64.encode(JSON.stringify(choices))}'`);
+    command.push(`--glob ${glob}`);
+    command.push(`--choices ${base64.encode(JSON.stringify(choices))}`);
 
     if(stats){
       command.push(`--stats`)
