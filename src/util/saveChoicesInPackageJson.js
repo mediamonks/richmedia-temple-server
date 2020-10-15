@@ -37,7 +37,7 @@ module.exports = async function saveChoicesInPackageJson(type, {
 No special chars, spaces, dashes just a single word.`,
       validate: function (value) {
         var pass = value.match(
-          /^[a-zA-Z\d]+$/g
+          /^[a-zA-Z\d_]+$/g
         );
         if (pass) {
           if(scripts[`${type}:${value}`]){
@@ -53,7 +53,7 @@ No special chars, spaces, dashes just a single word.`,
 
     const command = [`rds-${type}`];
     command.push(`--glob '${glob}'`);
-    command.push(`--choices '${JSON.stringify(JSON.stringify(choices))}'`);
+    command.push(`--choices '${JSON.stringify(choices)}'`);
 
     if(stats){
       command.push(`--stats`)

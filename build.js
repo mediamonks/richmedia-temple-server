@@ -16,5 +16,5 @@ program
 build({
   glob: program.glob,
   stats: program.stats,
-  choices: program.choices ? jsonParseDeep(program.choices) : null,
+  choices: program.choices ? JSON.parse(program.choices) : null,
 }).then(r => console.log('done'));
