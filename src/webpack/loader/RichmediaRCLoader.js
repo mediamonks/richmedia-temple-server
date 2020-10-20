@@ -16,10 +16,10 @@ module.exports = function RichmediaRCLoader(data) {
 
   const {configFilepath, config, isVirtual} = options;
 
-  const prom = Promise.resolve(config)
+  let prom = Promise.resolve(config)
 
   if(!isVirtual){
-    prom.then(() => {
+    prom = prom.then(() => {
       return getRichmediaRC(configFilepath, filepath => {
         this.addDependency(filepath);
       })
