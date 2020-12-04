@@ -1,3 +1,7 @@
 ## Welcome to the temple server
 
-For documentation do to docs.md
+First lets setup everything, for that please go to the [documentation](https://mediamonks.github.io/generator-richmedia-temple/) from the generator. [Here](https://mediamonks.github.io/generator-richmedia-temple/)
+
+Then follow the [documentation here](./docs.md)
+
+ - [Documentation](./docs.md)
