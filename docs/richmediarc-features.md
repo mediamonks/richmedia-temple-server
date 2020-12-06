@@ -135,11 +135,19 @@ You are able to link to a google spreadsheet so you can build multiple units wit
       "width": 300, // required: width of richmedia unit
       "height": 600 // required: height of richmedia unit
     },
-    ""
+    "contentSource":{
+      "url":"https://docs.google.com/spreadsheets/d/1cWkhMxC01WVFqWR616DyN7OPvtatD-ivguK9OSs_msg/edit?usp=sharing",
+      "apiKey": "API_KEY_PLACEHOLDER"
+    }
   },
   "content": {
+    "copy1": "This is the first copy",
+    "copy2": "This is the second copy",
     "bgcolor": "#FF0000", 
     "logo": "./img/logo.png"
   }
 }
 ```
+
+When you replaced API_KEY_PLACEHOLDER with your own api key https://developers.google.com/sheets/api/guides/authorizing#APIKey
+
