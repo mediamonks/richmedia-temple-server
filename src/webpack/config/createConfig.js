@@ -16,6 +16,7 @@ const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 const VirtualModulesPlugin = require("webpack-virtual-modules");
+const WebpackConditionalLoader = require("webpack-conditional-loader");
 const loaderUtils = require("loader-utils");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
@@ -240,7 +241,7 @@ module.exports = function createConfig({
           test: /\.js$/,
           // adding exception to libraries coming from @mediamonks namespace.
           exclude: /(?!(node_modules\/@mediamonks)|(node_modules\\@mediamonks))node_modules/,
-          use: {
+          use: [{
             loader: 'babel-loader',
             options: {
               presets: [
@@ -261,7 +262,7 @@ module.exports = function createConfig({
                 `@babel/plugin-transform-async-to-generator`,
               ],
             },
-          },
+          }, 'webpack-conditional-loader'],
         },
         {
           test: /richmediaconfig/,

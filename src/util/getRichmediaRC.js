@@ -3,6 +3,8 @@
 /* eslint no-loop-func: 0 */
 /* eslint no-shadow: 0 */
 
+import getValue from "./getValue";
+
 const fs = require('fs-extra');
 const path = require('path');
 const deepmerge = require('deepmerge');
@@ -44,6 +46,18 @@ module.exports = async function getRichmediaRC(
   if(parent){
     richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc)
     delete richmediarc.parent;
+  }
+
+  if(richmediarc.module && richmediarc.module.google_font){
+    const obj = richmediarc.module.google_font;
+
+    Object.keys(obj).forEach(font => {
+      const chars = [];
+      font.char_location.forEach(loc => {
+        getValue(richmediarc, loc)
+      })
+      font.url += `&text=${chars}`;
+    })
   }
 
   return richmediarc;

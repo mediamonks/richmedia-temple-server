@@ -1,3 +1,10 @@
+/**
+ *
+ * @param obj
+ * @param fn
+ * @param maxNesting
+ * @param path
+ */
 function leafs(obj, fn, maxNesting = 10, path = []) {
   if(maxNesting < 0){
     return;
