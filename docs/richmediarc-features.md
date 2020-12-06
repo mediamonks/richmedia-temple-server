@@ -4,11 +4,11 @@ So .richmediarc has a few features that are quite handy.
 
 So lets list them all
 
- - file paths are always relative.
- - content node. Everything in this node will be added and parsed by webpack.
- - css vars. Everything you put in the `.richmediarc` is accessible in css.
- - inheritance. `.richmediarc` can inherit from other .richmediarc files.
- - feeds
+ - [file paths are always relative](#file-paths-are-always-relative).
+ - [content node](content-node). Everything in this node will be added and parsed by webpack.
+ - [css vars](#css-vars). Everything you put in the `.richmediarc` is accessible in css.
+ - [inheritance](#inheritance). `.richmediarc` can inherit from other .richmediarc files.
+ - [feeds](#feeds)
 
 ## file paths are always relative.
 File paths defined in the .richmediarc are ALWAYS relative to the .richmediarc it self.
