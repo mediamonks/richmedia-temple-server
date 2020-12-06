@@ -2,6 +2,7 @@
 
 First lets setup everything, for that please go to the [documentation](https://mediamonks.github.io/generator-richmedia-temple/) from the generator. [Here](https://mediamonks.github.io/generator-richmedia-temple/)
 
-Then follow the [documentation here](./docs.md)
+Then follow documentation down here.
 
- - [Documentation](./docs.md)
+ - [Getting Started](./docs/getting-started.md)
+ - [.richmediarc features](./docs/richmediarc-features.md)
