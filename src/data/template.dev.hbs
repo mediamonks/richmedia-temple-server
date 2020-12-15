@@ -142,6 +142,83 @@
       text-transform: none;
     }
 
+		/* Toggle CSS */
+		.layout-toggle {
+			width: 80px;
+			height: 40px;
+			border: 1px solid #bcaaa4;
+			border-radius: 5px;
+			margin-left: 20px;
+			display: flex;
+		}
+	
+		.layout-toggle-button {
+			width: 50%;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			padding: 6px;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-content: center;
+			background-color: #000;
+
+			transition: background-color 0.7s;
+			transition-delay: 0s;
+			transition-timing-function: ease-in;
+		}
+
+		.layout-toggle-button.active {
+			background-color: #FFF;
+		}
+
+		.layout-toggle-button:focus {
+			outline: none;
+		}
+
+		.layout-toggle-button.left {
+			flex-direction: column;
+		}
+
+		.layout-toggle-button.right {
+			flex-direction: row;
+		}
+		.toggle-icon-wrapper {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.toggle-icon-wrapper.column {
+			flex-direction: column;
+		}
+
+		.layout-toggle-button .toggle-icon {
+			background-color: #FFF;
+			transition: background-color 0.7s;
+			transition-delay: 0.2s;
+			transition-timing-function: ease-in;
+		}
+
+		.layout-toggle-button.active .toggle-icon {
+			background-color: #000;
+		}
+
+		.layout-toggle-button .toggle-icon.line {
+			width: 15px;
+			height: 4px;
+			border-radius: 2px;
+			margin: 1px;
+		}
+
+		.layout-toggle-button .toggle-icon.square {
+			width: 10px;
+			height: 10px;
+			border-radius: 2px;
+			margin: 1px;
+		}
+
   </style>
 
 <body>
@@ -154,6 +231,28 @@
       <span class="mdl-layout-title">
         Preview
       </span>
+
+			<!-- Layout Toggle -->
+			<div class="layout-toggle" onclick="toggleLayout()">
+				<button class="layout-toggle-button left" >
+					<div class='toggle-icon-wrapper column'>
+						<div class="toggle-icon square"></div>
+						<div class="toggle-icon square"></div>
+					</div>
+					<div class='toggle-icon-wrapper column'>
+						<div class="toggle-icon line"></div>
+						<div class="toggle-icon line"></div>
+						<div class="toggle-icon line"></div>
+						<div class="toggle-icon line"></div>
+					</div>
+				</button>
+				<button class="layout-toggle-button right active">
+					<div class="toggle-icon square"></div>
+					<div class="toggle-icon square"></div>
+					<div class="toggle-icon square"></div>
+					<div class="toggle-icon square"></div>
+				</button>
+			</div>
 
 			<!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
@@ -332,6 +431,14 @@
 
 		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
 		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+	}
+
+	function toggleLayout() {
+		const domElem = event.currentTarget;
+		const buttonList = domElem.querySelectorAll('button');
+		buttonList.forEach( (button) => {
+			button.classList.toggle('active')
+		})
 	}
 
 </script>
