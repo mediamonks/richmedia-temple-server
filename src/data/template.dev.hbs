@@ -33,6 +33,19 @@
   </style>
 
   <style>
+		/* CSS ANIMATION*/
+		@keyframes fadeIn {
+			from {opacity: 0;}
+			to {opacity: 1;}
+		}
+
+		@keyframes slideUp {
+			from {transform: translateY(40px);}
+			to {transform: translateY(0px);}
+		}
+
+		/* GENERAL STYLING */
+
     body {
       margin: 0;
       font-family: Roboto;
@@ -197,8 +210,7 @@
 		.layout-toggle-button .toggle-icon {
 			background-color: #FFF;
 			transition: background-color 0.7s;
-			transition-delay: 0.2s;
-			transition-timing-function: ease-in;
+			transition-timing-function: ease-out;
 		}
 
 		.layout-toggle-button.active .toggle-icon {
@@ -217,6 +229,75 @@
 			height: 10px;
 			border-radius: 2px;
 			margin: 1px;
+		}
+
+		.banner-info {
+			display: none;
+			font-family: "Roboto","Helvetica","Arial",sans-serif;
+			font-size: 14px;
+			padding: 6px;
+		}
+
+		.bold {
+			font-weight: bold;
+		}
+
+		/* LIST VIEW STYLE */
+
+		.list-view .card {
+			width: 100% !important;
+			margin: 0;
+			padding: 60px 10%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.list-view .mdl-card__media {
+			box-shadow: 0px 0px 11px 3px rgba(0, 0, 0, 0.44);
+			animation-name: fadeIn, slideUp;
+  		animation-duration: 0.5s;
+		}
+
+		.list-view  .mdl-card__actions {
+			width: auto;
+			border: 0;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.list-view  .mdl-card:hover {
+			background-color: #eee;
+		}
+
+		.list-view  .mdl-card__actions  > * {
+			animation-name: fadeIn, slideUp;
+  		animation-duration: 0.5s;
+		}
+
+		.list-view  .mdl-card__actions  > *:nth-child(1) {
+			animation-delay: 0.0s;
+		}
+		.list-view  .mdl-card__actions  > *:nth-child(2) {
+			animation-delay: 0.05s;
+		}
+		.list-view  .mdl-card__actions  > *:nth-child(3) {
+			animation-delay: 0.1s;
+		}
+		.list-view  .mdl-card__actions  > *:nth-child(4) {
+			animation-delay: 0.15s;
+		}
+		.list-view  .mdl-card__actions  > *:nth-child(5) {
+			animation-delay: 0.20s;
+		}
+
+		.list-view .banner-name {
+			font-weight: bold;
+		}
+
+		.list-view .banner-info {
+			display: block;
 		}
 
   </style>
@@ -333,7 +414,16 @@
                 {{title}}
               </span>
               <i class="material-icons openNewWindow">open_in_new</i>
-            </a>            
+            </a>
+						<div class="banner-info">
+							<span class="bold">File Size:</span><span> 120 Kb</span>
+						</div>
+						<div class="banner-info">
+							<span class="bold">Display Size:</span><span> {{width}} x {{height}} px</span>
+						</div>
+						<div class="banner-info">
+							<span class="bold">Date Modified:</span><span> 03/11/2020</span>
+						</div>
           </div>
         </div>
       {{/each}}
@@ -438,7 +528,10 @@
 		const buttonList = domElem.querySelectorAll('button');
 		buttonList.forEach( (button) => {
 			button.classList.toggle('active')
-		})
+		});
+
+		document.querySelector('.page-content').classList.toggle('list-view');
+
 	}
 
 </script>
