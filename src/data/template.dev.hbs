@@ -58,6 +58,10 @@
 			padding-right: 40px;
 		}
 
+		.filter {
+			padding: 0px 20px;
+		}
+
 		.regular {
 			font-family: "Roboto","Helvetica","Arial",sans-serif;
 			font-size: 20px;
@@ -482,7 +486,14 @@
   }
 
 	removeDuplicateFromSelect(bannerSizeDropdown);
+	staggerCardAnimation();
+	populateFilterWrapper();
 
+	/* FUNCTIONS */
+
+	/*
+		Go through <select></select> dropdown and remove duplicate <option></options> values
+	*/
 	function removeDuplicateFromSelect(dropdown) {
 		[].slice.call(dropdown.options).map(function(option) {
     	if(this[option.value]) { 
@@ -493,7 +504,9 @@
   	},{});
 	}
 	
-  // Event Listener
+	/*
+		Event listener called when a filter value is changed
+	*/
 	function filterChangeHandler() {
 		document.querySelectorAll('.mdl-card').forEach((card) => {
 			
@@ -512,6 +525,9 @@
 		staggerCardAnimation();
 	}
 
+	/*
+		Return true if a card should be visible given the filter values
+	*/
 	function isCardVisible(card, dropdown) {
 		let attributeToTest = dropdown.getAttribute('data-card-attribute');
 		let cardAttribute = card.getAttribute(attributeToTest);
@@ -520,6 +536,9 @@
 		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
 	}
 
+	/*
+		Toggle between Massonry and List layout
+	*/
 	function toggleLayout() {
 		const domElem = event.currentTarget;
 		const buttonList = domElem.querySelectorAll('button');
@@ -532,6 +551,9 @@
 		staggerCardAnimation();
 	}
 
+	/*
+		Slide Up + Fade In animation for cards that are currently visible
+	*/
 	function staggerCardAnimation() {
 		if(this.staggerCardTL && this.staggerCardTL.progress() !== 1){
 			this.staggerCardTL.progress(1);
@@ -549,7 +571,82 @@
 		});
 	}
 
-	staggerCardAnimation();
+	function populateFilterWrapper() {
+		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
+		const filterWrapper =	document.querySelector('.filter-wrapper')
+		const filterArray = getFilterArrayFromBannerNames(bannerNames)	
+
+		filterArray.map( (filterValues, index) => {
+			let selectName = `filter_${index}`;
+
+			let label = document.createElement('LABEL');
+			label.htmlFor = selectName;
+			label.innerText = `${selectName} :`;
+
+			let select = document.createElement('SELECT');
+			select.name = selectName;
+			select.classList.add('filter', 'banner-size-dropdown')
+			select.addEventListener('change', selectChangeHandler);
+
+			let optionAll = document.createElement('OPTION');
+			optionAll.value = 'all';
+			optionAll.text = 'all';
+
+			select.appendChild(optionAll);
+
+			filterValues.map( value => {
+				let option = document.createElement('OPTION');
+				option.value = value;
+				option.text = value;
+
+				select.appendChild(option);
+			})
+
+			let div = document.createElement('DIV');
+			div.classList.add('filter');
+			div.appendChild(label);
+			div.appendChild(select);
+
+			filterWrapper.appendChild(div);
+		});
+	}
+
+	function selectChangeHandler() {
+		//TODO
+		console.log("TEST")
+	}
+
+	/*
+	  Create an array of array
+	  each element in the primary array represent a <select></select> DOM Element
+	  each element in the sub arrat represent a <option></option> DOM Element
+	*/
+	function getFilterArrayFromBannerNames(bannerNames) {
+		let filterArray = [];
+		let noDuplicatesFilterArray = [];
+		bannerNames.forEach( bannerName => {
+			const bannerNameSplitResult = bannerName.innerText.split('_');
+
+			bannerNameSplitResult.forEach( (splitElement,index) => {
+				if(!filterArray[index]) {
+					filterArray[index] = [];
+				}
+					
+				filterArray[index].push(splitElement);
+			})
+		})
+
+
+		filterArray.map( filterValues => {
+			const setFilterValue = new Set(filterValues);
+
+			if(setFilterValue.size > 1) {
+				noDuplicatesFilterArray.push([...setFilterValue]);
+			}
+		})
+
+		return noDuplicatesFilterArray;
+	}
 
 </script>
 
