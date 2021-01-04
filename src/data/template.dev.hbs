@@ -52,14 +52,16 @@
       min-width: 800px;
     }
 
-		.filter-wrapper {
+		.filter-container {
 			display: flex;
 			align-items: center;
 			padding-right: 40px;
 		}
 
 		.filter {
-			padding: 0px 20px;
+			margin: 0 30px 0 5px;
+			padding: 0 5px;
+			border-radius: 5px;
 		}
 
 		.regular {
@@ -68,6 +70,15 @@
 			line-height: 1;
 			letter-spacing: .02em;
 			font-weight: 400;
+		}
+
+		.filter-wrapper select, .filter-wrapper option {
+			font-family: "Roboto","Helvetica","Arial",sans-serif;
+			font-size: 18px;
+			line-height: 1;
+			letter-spacing: .02em;
+			font-weight: 400;
+			border-radius: 5px;
 		}
 
     .page-content {
@@ -338,14 +349,15 @@
       <div class="mdl-layout-spacer"></div>
 
 			<!-- Filter for banner size -->
-			<div class="filter-wrapper regular">
-				<label for="banner-size-dropdown">Banner size:</label>
+			<div class="filter-container regular">
+				<!-- TODO Remove this when done -->
+				<!-- <label for="banner-size-dropdown">Banner size:</label>
 				<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
 					<option value="all">all</option>
 					{{#each banner}}
 						<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
 					{{/each}}
-				</select>
+				</select> -->
 			</div>
 
       <!-- Navigation. We hide it in small screens. -->
@@ -439,7 +451,7 @@
   var elementsActionNewPage = document.querySelectorAll('.action-new-page');
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
-	var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
+	//var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
 	var filterDropdownArray = document.querySelectorAll('.filter');
 
   for (let index = 0; index < elementsActionRefresh.length; index++)
@@ -485,9 +497,9 @@
     })();
   }
 
-	removeDuplicateFromSelect(bannerSizeDropdown);
+	//removeDuplicateFromSelect(bannerSizeDropdown);
 	staggerCardAnimation();
-	populateFilterWrapper();
+	populateFilterContainer();
 
 	/* FUNCTIONS */
 
@@ -507,6 +519,7 @@
 	/*
 		Event listener called when a filter value is changed
 	*/
+	/*
 	function filterChangeHandler() {
 		document.querySelectorAll('.mdl-card').forEach((card) => {
 			
@@ -524,10 +537,12 @@
 
 		staggerCardAnimation();
 	}
+	*/
 
 	/*
 		Return true if a card should be visible given the filter values
 	*/
+	/*
 	function isCardVisible(card, dropdown) {
 		let attributeToTest = dropdown.getAttribute('data-card-attribute');
 		let cardAttribute = card.getAttribute(attributeToTest);
@@ -535,6 +550,7 @@
 		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
 		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
 	}
+	*/
 
 	/*
 		Toggle between Massonry and List layout
@@ -571,53 +587,73 @@
 		});
 	}
 
-	function populateFilterWrapper() {
+	/*
+		Create and Add to the DOM the select elements based on banner names
+	*/
+	function populateFilterContainer() {
 		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
-		const filterWrapper =	document.querySelector('.filter-wrapper')
-		const filterArray = getFilterArrayFromBannerNames(bannerNames)	
+		const filterContainer =	document.querySelector('.filter-container');
+		const filterArray = getFilterArrayFromBannerNames(bannerNames);
+		let count = 0;
 
 		filterArray.map( (filterValues, index) => {
-			let selectName = `filter_${index}`;
+			if(filterValues.length > 1) {
+				count++;
 
-			let label = document.createElement('LABEL');
-			label.htmlFor = selectName;
-			label.innerText = `${selectName} :`;
+				let selectName = `filter_${count}`;
 
-			let select = document.createElement('SELECT');
-			select.name = selectName;
-			select.classList.add('filter', 'banner-size-dropdown')
-			select.addEventListener('change', selectChangeHandler);
+				let label = document.createElement('LABEL');
+				label.htmlFor = selectName;
+				label.innerText = `Filter n°${count}:`;
 
-			let optionAll = document.createElement('OPTION');
-			optionAll.value = 'all';
-			optionAll.text = 'all';
+				let select = document.createElement('SELECT');
+				select.name = selectName;
+				select.classList.add('filter', 'banner-size-dropdown')
+				select.addEventListener('change', selectChangeHandler);
+				select.setAttribute('data-index-array', index);
 
-			select.appendChild(optionAll);
+				let optionAll = document.createElement('OPTION');
+				optionAll.value = 'All';
+				optionAll.text = 'All';
+				select.appendChild(optionAll);
 
-			filterValues.map( value => {
-				let option = document.createElement('OPTION');
-				option.value = value;
-				option.text = value;
+				filterValues.map( value => {
+					let option = document.createElement('OPTION');
+					option.value = value;
+					option.text = value;
+					select.appendChild(option);
+				})
 
-				select.appendChild(option);
-			})
-
-			let div = document.createElement('DIV');
-			div.classList.add('filter');
-			div.appendChild(label);
-			div.appendChild(select);
-
-			filterWrapper.appendChild(div);
+				let filterWrapper = document.createElement('DIV');
+				filterWrapper.classList.add('filter-wrapper');
+				filterWrapper.appendChild(label);
+				filterWrapper.appendChild(select);
+				filterContainer.appendChild(filterWrapper);
+			}
 		});
 	}
 
 	function selectChangeHandler() {
 		//TODO
-		console.log("TEST")
+		
+
+		const allFilters = Array.from(document.querySelectorAll('.filter'));
+		allFilters.forEach( filter => {
+			// test
+			console.log("TEST=",filter.value);
+		});
+
+		// Show only the cards that match the filters
+		// const allFilters = 
+		// allFilters.forEach(){
+		//   
+		// }
+		
+		
 	}
 
 	/*
-	  Create an array of array
+	  return an array of array
 	  each element in the primary array represent a <select></select> DOM Element
 	  each element in the sub arrat represent a <option></option> DOM Element
 	*/
@@ -636,13 +672,9 @@
 			})
 		})
 
-
 		filterArray.map( filterValues => {
 			const setFilterValue = new Set(filterValues);
-
-			if(setFilterValue.size > 1) {
-				noDuplicatesFilterArray.push([...setFilterValue]);
-			}
+			noDuplicatesFilterArray.push([...setFilterValue]);
 		})
 
 		return noDuplicatesFilterArray;
