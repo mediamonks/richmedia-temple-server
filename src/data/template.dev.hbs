@@ -515,42 +515,6 @@
     	} 
   	},{});
 	}
-	
-	/*
-		Event listener called when a filter value is changed
-	*/
-	/*
-	function filterChangeHandler() {
-		document.querySelectorAll('.mdl-card').forEach((card) => {
-			
-			let visible = true;
-
-			// loop through filters
-			filterDropdownArray.forEach((filter) => {
-				if(!isCardVisible(card,filter)) {
-					visible = false;
-				}
-			});
-
-			card.style.display = visible ? '' : 'none';
-		})
-
-		staggerCardAnimation();
-	}
-	*/
-
-	/*
-		Return true if a card should be visible given the filter values
-	*/
-	/*
-	function isCardVisible(card, dropdown) {
-		let attributeToTest = dropdown.getAttribute('data-card-attribute');
-		let cardAttribute = card.getAttribute(attributeToTest);
-
-		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
-		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
-	}
-	*/
 
 	/*
 		Toggle between Massonry and List layout
@@ -588,7 +552,7 @@
 	}
 
 	/*
-		Create and Add to the DOM the select elements based on banner names
+		Create and Add to the DOM select DOM elements based on banner names
 	*/
 	function populateFilterContainer() {
 		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
@@ -633,23 +597,29 @@
 		});
 	}
 
-	function selectChangeHandler() {
-		//TODO
-		
-
+	function selectChangeHandler() {		
 		const allFilters = Array.from(document.querySelectorAll('.filter'));
-		allFilters.forEach( filter => {
-			// test
-			console.log("TEST=",filter.value);
-		});
+		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
-		// Show only the cards that match the filters
-		// const allFilters = 
-		// allFilters.forEach(){
-		//   
-		// }
-		
-		
+		cards.forEach( card => {
+			let visible = true;
+
+			allFilters.forEach( filter => {
+				
+				const filterValue = filter.value.trim();
+
+				const indexInArray = filter.dataset.indexArray;
+				const bannerName = card.querySelector('.banner-name');
+				const bannerNameSplit = bannerName.innerText.split('_');
+				const valueToTest = bannerNameSplit[indexInArray].trim();
+
+				if(filterValue !== valueToTest && filterValue !== 'All') {
+					visible = false;
+				}
+			});
+
+			card.style.display = visible ? '' : 'none';
+		});
 	}
 
 	/*
@@ -679,6 +649,40 @@
 
 		return noDuplicatesFilterArray;
 	}
+
+	/*
+		Event listener called when a filter value is changed
+	*/
+//	function filterChangeHandler() {
+//		document.querySelectorAll('.mdl-card').forEach((card) => {
+//			
+//			let visible = true;
+//
+//			// loop through filters
+//			filterDropdownArray.forEach((filter) => {
+//				if(!isCardVisible(card,filter)) {
+//					visible = false;
+//				}
+//			});
+//
+//			card.style.display = visible ? '' : 'none';
+//		})
+//
+//		staggerCardAnimation();
+//	}
+
+	/*
+		Return true if a card should be visible given the filter values
+	*/
+	
+//	function isCardVisible(card, dropdown) {
+//		let attributeToTest = dropdown.getAttribute('data-card-attribute');
+//		let cardAttribute = card.getAttribute(attributeToTest);
+//
+//		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
+//		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+//	}
+	
 
 </script>
 
