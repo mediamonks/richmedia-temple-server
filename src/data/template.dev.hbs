@@ -349,16 +349,7 @@
       <div class="mdl-layout-spacer"></div>
 
 			<!-- Filter for banner size -->
-			<div class="filter-container regular">
-				<!-- TODO Remove this when done -->
-				<!-- <label for="banner-size-dropdown">Banner size:</label>
-				<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
-					<option value="all">all</option>
-					{{#each banner}}
-						<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
-					{{/each}}
-				</select> -->
-			</div>
+			<div class="filter-container regular"></div>
 
       <!-- Navigation. We hide it in small screens. -->
       <!--<nav class="mdl-navigation mdl-layout&#45;&#45;large-screen-only">-->
@@ -602,25 +593,30 @@
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
-			let visible = true;
-
-			allFilters.forEach( filter => {
-				
-				const filterValue = filter.value.trim();
-
-				const indexInArray = filter.dataset.indexArray;
-				const bannerName = card.querySelector('.banner-name');
-				const bannerNameSplit = bannerName.innerText.split('_');
-				const valueToTest = bannerNameSplit[indexInArray].trim();
-
-				if(filterValue !== valueToTest && filterValue !== 'All') {
-					visible = false;
-				}
-			});
-
-			card.style.display = visible ? '' : 'none';
+			card.style.display = isCardVisible(card) ? '' : 'none';
 		});
 	}
+
+	function isCardVisible(card) {
+		const allFilters = Array.from(document.querySelectorAll('.filter'));
+		let visible = true;
+
+		allFilters.forEach( filter => {			
+			const filterValue = filter.value.trim();
+
+			const indexInArray = filter.dataset.indexArray;
+			const bannerName = card.querySelector('.banner-name');
+			const bannerNameSplit = bannerName.innerText.split('_');
+			const valueToTest = bannerNameSplit[indexInArray].trim();
+
+			if(filterValue !== valueToTest && filterValue !== 'All') {
+				visible = false;
+			}
+		});
+
+		return visible;
+	}
+
 
 	/*
 	  return an array of array
@@ -649,40 +645,6 @@
 
 		return noDuplicatesFilterArray;
 	}
-
-	/*
-		Event listener called when a filter value is changed
-	*/
-//	function filterChangeHandler() {
-//		document.querySelectorAll('.mdl-card').forEach((card) => {
-//			
-//			let visible = true;
-//
-//			// loop through filters
-//			filterDropdownArray.forEach((filter) => {
-//				if(!isCardVisible(card,filter)) {
-//					visible = false;
-//				}
-//			});
-//
-//			card.style.display = visible ? '' : 'none';
-//		})
-//
-//		staggerCardAnimation();
-//	}
-
-	/*
-		Return true if a card should be visible given the filter values
-	*/
-	
-//	function isCardVisible(card, dropdown) {
-//		let attributeToTest = dropdown.getAttribute('data-card-attribute');
-//		let cardAttribute = card.getAttribute(attributeToTest);
-//
-//		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
-//		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
-//	}
-	
 
 </script>
 
