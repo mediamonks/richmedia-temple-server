@@ -147,6 +147,8 @@ You are able to link to a google spreadsheet so you can build multiple units wit
 }
 ```
 
-When you replaced API_KEY_PLACEHOLDER with your own api key https://developers.google.com/sheets/api/guides/authorizing#APIKey
+When you replaced API_KEY_PLACEHOLDER with your own api key <br><br> https://developers.google.com/sheets/api/guides/authorizing#APIKey
+
+<br>
 
 [Go back](./richmediarc.md/#richmediarc)
