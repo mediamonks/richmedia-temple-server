@@ -446,7 +446,6 @@
   var elementsActionNewPage = document.querySelectorAll('.action-new-page');
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
-	//var bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
 	var filterDropdownArray = document.querySelectorAll('.filter');
 
   for (let index = 0; index < elementsActionRefresh.length; index++)
@@ -492,24 +491,11 @@
     })();
   }
 
-	//removeDuplicateFromSelect(bannerSizeDropdown);
+	/* Init functions */
 	staggerCardAnimation();
 	populateFilterContainer();
 
 	/* FUNCTIONS */
-
-	/*
-		Go through <select></select> dropdown and remove duplicate <option></options> values
-	*/
-	function removeDuplicateFromSelect(dropdown) {
-		[].slice.call(dropdown.options).map(function(option) {
-    	if(this[option.value]) { 
-      	dropdown.removeChild(option); 
-    	} else { 
-      	this[option.value]=1; 
-    	} 
-  	},{});
-	}
 
 	/*
 		Toggle between Massonry and List layout
@@ -547,7 +533,7 @@
 	}
 
 	/*
-		Create and Add to the DOM select DOM elements based on banner names
+		Create and add to the DOM <select></select> DOM elements based on banner names
 	*/
 	function populateFilterContainer() {
 		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
@@ -578,8 +564,8 @@
 
 				filterValues.map( value => {
 					let option = document.createElement('OPTION');
-					option.value = value;
-					option.text = value;
+					option.value = value.trim();
+					option.text = value.trim();
 					select.appendChild(option);
 				})
 
@@ -588,25 +574,60 @@
 				filterWrapper.appendChild(label);
 				filterWrapper.appendChild(select);
 				filterContainer.appendChild(filterWrapper);
+
+				const params = new URLSearchParams(location.search);
+
+				/* if getParameter exist with this filter name then load the value and apply it to the filter */
+				const valueGetParam = params.get(selectName);
+				if(valueGetParam) {
+					selectItemByValue(select, valueGetParam);
+					changeCardVisibility(select);
+				}
 			}
 		});
 	}
 
+	/*
+		Change the selected item of a <select></select> based on the value passed as parameter
+	*/
+	function selectItemByValue(elmnt, value){
+
+    for(var i=0; i < elmnt.options.length; i++)
+    {
+      if(elmnt.options[i].value == value)
+        elmnt.selectedIndex = i;
+    }
+  }
+
+	/*
+		Select event listener
+	*/
 	function selectChangeHandler() {		
-		const allFilters = Array.from(document.querySelectorAll('.filter'));
+		const select = event.currentTarget;
+		changeCardVisibility(select);
+	}
+
+	function changeCardVisibility(select){
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
 			card.style.display = isCardVisible(card) ? '' : 'none';
 		});
+
+		const params = new URLSearchParams(location.search);
+		params.set(select.name, select.value);
+		window.history.replaceState({}, '', `${location.pathname}?${params}`);
 	}
 
+	/*
+		Return true if a card should be visible given the current values for each filter
+	*/
 	function isCardVisible(card) {
 		const allFilters = Array.from(document.querySelectorAll('.filter'));
 		let visible = true;
 
 		allFilters.forEach( filter => {			
-			const filterValue = filter.value.trim();
+			const filterValue = filter.value;
 
 			const indexInArray = filter.dataset.indexArray;
 			const bannerName = card.querySelector('.banner-name');
@@ -620,7 +641,6 @@
 
 		return visible;
 	}
-
 
 	/*
 	  return an array of array
