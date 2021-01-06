@@ -5,6 +5,8 @@ First lets setup everything, for that please go to the [documentation](https://m
 Then follow documentation down here.
 
  - [Getting Started](./docs/getting-started.md)
+ - [Creating a new project](./docs/creating-a-project.md) 
+ - [.richmediarc](./docs/richmediarc.md)  
  - [.richmediarc features](./docs/richmediarc-features.md)
 
 ### What is the richmedia temple server?
