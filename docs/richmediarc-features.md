@@ -1,8 +1,6 @@
 # .richmediarc features.
 
-So .richmediarc has a few features that are quite handy.
-
-So lets list them all
+Below is a list of features found as part of the [.richmediarc](./richmediarc.md) format
 
  - [file paths are always relative](#file-paths-are-always-relative).
  - [content node](content-node). Everything in this node will be added and parsed by webpack.
@@ -151,3 +149,4 @@ You are able to link to a google spreadsheet so you can build multiple units wit
 
 When you replaced API_KEY_PLACEHOLDER with your own api key https://developers.google.com/sheets/api/guides/authorizing#APIKey
 
+[Go back](./richmediarc.md/#richmediarc)
