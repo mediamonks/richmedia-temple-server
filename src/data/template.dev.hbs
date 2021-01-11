@@ -53,10 +53,23 @@
       min-width: 800px;
     }
 
+		.add-filter-button {
+			margin: 0 20px;
+			width: 40px;
+			min-width: 40px;
+			height: 40px;
+			background-color: rgba(255,255,255,0.7);
+		}
+
+		.mdl-button:hover {
+			background-color: rgba(158,158,158,.5);
+		}
+
 		.filter-container {
 			display: flex;
 			align-items: center;
 			padding-right: 40px;
+			flex-direction: row-reverse;
 		}
 
 		.filter {
@@ -213,6 +226,7 @@
 		.layout-toggle-button.right {
 			flex-direction: row;
 		}
+
 		.toggle-icon-wrapper {
 			display: flex;
 			align-items: center;
@@ -341,8 +355,23 @@
 			<!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
 
+			<!-- FAB button with ripple -->
+			<button class="add-filter-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" onclick="addFilterClickHandler()">
+				<i class="material-icons">add</i>
+			</button>
+
 			<!-- Filter for banner size -->
-			<div class="filter-container regular"></div>
+			<div class="filter-container regular">
+				<div class="filter-wrapper">
+					<label for="banner-size-dropdown">Banner size:</label>
+					<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
+						<option value="all">all</option>
+						{{#each banner}}
+							<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
+						{{/each}}
+					</select>
+				</div>
+			</div>
 
       <!-- Navigation. We hide it in small screens. -->
       <!--<nav class="mdl-navigation mdl-layout&#45;&#45;large-screen-only">-->
@@ -478,10 +507,34 @@
     })();
   }
 
-	populateFilterContainer();
+	//populateFilterContainer();
 	staggerCardAnimation();
 
+	// Todo filter-2
+	const bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
+	removeDuplicateFromSelect(bannerSizeDropdown);
+	loadGetParameter('banner-size-dropdown','banner-size-dropdown');
+	this.counter = 0;
+	
+
 	/* Logic */
+	function loadGetParameter(paramName,selectName) {
+		const valueGetParam = getParameterValue(paramName);
+		const select = document.getElementsByName(selectName)[0];
+		selectItemByValue(select, valueGetParam);
+		refreshCardsVisibility(select);
+	}
+
+	function removeDuplicateFromSelect(dropdown) {
+		[].slice.call(dropdown.options).map(function(option) {
+    	if(this[option.value]) { 
+      	dropdown.removeChild(option); 
+    	} else { 
+      	this[option.value]=1; 
+    	} 
+  	},{});
+	}
+
 	/*
 		Slide Up + Fade In animation for cards that are currently visible
 	*/
@@ -505,6 +558,7 @@
 	/*
 		Create and add to the DOM <select></select> DOM elements based on banner names
 	*/
+	/* TODO filter-old
 	function populateFilterContainer() {
 		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
 		const filterContainer =	document.querySelector('.filter-container');
@@ -554,6 +608,7 @@
 			}
 		});
 	}
+	*/
 
 	/*
 		Change the selected item of a <select></select> based on the value passed as parameter
@@ -570,7 +625,8 @@
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
-			card.style.display = isCardVisible(card) ? '' : 'none';
+			//card.style.display = isCardVisible(card) ? '' : 'none';
+			card.style.display = isCardVisible2(card,document .querySelector('.filter')) ? '' : 'none';
 		});
 
 		setParameterValue(select.name,select.value)
@@ -598,6 +654,7 @@
 	/*
 		Return true if a card should be visible given the current values for each filter
 	*/
+	/* TODO filter-old
 	function isCardVisible(card) {
 		const allFilters = Array.from(document.querySelectorAll('.filter'));
 		let visible = true;
@@ -617,12 +674,25 @@
 
 		return visible;
 	}
+	*/
+
+	/*
+		Return true if a card should be visible given the current values for each filter
+	*/
+	function isCardVisible2(card, dropdown) {
+		let attributeToTest = dropdown.getAttribute('data-card-attribute');
+		let cardAttribute = card.getAttribute(attributeToTest);
+
+		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
+		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+	}
 
 	/*
 	  return an array of array
 	  each element in the primary array represent a <select></select> DOM Element
 	  each element in the sub arrat represent a <option></option> DOM Element
 	*/
+	/* TODO filter-old
 	function getFilterArrayFromBannerNames(bannerNames) {
 		let filterArray = [];
 		let noDuplicatesFilterArray = [];
@@ -646,22 +716,65 @@
 
 		return noDuplicatesFilterArray;
 	}
+	*/
 
 	/* Event Listener*/
 
 	/*
 		Select event listener
 	*/
+	/* TODO filter-old
 	function selectChangeHandler() {		
 		const select = event.currentTarget;
 		refreshCardsVisibility(select);
 	}
+	*/
 
 	/*
 		List view / massonry button event listener
 	*/
 	function toggleClickHandler() {
 		toggleLayout();
+	}
+
+	/* 
+		Banner size filter handler
+	*/
+	function filterChangeHandler() {
+		refreshCardsVisibility(event.target);
+		staggerCardAnimation();
+	}
+
+	/* 
+		Button add filter
+	*/
+	function addFilterClickHandler() {
+		this.counter++;
+
+		let filterContainer = document.querySelector('.filter-container');
+		let selectName = `filter_${this.counter}`;
+
+		let label = document.createElement('LABEL');
+		label.htmlFor = selectName;
+		label.innerText = `Filter n°${this.counter}:`;
+
+		let select = document.createElement('SELECT');
+		select.name = selectName;
+		select.classList.add('filter', `filter-${this.counter}`);
+
+		let filterWrapper = document.createElement('DIV');
+		filterWrapper.classList.add('filter-wrapper');
+		filterWrapper.appendChild(label);
+		filterWrapper.appendChild(select);
+		filterContainer.appendChild(filterWrapper);
+
+		//TODO
+		// add a remove button for each filter
+		
+		//TODO
+		// Populate filter with values in the banner name
+		// ignore the value that was already picked before
+		// save the value picked in a var ?
 	}
 
 	/*
