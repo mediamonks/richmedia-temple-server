@@ -15,6 +15,10 @@ const readFile = util.promisify(fs.readFile);
 const getTemplate = require('../util/getDevTemplate');
 const getNameFromLocation = require('../util/getNameFromLocation');
 
+handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+	return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+});
+
 /**
  *
  * @param {Array<{webpack: *, settings: {location, data}}>} configs
@@ -101,7 +105,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           width,
 					height,
         };
-      }),
+			}),
+			query: req.query,
     };
 
     res.send(template(templateConfig));

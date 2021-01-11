@@ -7,6 +7,7 @@
 
   <title>Templates</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
 	<script>
 		/*!
 		* GSAP 3.5.1
@@ -42,11 +43,11 @@
   </style>
 
   <style>
-		/* GENERAL STYLING */
 
+		/* GENERAL STYLING */
     body {
       margin: 0;
-      font-family: Roboto;
+      font-family: "Roboto","Helvetica","Arial",sans-serif;
       font-size: 12px;
       color: #0C0C0C;
       min-width: 800px;
@@ -114,7 +115,7 @@
 
 		.mdl-layout__drawer {
 			width: auto;
-			left: calc( 100% / -2);
+			left: calc(100% / -2);
 		}
 
 		.mdl-layout__drawer.is-visible {
@@ -160,10 +161,6 @@
 			text-align: left;
 		}
 
-    .openNewWindow{
-      font-size: 20px;
-    }
-
     .mdl-card__actions {
       padding: 11px;
     }
@@ -177,13 +174,15 @@
 			width: 80px;
 			height: 40px;
 			border: 1px solid #bcaaa4;
-			border-radius: 5px;
+			border-radius: 6px;
 			margin-left: 20px;
 			display: flex;
+			background-color: #000;
 		}
 	
 		.layout-toggle-button {
 			width: 50%;
+			height: 100%;
 			border: none;
 			border-radius: 5px;
 			cursor: pointer;
@@ -248,6 +247,14 @@
 			margin: 1px;
 		}
 
+		.banner-name {
+			font-family: "Roboto","Helvetica","Arial",sans-serif;
+		}
+
+		.banner-name .material-icons{
+      font-size: 20px;
+    }
+
 		.banner-info {
 			display: none;
 			font-family: "Roboto","Helvetica","Arial",sans-serif;
@@ -287,25 +294,6 @@
 			transition: background-color 0.2s;
 		}
 
-		.list-view  .mdl-card__actions  > * {
-		}
-
-		.list-view  .mdl-card__actions  > *:nth-child(1) {
-			animation-delay: 0.0s;
-		}
-		.list-view  .mdl-card__actions  > *:nth-child(2) {
-			animation-delay: 0.05s;
-		}
-		.list-view  .mdl-card__actions  > *:nth-child(3) {
-			animation-delay: 0.1s;
-		}
-		.list-view  .mdl-card__actions  > *:nth-child(4) {
-			animation-delay: 0.15s;
-		}
-		.list-view  .mdl-card__actions  > *:nth-child(5) {
-			animation-delay: 0.20s;
-		}
-
 		.list-view .banner-name {
 			font-weight: bold;
 		}
@@ -328,8 +316,9 @@
       </span>
 
 			<!-- Layout Toggle -->
-			<div class="layout-toggle" onclick="toggleLayout()">
-				<button class="layout-toggle-button left" >
+			<!-- TODO replace with SVG -->
+			<div class="layout-toggle" onclick="toggleClickHandler()">
+				<button class="layout-toggle-button left {{#ifEquals query.list-view "true"}} active {{/ifEquals}}">
 					<div class='toggle-icon-wrapper column'>
 						<div class="toggle-icon square"></div>
 						<div class="toggle-icon square"></div>
@@ -341,7 +330,7 @@
 						<div class="toggle-icon line"></div>
 					</div>
 				</button>
-				<button class="layout-toggle-button right active">
+				<button class="layout-toggle-button right {{#if query.list-view}} {{#ifEquals query.list-view "false"}} active {{/ifEquals}} {{else}} active {{/if}}">
 					<div class="toggle-icon square"></div>
 					<div class="toggle-icon square"></div>
 					<div class="toggle-icon square"></div>
@@ -384,12 +373,10 @@
       {{#each banner}}
         <a class="mdl-navigation__link" href="{{src}}index.html" target="_blank">{{name}}</a>
       {{/each}}
-
     </nav>
   </div>
   <main class="mdl-layout__content">
-    <div class="page-content">
-
+    <div class="page-content {{#ifEquals query.list-view "true"}} list-view {{/ifEquals}}">
       {{#each banner}}
         <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}">
 
@@ -419,7 +406,7 @@
               <span class="banner-name">
                 {{title}}
               </span>
-              <i class="material-icons openNewWindow">open_in_new</i>
+              <i class="material-icons">open_in_new</i>
             </a>
 						<!-- <div class="banner-info">
 							<span class="bold">File Size:</span><span> 120 Kb</span>
@@ -491,27 +478,10 @@
     })();
   }
 
-	/* Init functions */
-	staggerCardAnimation();
 	populateFilterContainer();
+	staggerCardAnimation();
 
-	/* FUNCTIONS */
-
-	/*
-		Toggle between Massonry and List layout
-	*/
-	function toggleLayout() {
-		const domElem = event.currentTarget;
-		const buttonList = domElem.querySelectorAll('button');
-		buttonList.forEach( (button) => {
-			button.classList.toggle('active')
-		});
-
-		document.querySelector('.page-content').classList.toggle('list-view');
-
-		staggerCardAnimation();
-	}
-
+	/* Logic */
 	/*
 		Slide Up + Fade In animation for cards that are currently visible
 	*/
@@ -575,13 +545,11 @@
 				filterWrapper.appendChild(select);
 				filterContainer.appendChild(filterWrapper);
 
-				const params = new URLSearchParams(location.search);
+				const valueGetParam = getParameterValue(selectName);
 
-				/* if getParameter exist with this filter name then load the value and apply it to the filter */
-				const valueGetParam = params.get(selectName);
 				if(valueGetParam) {
 					selectItemByValue(select, valueGetParam);
-					changeCardVisibility(select);
+					refreshCardsVisibility(select);
 				}
 			}
 		});
@@ -591,7 +559,6 @@
 		Change the selected item of a <select></select> based on the value passed as parameter
 	*/
 	function selectItemByValue(elmnt, value){
-
     for(var i=0; i < elmnt.options.length; i++)
     {
       if(elmnt.options[i].value == value)
@@ -599,24 +566,33 @@
     }
   }
 
-	/*
-		Select event listener
-	*/
-	function selectChangeHandler() {		
-		const select = event.currentTarget;
-		changeCardVisibility(select);
-	}
-
-	function changeCardVisibility(select){
+	function refreshCardsVisibility(select){
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
 			card.style.display = isCardVisible(card) ? '' : 'none';
 		});
 
+		setParameterValue(select.name,select.value)
+	}
+
+	/*
+		Utility function
+		Set name and value as GET Parameter
+	*/
+	function setParameterValue(name, value) {
 		const params = new URLSearchParams(location.search);
-		params.set(select.name, select.value);
+		params.set(name, value);
 		window.history.replaceState({}, '', `${location.pathname}?${params}`);
+	}
+
+	/*
+		Utility function
+		Get value from GET Parameter
+	*/
+	function getParameterValue(name) {
+		const params = new URLSearchParams(location.search);
+		return params.get(name);
 	}
 
 	/*
@@ -650,6 +626,7 @@
 	function getFilterArrayFromBannerNames(bannerNames) {
 		let filterArray = [];
 		let noDuplicatesFilterArray = [];
+
 		bannerNames.forEach( bannerName => {
 			const bannerNameSplitResult = bannerName.innerText.split('_');
 
@@ -659,15 +636,47 @@
 				}
 					
 				filterArray[index].push(splitElement);
-			})
-		})
+			});
+		});
 
 		filterArray.map( filterValues => {
 			const setFilterValue = new Set(filterValues);
 			noDuplicatesFilterArray.push([...setFilterValue]);
-		})
+		});
 
 		return noDuplicatesFilterArray;
+	}
+
+	/* Event Listener*/
+
+	/*
+		Select event listener
+	*/
+	function selectChangeHandler() {		
+		const select = event.currentTarget;
+		refreshCardsVisibility(select);
+	}
+
+	/*
+		List view / massonry button event listener
+	*/
+	function toggleClickHandler() {
+		toggleLayout();
+	}
+
+	/*
+		Toggle between Massonry and List layout
+	*/
+	function toggleLayout() {
+		const buttonList = document.querySelectorAll('.layout-toggle-button');
+		buttonList.forEach( (button) => {
+			button.classList.toggle('active')
+		});
+
+		let isListView = document.querySelector('.page-content').classList.toggle('list-view');
+		setParameterValue('list-view', isListView);
+
+		staggerCardAnimation();
 	}
 
 </script>
