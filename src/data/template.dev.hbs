@@ -53,6 +53,10 @@
       min-width: 800px;
     }
 
+		.hide {
+			display: none !important;
+		}
+
 		.add-filter-button {
 			margin: 0 20px;
 			width: 40px;
@@ -365,7 +369,7 @@
 				<div class="filter-wrapper">
 					<label for="banner-size-dropdown">Banner size:</label>
 					<select name="banner-size-dropdown" class="filter banner-size-dropdown" data-card-attribute="data-banner-size" onchange="filterChangeHandler()">
-						<option value="all">all</option>
+						<option value="All">All</option>
 						{{#each banner}}
 							<option value="{{width}}x{{height}}">{{width}}x{{height}}</option>
 						{{/each}}
@@ -507,28 +511,58 @@
     })();
   }
 
+	/**************/
+	/* INITIALIZE */
+	/**************/
+	this.counter = 0;
+
 	//populateFilterContainer();
 	staggerCardAnimation();
 
-	// Todo filter-2
 	const bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
 	removeDuplicateFromSelect(bannerSizeDropdown);
-	loadGetParameter('banner-size-dropdown','banner-size-dropdown');
-	this.counter = 0;
-	
+	setBannerSizeSelectValue('banner-size-dropdown','banner-size-dropdown');
+	setDynamicFilterValue();
+	refreshCardsVisibility();
 
-	/* Logic */
-	function loadGetParameter(paramName,selectName) {
+	
+	
+	/**************/
+	/* CODE LOGIC */
+	/**************/
+
+	/*
+		Load the value of a GET parameter in a filter
+	*/
+	function setBannerSizeSelectValue(paramName,selectName) {
 		const valueGetParam = getParameterValue(paramName);
 		const select = document.getElementsByName(selectName)[0];
 		selectItemByValue(select, valueGetParam);
-		refreshCardsVisibility(select);
 	}
 
-	function removeDuplicateFromSelect(dropdown) {
-		[].slice.call(dropdown.options).map(function(option) {
-    	if(this[option.value]) { 
-      	dropdown.removeChild(option); 
+	/*
+		Load the value of a GET parameter in a filter
+	*/
+	function setDynamicFilterValue() {
+		let i = 0;
+		while(getParameterValue(`filter-${i}`)){
+			const valueGetParam = getParameterValue(`filter-${i}`);
+
+			// TODO
+			// Create a dropdown and fill it with the correct values
+			const select = document.getElementsByName(selectName)[0];
+			selectItemByValue(select, valueGetParam);
+			i++;
+		}
+	}
+
+	/*
+		Remove duplicate <option></option> from a select
+	*/
+	function removeDuplicateFromSelect(select) {
+		[].slice.call(select.options).map(function(option) {
+    	if(this[option.value]) {
+      	select.removeChild(option); 
     	} else { 
       	this[option.value]=1; 
     	} 
@@ -542,8 +576,7 @@
 		if(this.staggerCardTL && this.staggerCardTL.progress() !== 1){
 			this.staggerCardTL.progress(1);
 		} 
-		const cards = Array.from(document.querySelectorAll('.mdl-card'));
-		const visibleCards = cards.filter( card => card.style.display !== 'none');
+		const visibleCards = Array.from(document.querySelectorAll('.mdl-card:not(.hide)'));
 		this.staggerCardTL = gsap.fromTo(visibleCards, {
 			y: 40,
 			opacity:0
@@ -613,23 +646,28 @@
 	/*
 		Change the selected item of a <select></select> based on the value passed as parameter
 	*/
-	function selectItemByValue(elmnt, value){
-    for(var i=0; i < elmnt.options.length; i++)
-    {
-      if(elmnt.options[i].value == value)
-        elmnt.selectedIndex = i;
+	function selectItemByValue(select, value){
+    for(var i=0; i < select.options.length; i++) {
+      if(select.options[i].value === value) {
+				select.selectedIndex = i;
+			}
     }
   }
 
-	function refreshCardsVisibility(select){
+	function refreshCardsVisibility(){
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
 			//card.style.display = isCardVisible(card) ? '' : 'none';
-			card.style.display = isCardVisible2(card,document .querySelector('.filter')) ? '' : 'none';
+			//card.style.display = isCardVisible2(card,document .querySelector('.filter')) ? '' : 'none';
+			//if(isCardVisible2(card,document.querySelector('.filter'))) {
+			if(isCardVisible3(card)) {	
+				card.classList.remove('hide')
+			} else {
+				card.classList.add('hide')
+			}
+			
 		});
-
-		setParameterValue(select.name,select.value)
 	}
 
 	/*
@@ -646,15 +684,17 @@
 		Utility function
 		Get value from GET Parameter
 	*/
+	/*
 	function getParameterValue(name) {
 		const params = new URLSearchParams(location.search);
 		return params.get(name);
 	}
+	*/
 
 	/*
 		Return true if a card should be visible given the current values for each filter
 	*/
-	/* TODO filter-old
+	/*
 	function isCardVisible(card) {
 		const allFilters = Array.from(document.querySelectorAll('.filter'));
 		let visible = true;
@@ -667,7 +707,7 @@
 			const bannerNameSplit = bannerName.innerText.split('_');
 			const valueToTest = bannerNameSplit[indexInArray].trim();
 
-			if(filterValue !== valueToTest && filterValue !== 'All') {
+			if(filterValue.toLowerCase() !== valueToTest.toLowerCase() && filterValue.toLowerCase() !== 'all') {
 				visible = false;
 			}
 		});
@@ -679,12 +719,35 @@
 	/*
 		Return true if a card should be visible given the current values for each filter
 	*/
+	/*
 	function isCardVisible2(card, dropdown) {
 		let attributeToTest = dropdown.getAttribute('data-card-attribute');
 		let cardAttribute = card.getAttribute(attributeToTest);
 
 		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
-		return dropdownSelectedValue === "all" || cardAttribute === dropdownSelectedValue;
+		return dropdownSelectedValue.toLowerCase() === "all" || cardAttribute.toLowerCase() === dropdownSelectedValue.toLowerCase();
+	}
+	*/
+
+	/*
+		Return true if a card should be visible given the current values for each filter
+	*/
+	function isCardVisible3(card) {
+		const allFilters = Array.from(document.querySelectorAll('.filter'));
+		let visible = true;
+
+		allFilters.forEach( filter => {			
+			const filterValue = filter.value;
+			const bannerName = card.querySelector('.banner-name').innerText;
+			console.log("TEST")
+			// TODO FIX Bug
+			// Check with language 'en'
+			if(!bannerName.includes(filterValue) && filterValue.toLowerCase() !== 'all') {
+				visible = false;
+			}
+		});
+
+		return visible;
 	}
 
 	/*
@@ -718,6 +781,37 @@
 	}
 	*/
 
+	/*
+	  return an array of array
+	  each element in the primary array represent a <select></select> DOM Element
+	  each element in the sub arrat represent a <option></option> DOM Element
+	*/
+	function getFilterValuesFromBannerNames(bannerNames) {
+		let filterArray = [];
+		let noDuplicatesFilterArray = [];
+
+		bannerNames.forEach( bannerName => {
+			const bannerNameSplitResult = bannerName.innerText.split('_');
+
+			bannerNameSplitResult.forEach( (splitElement,index) => {
+				if(!filterArray[index]) {
+					filterArray[index] = [];
+				}
+					
+				filterArray[index].push(splitElement);
+			});
+		});
+
+		filterArray.map( filterValues => {
+			const setFilterValue = new Set(filterValues);
+			if(setFilterValue.size > 1) {
+				noDuplicatesFilterArray.push([...setFilterValue]);
+			}
+		});
+
+		return noDuplicatesFilterArray.flat();
+	}
+
 	/* Event Listener*/
 
 	/*
@@ -741,7 +835,8 @@
 		Banner size filter handler
 	*/
 	function filterChangeHandler() {
-		refreshCardsVisibility(event.target);
+		refreshCardsVisibility();
+		setParameterValue(event.target.name,event.target.value)
 		staggerCardAnimation();
 	}
 
@@ -752,7 +847,7 @@
 		this.counter++;
 
 		let filterContainer = document.querySelector('.filter-container');
-		let selectName = `filter_${this.counter}`;
+		let selectName = `filter-${this.counter}`;
 
 		let label = document.createElement('LABEL');
 		label.htmlFor = selectName;
@@ -762,19 +857,31 @@
 		select.name = selectName;
 		select.classList.add('filter', `filter-${this.counter}`);
 
+		select.addEventListener('change',filterChangeHandler)
+
+		let optionAll = document.createElement('OPTION');
+		optionAll.value = 'All';
+		optionAll.text = 'All';
+		select.appendChild(optionAll);
+
+		//TODO
+		// add a remove button for each filter
+		
+		const bannerNameNodes = Array.from(document.querySelectorAll('.card:not(.hide) .banner-name'));
+		const filterValueFromBannerName = getFilterValuesFromBannerNames(bannerNameNodes);
+		
+		filterValueFromBannerName.forEach((filterValue) => {
+				let option = document.createElement('OPTION');
+				option.value = filterValue.trim();
+				option.text = filterValue.trim();
+				select.appendChild(option);
+		});
+
 		let filterWrapper = document.createElement('DIV');
 		filterWrapper.classList.add('filter-wrapper');
 		filterWrapper.appendChild(label);
 		filterWrapper.appendChild(select);
 		filterContainer.appendChild(filterWrapper);
-
-		//TODO
-		// add a remove button for each filter
-		
-		//TODO
-		// Populate filter with values in the banner name
-		// ignore the value that was already picked before
-		// save the value picked in a var ?
 	}
 
 	/*
