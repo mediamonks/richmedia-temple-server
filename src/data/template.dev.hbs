@@ -77,7 +77,6 @@
 		}
 
 		.filter {
-			margin: 0 30px 0 5px;
 			padding: 0 5px;
 			border-radius: 5px;
 		}
@@ -88,6 +87,17 @@
 			line-height: 1;
 			letter-spacing: .02em;
 			font-weight: 400;
+		}
+
+		.filter-wrapper label {
+			padding: 10px;
+			border-radius: 5px;
+			margin-right: 5px;
+		}
+
+		label.dynamic-label:hover {
+			background-color: rgba(255,255,255,0.3);
+			cursor: pointer;
 		}
 
 		.filter-wrapper select, .filter-wrapper option {
@@ -517,12 +527,12 @@
 	this.counter = 0;
 
 	//populateFilterContainer();
-	staggerCardAnimation();
 
 	const bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
 	removeDuplicateFromSelect(bannerSizeDropdown);
 	setBannerSizeSelectValue('banner-size-dropdown','banner-size-dropdown');
-	setDynamicFilterValue();
+	//TODO
+	//setDynamicFilterValue();
 	refreshCardsVisibility();
 
 	
@@ -666,8 +676,9 @@
 			} else {
 				card.classList.add('hide')
 			}
-			
 		});
+
+		staggerCardAnimation();
 	}
 
 	/*
@@ -684,12 +695,10 @@
 		Utility function
 		Get value from GET Parameter
 	*/
-	/*
 	function getParameterValue(name) {
 		const params = new URLSearchParams(location.search);
 		return params.get(name);
 	}
-	*/
 
 	/*
 		Return true if a card should be visible given the current values for each filter
@@ -738,10 +747,8 @@
 
 		allFilters.forEach( filter => {			
 			const filterValue = filter.value;
-			const bannerName = card.querySelector('.banner-name').innerText;
-			console.log("TEST")
-			// TODO FIX Bug
-			// Check with language 'en'
+			const bannerName = card.querySelector('.banner-name').innerText.split('_').map(element => element.trim());
+
 			if(!bannerName.includes(filterValue) && filterValue.toLowerCase() !== 'all') {
 				visible = false;
 			}
@@ -789,16 +796,19 @@
 	function getFilterValuesFromBannerNames(bannerNames) {
 		let filterArray = [];
 		let noDuplicatesFilterArray = [];
+		const bannerSizeArray = Array.from(document.querySelectorAll('.banner-size-dropdown option')).map(option => option.value);
 
 		bannerNames.forEach( bannerName => {
-			const bannerNameSplitResult = bannerName.innerText.split('_');
+			const bannerNameSplitResult = bannerName.innerText.split('_').map(element => element.trim());
 
 			bannerNameSplitResult.forEach( (splitElement,index) => {
 				if(!filterArray[index]) {
 					filterArray[index] = [];
 				}
-					
-				filterArray[index].push(splitElement);
+
+				if(!bannerSizeArray.includes(splitElement)) {
+					filterArray[index].push(splitElement);
+				}	
 			});
 		});
 
@@ -835,9 +845,8 @@
 		Banner size filter handler
 	*/
 	function filterChangeHandler() {
+		setParameterValue(event.target.name,event.target.value);
 		refreshCardsVisibility();
-		setParameterValue(event.target.name,event.target.value)
-		staggerCardAnimation();
 	}
 
 	/* 
@@ -851,7 +860,17 @@
 
 		let label = document.createElement('LABEL');
 		label.htmlFor = selectName;
+		label.classList.add('dynamic-label');
 		label.innerText = `Filter n°${this.counter}:`;
+		label.addEventListener('click',removeFilterHandler);
+
+		/*
+			TODO REPLACE LABEL PER BUTTON
+			<!-- Flat button with ripple -->
+			<button class="mdl-button mdl-js-button mdl-js-ripple-effect">
+				Button
+			</button>
+		*/
 
 		let select = document.createElement('SELECT');
 		select.name = selectName;
@@ -864,16 +883,13 @@
 		optionAll.text = 'All';
 		select.appendChild(optionAll);
 
-		//TODO
-		// add a remove button for each filter
-		
 		const bannerNameNodes = Array.from(document.querySelectorAll('.card:not(.hide) .banner-name'));
 		const filterValueFromBannerName = getFilterValuesFromBannerNames(bannerNameNodes);
 		
 		filterValueFromBannerName.forEach((filterValue) => {
 				let option = document.createElement('OPTION');
-				option.value = filterValue.trim();
-				option.text = filterValue.trim();
+				option.value = filterValue;
+				option.text = filterValue;
 				select.appendChild(option);
 		});
 
@@ -882,6 +898,24 @@
 		filterWrapper.appendChild(label);
 		filterWrapper.appendChild(select);
 		filterContainer.appendChild(filterWrapper);
+	}
+
+	/*
+		Remove filter after clicking on Label
+	*/
+	function removeFilterHandler() {
+		const parent = event.target.parentElement;
+		const select = event.target.nextElementSibling;
+
+		select.removeEventListener('change',filterChangeHandler);
+		parent.remove();
+
+		//TODO change number on
+		// Label innerText
+		// Label htmlFor
+		// Select name
+		// class number
+		refreshCardsVisibility();
 	}
 
 	/*
