@@ -526,16 +526,11 @@
 	/**************/
 	this.counter = 0;
 
-	//populateFilterContainer();
-
 	const bannerSizeDropdown = document.querySelector('.banner-size-dropdown');
 	removeDuplicateFromSelect(bannerSizeDropdown);
 	setBannerSizeSelectValue('banner-size-dropdown','banner-size-dropdown');
-	//TODO
-	//setDynamicFilterValue();
+	setDynamicFilterValue();
 	refreshCardsVisibility();
-
-	
 	
 	/**************/
 	/* CODE LOGIC */
@@ -554,13 +549,10 @@
 		Load the value of a GET parameter in a filter
 	*/
 	function setDynamicFilterValue() {
-		let i = 0;
+		let i = 1;
 		while(getParameterValue(`filter-${i}`)){
 			const valueGetParam = getParameterValue(`filter-${i}`);
-
-			// TODO
-			// Create a dropdown and fill it with the correct values
-			const select = document.getElementsByName(selectName)[0];
+			const select = createFilter();
 			selectItemByValue(select, valueGetParam);
 			i++;
 		}
@@ -599,61 +591,6 @@
 	}
 
 	/*
-		Create and add to the DOM <select></select> DOM elements based on banner names
-	*/
-	/* TODO filter-old
-	function populateFilterContainer() {
-		const bannerNames = Array.from(document.querySelectorAll('.banner-name'));
-		const filterContainer =	document.querySelector('.filter-container');
-		const filterArray = getFilterArrayFromBannerNames(bannerNames);
-		let count = 0;
-
-		filterArray.map( (filterValues, index) => {
-			if(filterValues.length > 1) {
-				count++;
-
-				let selectName = `filter_${count}`;
-
-				let label = document.createElement('LABEL');
-				label.htmlFor = selectName;
-				label.innerText = `Filter n°${count}:`;
-
-				let select = document.createElement('SELECT');
-				select.name = selectName;
-				select.classList.add('filter', 'banner-size-dropdown')
-				select.addEventListener('change', selectChangeHandler);
-				select.setAttribute('data-index-array', index);
-
-				let optionAll = document.createElement('OPTION');
-				optionAll.value = 'All';
-				optionAll.text = 'All';
-				select.appendChild(optionAll);
-
-				filterValues.map( value => {
-					let option = document.createElement('OPTION');
-					option.value = value.trim();
-					option.text = value.trim();
-					select.appendChild(option);
-				})
-
-				let filterWrapper = document.createElement('DIV');
-				filterWrapper.classList.add('filter-wrapper');
-				filterWrapper.appendChild(label);
-				filterWrapper.appendChild(select);
-				filterContainer.appendChild(filterWrapper);
-
-				const valueGetParam = getParameterValue(selectName);
-
-				if(valueGetParam) {
-					selectItemByValue(select, valueGetParam);
-					refreshCardsVisibility(select);
-				}
-			}
-		});
-	}
-	*/
-
-	/*
 		Change the selected item of a <select></select> based on the value passed as parameter
 	*/
 	function selectItemByValue(select, value){
@@ -668,9 +605,6 @@
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
-			//card.style.display = isCardVisible(card) ? '' : 'none';
-			//card.style.display = isCardVisible2(card,document .querySelector('.filter')) ? '' : 'none';
-			//if(isCardVisible2(card,document.querySelector('.filter'))) {
 			if(isCardVisible3(card)) {	
 				card.classList.remove('hide')
 			} else {
@@ -685,7 +619,7 @@
 		Utility function
 		Set name and value as GET Parameter
 	*/
-	function setParameterValue(name, value) {
+	function setGetParameterValue(name, value) {
 		const params = new URLSearchParams(location.search);
 		params.set(name, value);
 		window.history.replaceState({}, '', `${location.pathname}?${params}`);
@@ -701,42 +635,14 @@
 	}
 
 	/*
-		Return true if a card should be visible given the current values for each filter
+		Utility function
+		Delete GET Parameter
 	*/
-	/*
-	function isCardVisible(card) {
-		const allFilters = Array.from(document.querySelectorAll('.filter'));
-		let visible = true;
-
-		allFilters.forEach( filter => {			
-			const filterValue = filter.value;
-
-			const indexInArray = filter.dataset.indexArray;
-			const bannerName = card.querySelector('.banner-name');
-			const bannerNameSplit = bannerName.innerText.split('_');
-			const valueToTest = bannerNameSplit[indexInArray].trim();
-
-			if(filterValue.toLowerCase() !== valueToTest.toLowerCase() && filterValue.toLowerCase() !== 'all') {
-				visible = false;
-			}
-		});
-
-		return visible;
+	function deleteParameterValue(name) {
+		const params = new URLSearchParams(location.search);
+		params.delete(name);
+		window.history.replaceState({}, '', `${location.pathname}?${params}`);
 	}
-	*/
-
-	/*
-		Return true if a card should be visible given the current values for each filter
-	*/
-	/*
-	function isCardVisible2(card, dropdown) {
-		let attributeToTest = dropdown.getAttribute('data-card-attribute');
-		let cardAttribute = card.getAttribute(attributeToTest);
-
-		let dropdownSelectedValue = dropdown.selectedOptions[0].value;
-		return dropdownSelectedValue.toLowerCase() === "all" || cardAttribute.toLowerCase() === dropdownSelectedValue.toLowerCase();
-	}
-	*/
 
 	/*
 		Return true if a card should be visible given the current values for each filter
@@ -762,37 +668,8 @@
 	  each element in the primary array represent a <select></select> DOM Element
 	  each element in the sub arrat represent a <option></option> DOM Element
 	*/
-	/* TODO filter-old
-	function getFilterArrayFromBannerNames(bannerNames) {
-		let filterArray = [];
-		let noDuplicatesFilterArray = [];
-
-		bannerNames.forEach( bannerName => {
-			const bannerNameSplitResult = bannerName.innerText.split('_');
-
-			bannerNameSplitResult.forEach( (splitElement,index) => {
-				if(!filterArray[index]) {
-					filterArray[index] = [];
-				}
-					
-				filterArray[index].push(splitElement);
-			});
-		});
-
-		filterArray.map( filterValues => {
-			const setFilterValue = new Set(filterValues);
-			noDuplicatesFilterArray.push([...setFilterValue]);
-		});
-
-		return noDuplicatesFilterArray;
-	}
-	*/
-
-	/*
-	  return an array of array
-	  each element in the primary array represent a <select></select> DOM Element
-	  each element in the sub arrat represent a <option></option> DOM Element
-	*/
+	// TODO
+	// Bugs remaining with similar banners at different depth
 	function getFilterValuesFromBannerNames(bannerNames) {
 		let filterArray = [];
 		let noDuplicatesFilterArray = [];
@@ -822,47 +699,15 @@
 		return noDuplicatesFilterArray.flat();
 	}
 
-	/* Event Listener*/
-
-	/*
-		Select event listener
-	*/
-	/* TODO filter-old
-	function selectChangeHandler() {		
-		const select = event.currentTarget;
-		refreshCardsVisibility(select);
-	}
-	*/
-
-	/*
-		List view / massonry button event listener
-	*/
-	function toggleClickHandler() {
-		toggleLayout();
-	}
-
-	/* 
-		Banner size filter handler
-	*/
-	function filterChangeHandler() {
-		setParameterValue(event.target.name,event.target.value);
-		refreshCardsVisibility();
-	}
-
-	/* 
-		Button add filter
-	*/
-	function addFilterClickHandler() {
+	function createFilter() {
 		this.counter++;
 
 		let filterContainer = document.querySelector('.filter-container');
-		let selectName = `filter-${this.counter}`;
 
 		let label = document.createElement('LABEL');
-		label.htmlFor = selectName;
 		label.classList.add('dynamic-label');
 		label.innerText = `Filter n°${this.counter}:`;
-		label.addEventListener('click',removeFilterHandler);
+		label.addEventListener('click',removeFilterHandler.bind(this));
 
 		/*
 			TODO REPLACE LABEL PER BUTTON
@@ -873,8 +718,8 @@
 		*/
 
 		let select = document.createElement('SELECT');
-		select.name = selectName;
-		select.classList.add('filter', `filter-${this.counter}`);
+		select.name = `filter-${this.counter}`;
+		select.classList.add('filter', select.name);
 
 		select.addEventListener('change',filterChangeHandler)
 
@@ -887,17 +732,47 @@
 		const filterValueFromBannerName = getFilterValuesFromBannerNames(bannerNameNodes);
 		
 		filterValueFromBannerName.forEach((filterValue) => {
-				let option = document.createElement('OPTION');
-				option.value = filterValue;
-				option.text = filterValue;
-				select.appendChild(option);
+			let option = document.createElement('OPTION');
+			option.value = filterValue;
+			option.text = filterValue;
+			select.appendChild(option);
 		});
 
 		let filterWrapper = document.createElement('DIV');
-		filterWrapper.classList.add('filter-wrapper');
+		filterWrapper.classList.add('filter-wrapper','dynamic-filter');
 		filterWrapper.appendChild(label);
 		filterWrapper.appendChild(select);
 		filterContainer.appendChild(filterWrapper);
+
+		removeDuplicateFromSelect(select);
+
+		return select;
+	}
+	
+	/******************/
+	/* Event Listener */
+	/******************/
+
+	/*
+		List view / massonry button event listener
+	*/
+	function toggleClickHandler() {
+		toggleLayout();
+	}
+
+	/* 
+		Banner size filter handler
+	*/
+	function filterChangeHandler() {
+		setGetParameterValue(event.target.name,event.target.value);
+		refreshCardsVisibility();
+	}
+
+	/* 
+		Button add filter
+	*/
+	function addFilterClickHandler() {
+		createFilter();
 	}
 
 	/*
@@ -906,15 +781,29 @@
 	function removeFilterHandler() {
 		const parent = event.target.parentElement;
 		const select = event.target.nextElementSibling;
+		this.counter = 0;
 
 		select.removeEventListener('change',filterChangeHandler);
+		deleteParameterValue(select.name);
 		parent.remove();
+		
 
-		//TODO change number on
-		// Label innerText
-		// Label htmlFor
-		// Select name
-		// class number
+		const filterWrappers = Array.from(document.querySelectorAll('.dynamic-filter'));
+		filterWrappers.forEach( filterWrapper => {
+			this.counter++;
+			const label = filterWrapper.querySelector('label');
+			const select = filterWrapper.querySelector('select');
+			const oldClassName = select.name;
+
+			label.htmlFor = select.name;
+			label.innerText = `Filter n°${this.counter}:`;
+
+			select.name = `filter-${this.counter}`;
+			select.classList.replace(oldClassName, select.name);
+
+			setGetParameterValue(select.name,select.value);
+		});
+
 		refreshCardsVisibility();
 	}
 
@@ -928,7 +817,7 @@
 		});
 
 		let isListView = document.querySelector('.page-content').classList.toggle('list-view');
-		setParameterValue('list-view', isListView);
+		setGetParameterValue('list-view', isListView);
 
 		staggerCardAnimation();
 	}
