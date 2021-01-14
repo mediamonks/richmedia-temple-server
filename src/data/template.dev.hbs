@@ -605,7 +605,7 @@
 		const cards = Array.from(document.querySelectorAll('.mdl-card'));
 
 		cards.forEach( card => {
-			if(isCardVisible3(card)) {	
+			if(isCardVisible(card)) {	
 				card.classList.remove('hide')
 			} else {
 				card.classList.add('hide')
@@ -638,7 +638,7 @@
 		Utility function
 		Delete GET Parameter
 	*/
-	function deleteParameterValue(name) {
+	function deleteGetParameter(name) {
 		const params = new URLSearchParams(location.search);
 		params.delete(name);
 		window.history.replaceState({}, '', `${location.pathname}?${params}`);
@@ -647,7 +647,7 @@
 	/*
 		Return true if a card should be visible given the current values for each filter
 	*/
-	function isCardVisible3(card) {
+	function isCardVisible(card) {
 		const allFilters = Array.from(document.querySelectorAll('.filter'));
 		let visible = true;
 
@@ -664,40 +664,39 @@
 	}
 
 	/*
-	  return an array of array
-	  each element in the primary array represent a <select></select> DOM Element
-	  each element in the sub arrat represent a <option></option> DOM Element
+		return an array of possible values for a new filter based on the banner currently visible
 	*/
-	// TODO
-	// Bugs remaining with similar banners at different depth
 	function getFilterValuesFromBannerNames(bannerNames) {
-		let filterArray = [];
-		let noDuplicatesFilterArray = [];
 		const bannerSizeArray = Array.from(document.querySelectorAll('.banner-size-dropdown option')).map(option => option.value);
+		filterArray = [];
 
 		bannerNames.forEach( bannerName => {
 			const bannerNameSplitResult = bannerName.innerText.split('_').map(element => element.trim());
-
-			bannerNameSplitResult.forEach( (splitElement,index) => {
-				if(!filterArray[index]) {
-					filterArray[index] = [];
+			bannerNameSplitResult.forEach( bannerWord => {
+				if(
+					!filterArray.includes(bannerWord) &&
+					!bannerSizeArray.includes(bannerWord) && 
+					!isBannerWordInEveryBannerName(bannerWord,bannerNames
+				)) {
+					filterArray.push(bannerWord);
 				}
-
-				if(!bannerSizeArray.includes(splitElement)) {
-					filterArray[index].push(splitElement);
-				}	
 			});
 		});
-
-		filterArray.map( filterValues => {
-			const setFilterValue = new Set(filterValues);
-			if(setFilterValue.size > 1) {
-				noDuplicatesFilterArray.push([...setFilterValue]);
-			}
-		});
-
-		return noDuplicatesFilterArray.flat();
+		
+		return filterArray;
 	}
+
+	function isBannerWordInEveryBannerName(bannerWord, bannerNames) {
+		return bannerNames.every( (bannerName) => {
+			const bannerNameSplitResult = bannerName.innerText.split('_').map(element => element.trim());
+			return bannerNameSplitResult.includes(bannerWord);
+		})
+	}
+
+	// TODO
+	// Hide + button until someone change value on filter
+	// TODO
+	// FIX Scenario where too many filters are added
 
 	function createFilter() {
 		this.counter++;
@@ -744,8 +743,6 @@
 		filterWrapper.appendChild(select);
 		filterContainer.appendChild(filterWrapper);
 
-		removeDuplicateFromSelect(select);
-
 		return select;
 	}
 	
@@ -761,7 +758,7 @@
 	}
 
 	/* 
-		Banner size filter handler
+		Filter change handler
 	*/
 	function filterChangeHandler() {
 		setGetParameterValue(event.target.name,event.target.value);
@@ -769,7 +766,7 @@
 	}
 
 	/* 
-		Button add filter
+		Button add filter handler
 	*/
 	function addFilterClickHandler() {
 		createFilter();
@@ -777,18 +774,21 @@
 
 	/*
 		Remove filter after clicking on Label
+		Update the filter number on remaining filters and GET parameter
 	*/
 	function removeFilterHandler() {
 		const parent = event.target.parentElement;
 		const select = event.target.nextElementSibling;
+
+		deleteGetParameter(`filter-${this.counter}`);
+		
+		select.removeEventListener('change',filterChangeHandler);
+		parent.remove();
+
 		this.counter = 0;
 
-		select.removeEventListener('change',filterChangeHandler);
-		deleteParameterValue(select.name);
-		parent.remove();
-		
-
 		const filterWrappers = Array.from(document.querySelectorAll('.dynamic-filter'));
+
 		filterWrappers.forEach( filterWrapper => {
 			this.counter++;
 			const label = filterWrapper.querySelector('label');
