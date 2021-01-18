@@ -693,13 +693,10 @@
 		})
 	}
 
-	// TODO
-	// Hide + button until someone change value on filter
-	
-	// TODO
-	// FIX Scenario where too many filters are added
-
 	function createFilter() {
+
+		event.currentTarget.classList.add('hide');
+
 		this.counter++;
 
 		let filterContainer = document.querySelector('.filter-container');
@@ -762,6 +759,10 @@
 		Filter change handler
 	*/
 	function filterChangeHandler() {
+		if(Array.from(document.querySelectorAll('.dynamic-filter select')).pop() === this){
+			document.querySelector('.add-filter-button').classList.remove('hide')
+		}
+			
 		setGetParameterValue(event.target.name,event.target.value);
 		refreshCardsVisibility();
 	}
@@ -780,6 +781,10 @@
 	function removeFilterHandler() {
 		const parent = event.target.parentElement;
 		const select = event.target.nextElementSibling;
+
+		if(Array.from(document.querySelectorAll('.dynamic-filter select')).pop() === select){
+			document.querySelector('.add-filter-button').classList.remove('hide')
+		}
 
 		deleteGetParameter(`filter-${this.counter}`);
 		
