@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/webpack/devServer.js | @mediamonks/richmedia-temple-server</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."><meta property="twitter:card" content="summary"><meta property="twitter:title" content="@mediamonks/richmedia-temple-server"><meta property="twitter:description" content="This is the Richmedia Temple, used for creating richmedia units for various vendors."></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+<a style="position:relative; top:3px;" href="https://github.com/mediamonks/temple"><img width="20px" src="./image/github.png"></a></header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/webpack/devServer.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const path = require(&apos;path&apos;);
+const fs = require(&apos;fs&apos;);
+const webpack = require(&apos;webpack&apos;);
+const webpackHotMiddleware = require(&apos;webpack-hot-middleware&apos;);
+const webpackDevMiddleware = require(&apos;webpack-dev-middleware&apos;);
+const express = require(&apos;express&apos;);
+const handlebars = require(&apos;handlebars&apos;);
+const portfinder = require(&apos;portfinder&apos;);
+const screenshot = require(&apos;@mediamonks/richmedia-temple-screenshot&apos;);
+const util = require(&apos;util&apos;);
+const chalk = require(&apos;chalk&apos;);
+const opener = require(&apos;opener&apos;);
+
+const readFile = util.promisify(fs.readFile);
+const getTemplate = require(&apos;../util/getDevTemplate&apos;);
+const getNameFromLocation = require(&apos;../util/getNameFromLocation&apos;);
+
+/**
+ *
+ * @param {Array&lt;{webpack: *, settings: {location, data}}&gt;} configs
+ * @param {boolean} openLocation
+ */
+module.exports = async function devServer(configs, openLocation = true) {
+  const webpackConfigList = configs.map(({ webpack }) =&gt; webpack);
+  const settingsList = configs.map(({ settings }) =&gt; settings);
+  const port = await portfinder.getPortPromise();
+  const template = await getTemplate();
+
+  const httpLocation = `http://localhost:${port}`;
+
+  if(openLocation){
+    // opener
+    opener(httpLocation);
+  }
+
+  console.log(`${chalk.blue(&apos;i&apos;)} Server running. Please go to ${httpLocation}
+${chalk.grey.bold(&apos;-------------------------------------------------------&apos;)}
+`);
+
+  const app = express();
+
+  webpackConfigList.forEach((config, index) =&gt; {
+    const hmrPath = &apos;__webpack_hmr&apos;;
+    const name = getNameFromLocation(settingsList[index].location);
+
+    config.mode =  &apos;development&apos;;
+    // config.entry.main = [
+    //   `webpack-hot-middleware/client?path=/${name}/${hmrPath}&amp;reload=true`,
+    //   ...config.entry.main,
+    // ];
+
+
+    config.output = {
+      ...config.output,
+      &quot;hotUpdateChunkFilename&quot;: &quot;.hot/.hot-update.js&quot;,
+      &quot;hotUpdateMainFilename&quot;: &quot;.hot/.hot-update.json&quot;
+    };
+
+
+
+    const compiler = webpack(config);
+
+    app.use(
+      webpackDevMiddleware(compiler, {
+        noInfo: true,
+        publicPath: `/${name}/`,
+        // publicPath: config.output.publicPath,
+        // publicPath: config.output.path,
+      }),
+    );
+
+    app.use(
+      webpackHotMiddleware(compiler, {
+        path: `/${name}/${hmrPath}`
+      }),
+    );
+    //
+    // app.use(webpackHotMiddleware(compiler, {
+    //   path: `/${getNameFromSettings(settingsList[index])}/__webpack_hmr`
+    // }));
+  });
+
+  app.get(&apos;/&apos;, (req, res) =&gt; {
+    const templateConfig = {
+      banner: settingsList.map(value =&gt; {
+        const name = getNameFromLocation(value.location);
+        let width = value.data.settings.size.width;
+        let height = value.data.settings.size.height;
+				let title = name;
+
+        if(value.data.settings.expandable){
+          width = value.data.settings.expandable.width;
+          height = value.data.settings.expandable.height;
+          title += &quot;_EXP_&quot; + width + &quot;x&quot; + height;
+				}
+
+        return {
+          src: `./${name}/`,
+          name,
+          title,
+          width,
+					height,
+        };
+      }),
+    };
+
+    res.send(template(templateConfig));
+  });
+
+  app.get(&apos;/screenshot/:target&apos;, (req, res) =&gt; {
+    const name = req.params.target;
+
+    const folder = path.join(process.cwd(), &apos;tmpFolder&apos;);
+    if (!fs.existsSync(folder)){
+      fs.mkdirSync(folder);
+    }
+
+    const location = path.join(folder, &apos;screenshot.png&apos;);
+    const result = settingsList.find(val =&gt; getNameFromLocation(val.location) === name);
+
+    const data = {
+      config: {},
+      url: `http://localhost:${port}/${name}/`,
+      location,
+    };
+
+    if (
+      result &amp;&amp;
+      result.data &amp;&amp;
+      result.data.settings &amp;&amp;
+      result.data.settings.size &amp;&amp;
+      result.data.settings.size.width &amp;&amp;
+      result.data.settings.size.height
+    ) {
+      data.clip = {
+        x: 0,
+        y: 0,
+        width: result.data.settings.size.width,
+        height: result.data.settings.size.height,
+      };
+    }
+
+    screenshot
+      .fromUrl(data)
+      .then(() =&gt; readFile(location))
+      .then(img =&gt; {
+        res.contentType(&apos;image/png&apos;);
+        res.end(img, &apos;binary&apos;);
+      });
+  });
+
+  app.post(&apos;/api/upload&apos;, (req, res) =&gt; {});
+
+  app.listen(port, () =&gt; {});
+
+  // eslint-disable-next-line
+
+  process.on(&apos;uncaughtException&apos;, e =&gt; {
+    // eslint-disable-next-line
+    console.log(e);
+    // app.close();
+  });
+  process.on(&apos;SIGTERM&apos;, () =&gt; app.close());
+};
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
-  "coverage": "7.94%",
-  "expectCount": 151,
-  "actualCount": 12,
+  "coverage": "8.17%",
+  "expectCount": 159,
+  "actualCount": 13,
   "files": {
     "src/build.js": {
       "expectCount": 14,
@@ -34,35 +34,6 @@
         8,
         9,
         11
-      ]
-    },
-    "src/preview.js": {
-      "expectCount": 3,
-      "actualCount": 0,
-      "undocumentLines": [
-        1,
-        2,
-        4
-      ]
-    },
-    "src/util/OptionsValidationError.js": {
-      "expectCount": 14,
-      "actualCount": 0,
-      "undocumentLines": [
-        8,
-        9,
-        11,
-        27,
-        44,
-        54,
-        60,
-        68,
-        69,
-        72,
-        73,
-        82,
-        87,
-        160
       ]
     },
     "src/util/doesNestedExists.js": {
@@ -156,6 +127,18 @@
         11
       ]
     },
+    "src/util/getRichmediaRCSync.js": {
+      "expectCount": 7,
+      "actualCount": 1,
+      "undocumentLines": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
     "src/util/isExternalURL.js": {
       "expectCount": 2,
       "actualCount": 0,
@@ -179,6 +162,13 @@
         1
       ]
     },
+    "src/util/jsonParseDeep.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        1
+      ]
+    },
     "src/util/leafs.js": {
       "expectCount": 1,
       "actualCount": 0,
@@ -186,15 +176,36 @@
         1
       ]
     },
+    "src/util/OptionsValidationError.js": {
+      "expectCount": 14,
+      "actualCount": 0,
+      "undocumentLines": [
+        8,
+        9,
+        11,
+        27,
+        44,
+        54,
+        60,
+        68,
+        69,
+        72,
+        73,
+        82,
+        87,
+        160
+      ]
+    },
     "src/util/saveChoicesInPackageJson.js": {
-      "expectCount": 5,
+      "expectCount": 6,
       "actualCount": 0,
       "undocumentLines": [
         2,
         3,
         4,
         5,
-        7
+        6,
+        8
       ]
     },
     "src/util/validateSchema.js": {
@@ -209,7 +220,7 @@
       ]
     },
     "src/webpack/config/createConfig.js": {
-      "expectCount": 19,
+      "expectCount": 20,
       "actualCount": 1,
       "undocumentLines": [
         1,
@@ -229,7 +240,8 @@
         16,
         17,
         18,
-        20
+        19,
+        21
       ]
     },
     "src/webpack/config/createConfigByRichmediarcList.js": {
@@ -269,14 +281,15 @@
       ]
     },
     "src/webpack/loader/RichmediaRCLoader.js": {
-      "expectCount": 6,
+      "expectCount": 7,
       "actualCount": 1,
       "undocumentLines": [
         1,
         2,
         3,
         4,
-        5
+        5,
+        6
       ]
     },
     "src/webpack/plugin/RichmediaRCPlugin.js": {

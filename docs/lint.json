@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "name": "exports",
+    "filePath": "src/util/getRichmediaRCSync.js",
+    "lines": [
+      {
+        "lineNumber": 19,
+        "line": "module.exports = function getRichmediaRCSync(\r"
+      }
+    ],
+    "codeParams": [
+      "filepath",
+      "onDependecy"
+    ],
+    "docParams": [
+      "filepath"
+    ]
+  }
+]

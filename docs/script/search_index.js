@@ -306,15 +306,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/preview.js",
-    "file/src/preview.js.html",
-    "src/preview.js",
-    "file"
-  ],
-  [
     "src/util/optionsvalidationerror.js",
     "file/src/util/OptionsValidationError.js.html",
     "src/util/OptionsValidationError.js",
+    "file"
+  ],
+  [
+    "src/util/base64.js",
+    "file/src/util/base64.js.html",
+    "src/util/base64.js",
     "file"
   ],
   [
@@ -384,6 +384,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/util/getrichmediarcsync.js",
+    "file/src/util/getRichmediaRCSync.js.html",
+    "src/util/getRichmediaRCSync.js",
+    "file"
+  ],
+  [
     "src/util/isexternalurl.js",
     "file/src/util/isExternalURL.js.html",
     "src/util/isExternalURL.js",
@@ -399,6 +405,12 @@ window.esdocSearchIndex = [
     "src/util/isgooglespreadsheeturl.js",
     "file/src/util/isGoogleSpreadsheetUrl.js.html",
     "src/util/isGoogleSpreadsheetUrl.js",
+    "file"
+  ],
+  [
+    "src/util/jsonparsedeep.js",
+    "file/src/util/jsonParseDeep.js.html",
+    "src/util/jsonParseDeep.js",
     "file"
   ],
   [
