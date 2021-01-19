@@ -92,7 +92,7 @@
 		.filter-wrapper label {
 			padding: 10px;
 			border-radius: 5px;
-			margin-right: 5px;
+			margin: 5px;
 		}
 
 		label.dynamic-label:hover {
@@ -705,14 +705,6 @@
 		label.classList.add('dynamic-label');
 		label.innerText = `Filter n°${this.counter}:`;
 		label.addEventListener('click',removeFilterHandler.bind(this));
-
-		/*
-			TODO REPLACE LABEL PER BUTTON
-			<!-- Flat button with ripple -->
-			<button class="mdl-button mdl-js-button mdl-js-ripple-effect">
-				Button
-			</button>
-		*/
 
 		let select = document.createElement('SELECT');
 		select.name = `filter-${this.counter}`;
