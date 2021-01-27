@@ -161,6 +161,7 @@ module.exports = async function build({
 				let width = item.data.settings.size.width;
 				let height = item.data.settings.size.height;
 				let title = name;
+				const isDevelopment = false;
 
 				// if (item.data.settings.expandable) {
 				//   width = item.data.settings.expandable.width;
@@ -174,6 +175,8 @@ module.exports = async function build({
 					title,
 					width,
 					height,
+					isDevelopment
+,
 				};
 			}),
 		};

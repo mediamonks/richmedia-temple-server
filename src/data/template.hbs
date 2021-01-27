@@ -432,11 +432,11 @@
               <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-refresh">
                 <i class="material-icons">refresh</i>
               </a>
-
-              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-screenshot" href="screenshot/{{src}}" download="{{name}}.png">
-                <i class="material-icons">add_a_photo</i>
-              </a>
-
+							{{#if isDevelopment}}
+								<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-screenshot" href="screenshot/{{src}}" download="{{name}}.png">
+									<i class="material-icons">add_a_photo</i>
+								</a>
+							{{/if}}
               <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility" style="display: none">
                 <i class="material-icons">visibility</i>
               </a>

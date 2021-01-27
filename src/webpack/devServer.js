@@ -91,6 +91,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
 				let title = name;
+				const isDevelopment = true;
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
@@ -104,6 +105,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           title,
           width,
 					height,
+					isDevelopment,
         };
 			}),
 			query: req.query,

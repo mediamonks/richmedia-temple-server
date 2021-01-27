@@ -14,7 +14,7 @@ module.exports = function getTemplate() {
       () =>
         new Promise((resolve, reject) => {
           fs.readFile(
-            path.join(__dirname, '../data/template.dev.hbs'),
+            path.join(__dirname, '../data/template.hbs'),
             { encoding: 'utf-8' },
             (err, data) => {
               if (err) {
