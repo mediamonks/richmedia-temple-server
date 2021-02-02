@@ -746,10 +746,7 @@
 		})
 	}
 
-	function createFilter() {
-
-		event.currentTarget.classList.add('hide');
-
+	function createFilter() {	
 		this.counter++;
 
 		let filterContainer = document.querySelector('.filter-container');
@@ -816,6 +813,7 @@
 		Button add filter handler
 	*/
 	function addFilterClickHandler() {
+		event.currentTarget.classList.add('hide');
 		createFilter();
 	}
 
