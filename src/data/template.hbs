@@ -142,7 +142,38 @@
 
     .mdl-card__media {
       background-color: #ffffff;
+			position: relative;
     }
+
+		.loader {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+			border: 10px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 10px solid #263238;
+			width: 40px;
+			height: 40px;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		.paused {
+			animation-play-state: paused;
+		}
+
+		.mdl-card__media iframe {
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
 
 		.mdl-layout__drawer {
 			width: auto;
@@ -430,6 +461,7 @@
         <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}">
 
           <div class="mdl-card__media" style="width: {{width}}px; height: {{height}}px;">
+						<div class="loader"></div>
             <iframe class="visible" src="{{src}}index.html" width="{{width}}" height="{{height}}" frameborder="0"></iframe>
           </div>
 
@@ -493,6 +525,10 @@
   for (let index = 0; index < elementsActionRefresh.length; index++)
   {
     (function(){
+			iframes[index].addEventListener('load', function(){
+				iframes[index].parentElement.querySelector('.loader').classList.add('paused','hide')
+			})
+
       var actionRefresh = elementsActionRefresh[index];
       if(actionRefresh){
         actionRefresh.addEventListener('click', function(){
