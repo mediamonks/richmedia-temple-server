@@ -377,7 +377,7 @@ module.exports = function createConfig({
     config.plugins.push(
       new ZipPlugin({
         path: path.join(outputPath, '../'),
-        filename: `./${bundleName}`,
+        filename: `./${bundleName}.html`,
 
         fileOptions: {
           mtime: new Date(),
