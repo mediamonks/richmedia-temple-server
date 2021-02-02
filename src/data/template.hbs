@@ -115,6 +115,7 @@
 
     .page-content {
       flex-direction: row;
+
     }
 
     .card {
@@ -123,7 +124,10 @@
     }
 
     .iconsContainer{
-      display: block;
+      display: flex;
+			justify-content: flex-start;
+			padding-bottom: 10px;
+			border-bottom: 1px solid rgba(0,0,0,.1);
     }
 
     .svg-logo-mm{
@@ -185,7 +189,9 @@
 			height: auto;
 			word-break: break-word;
 			padding: 0 6px;
+			margin-top: 6px;
 			text-align: left;
+			border-radius: 3px;
 		}
 
     .mdl-card__actions {
@@ -437,6 +443,7 @@
 									<i class="material-icons">add_a_photo</i>
 								</a>
 							{{/if}}
+
               <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility" style="display: none">
                 <i class="material-icons">visibility</i>
               </a>
@@ -444,12 +451,16 @@
               <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility">
                 <i class="material-icons">visibility_off</i>
               </a>
+
+							<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-new-page-button">
+                <i class="material-icons">open_in_new</i>
+              </a>
+
             </div>
             <a class="mdl-button mdl-js-button mdl-js-ripple.mdl-card__media-effect action-new-page">
               <span class="banner-name">
                 {{title}}
               </span>
-              <i class="material-icons">open_in_new</i>
             </a>
 						<!-- <div class="banner-info">
 							<span class="bold">File Size:</span><span> 120 Kb</span>
@@ -474,6 +485,7 @@
 
   var elementsActionRefresh = document.querySelectorAll('.action-refresh');
   var elementsActionNewPage = document.querySelectorAll('.action-new-page');
+	var elementsActionNewPageButton = document.querySelectorAll('.action-new-page-button');
   var elementsActionVisibility = document.querySelectorAll('.action-visibility');
   var elementsActionScreenshot = document.querySelectorAll('.action-screenshot');
 	var filterDropdownArray = document.querySelectorAll('.filter');
@@ -490,11 +502,16 @@
       }
 
       var actionNewPage = elementsActionNewPage[index];
+			var actionNewPageButton = elementsActionNewPageButton[index];
       if(actionNewPage){
         actionNewPage.addEventListener('click', function(){
           var el = this;
           window.open(iframes[index].src);
-        })
+        });
+				actionNewPageButton.addEventListener('click', function(){
+          var el = this;
+          window.open(iframes[index].src);
+        });
       }
 
       var actionVisibility0 = elementsActionVisibility[index * 2];
