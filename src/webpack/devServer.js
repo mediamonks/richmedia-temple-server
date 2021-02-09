@@ -15,6 +15,10 @@ const readFile = util.promisify(fs.readFile);
 const getTemplate = require('../util/getDevTemplate');
 const getNameFromLocation = require('../util/getNameFromLocation');
 
+handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+	return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+});
+
 /**
  *
  * @param {Array<{webpack: *, settings: {location, data}}>} configs
@@ -87,6 +91,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
 				let title = name;
+				const isDevelopment = true;
 
         if(value.data.settings.expandable){
           width = value.data.settings.expandable.width;
@@ -100,8 +105,10 @@ ${chalk.grey.bold('-------------------------------------------------------')}
           title,
           width,
 					height,
+					isDevelopment,
         };
-      }),
+			}),
+			query: req.query,
     };
 
     res.send(template(templateConfig));
