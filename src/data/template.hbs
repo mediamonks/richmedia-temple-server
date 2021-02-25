@@ -114,17 +114,30 @@
 		}
 
     .page-content {
+			display: flex;
+			flex-wrap: wrap;
       flex-direction: row;
+			justify-content: flex-start;
     }
 
     .card {
       display: inline-block;
       margin: 20px;
+			height: -moz-fit-content;
+			height: fit-content;
     }
 
     .iconsContainer{
-      display: block;
+      display: flex;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			padding-bottom: 10px;
+			border-bottom: 1px solid rgba(0,0,0,.1);
     }
+
+		.action-download {
+			margin-right: -3px;
+		}
 
     .svg-logo-mm{
       height: 70px;
@@ -137,8 +150,39 @@
     }
 
     .mdl-card__media {
-      background-color: #ffffff;
+      background-color: #cccccc;
+			position: relative;
     }
+
+		.loader {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+			border: 5px solid #f3f3f3;
+			border-radius: 50%;
+			border-top: 5px solid #263238;
+			width: 40px;
+			height: 40px;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		.paused {
+			animation-play-state: paused;
+		}
+
+		.mdl-card__media iframe {
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
 
 		.mdl-layout__drawer {
 			width: auto;
@@ -185,7 +229,9 @@
 			height: auto;
 			word-break: break-word;
 			padding: 0 6px;
+			margin-top: 6px;
 			text-align: left;
+			border-radius: 3px;
 		}
 
     .mdl-card__actions {
@@ -424,32 +470,40 @@
         <div class="card mdl-card mdl-shadow--2dp" style="width: {{width}}px;" data-banner-size="{{width}}x{{height}}">
 
           <div class="mdl-card__media" style="width: {{width}}px; height: {{height}}px;">
+						<div class="loader"></div>
             <iframe class="visible" src="{{src}}index.html" width="{{width}}" height="{{height}}" frameborder="0"></iframe>
           </div>
 
           <div class="mdl-card__actions mdl-card--border">
 						<div class="iconsContainer">
-              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-refresh">
-                <i class="material-icons">refresh</i>
+							<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility" style="display: none">
+                <i class="material-icons">visibility</i>
               </a>
+
+              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility">
+                <i class="material-icons">info</i>
+              </a>
+
 							{{#if isDevelopment}}
 								<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-screenshot" href="screenshot/{{src}}" download="{{name}}.png">
 									<i class="material-icons">add_a_photo</i>
 								</a>
 							{{/if}}
-              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility" style="display: none">
-                <i class="material-icons">visibility</i>
+<!-- TODO
+							<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-download" href="{{src}}" download="{{name}}.zip">
+                <i class="material-icons">download</i>
               </a>
-
-              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-visibility">
-                <i class="material-icons">visibility_off</i>
+-->
+              <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-refresh">
+                <i class="material-icons">refresh</i>
               </a>
             </div>
+
             <a class="mdl-button mdl-js-button mdl-js-ripple.mdl-card__media-effect action-new-page">
               <span class="banner-name">
                 {{title}}
               </span>
-              <i class="material-icons">open_in_new</i>
+							<i class="material-icons">open_in_new</i>
             </a>
 						<!-- <div class="banner-info">
 							<span class="bold">File Size:</span><span> 120 Kb</span>
@@ -481,6 +535,10 @@
   for (let index = 0; index < elementsActionRefresh.length; index++)
   {
     (function(){
+			iframes[index].addEventListener('load', function(){
+				iframes[index].parentElement.querySelector('.loader').classList.add('paused','hide')
+			})
+
       var actionRefresh = elementsActionRefresh[index];
       if(actionRefresh){
         actionRefresh.addEventListener('click', function(){
@@ -494,7 +552,7 @@
         actionNewPage.addEventListener('click', function(){
           var el = this;
           window.open(iframes[index].src);
-        })
+        });
       }
 
       var actionVisibility0 = elementsActionVisibility[index * 2];
