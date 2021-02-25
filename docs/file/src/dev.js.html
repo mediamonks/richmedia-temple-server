@@ -45,6 +45,7 @@ const inquirer = require(&apos;inquirer&apos;);
 const chalk = require(&apos;chalk&apos;);
 
 module.exports = async function dev({ glob = &apos;./**/.richmediarc*&apos;, choices = null, stats = null }) {
+
   // start with showing search message
   console.log(`${chalk.blue(&apos;i&apos;)} Searching for configs`);
 
@@ -99,6 +100,12 @@ module.exports = async function dev({ glob = &apos;./**/.richmediarc*&apos;, cho
             return true;
           },
         },
+        {
+          type: &apos;confirm&apos;,
+          name: &apos;openLocation&apos;,
+          message: &apos;Do you want a browser to open to your dev location?&apos;,
+          default: true,
+        }
       ]);
     }
 
@@ -133,7 +140,7 @@ module.exports = async function dev({ glob = &apos;./**/.richmediarc*&apos;, cho
     }
   });
 
-  await devServer(list);
+  await devServer(list, choices.openLocation);
 };
 </code></pre>
 

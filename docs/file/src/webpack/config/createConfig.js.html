@@ -48,6 +48,7 @@ const BundleAnalyzerPlugin = require(&apos;webpack-bundle-analyzer&apos;).Bundle
 const DevEnum = require(&apos;../../data/DevEnum&apos;);
 const isFile = require(&apos;../../util/isFile&apos;);
 const isExternalURL = require(&apos;../../util/isExternalURL&apos;);
+const getRichmediaRCSync = require(&apos;../../util/getRichmediaRCSync&apos;);
 const flattenObjectToCSSVars = require(&quot;../../util/flattenObjectToCSSVars&quot;);
 const RichmediaRCPlugin = require(&quot;../plugin/RichmediaRCPlugin&quot;);
 const VirtualModulesPlugin = require(&quot;webpack-virtual-modules&quot;);
@@ -87,6 +88,11 @@ module.exports = function createConfig({
 
   if (mode === DevEnum.DEVELOPMENT) {
     devtool = &apos;inline-source-map&apos;;
+  }
+
+  let isVirtual = true;
+  if(fs.existsSync(filepathRichmediaRC)){
+    isVirtual = false;
   }
 
   let namedHashing = &apos;_[sha512:hash:base64:7]&apos;;
@@ -177,8 +183,17 @@ module.exports = function createConfig({
               loader: &apos;postcss-loader&apos;,
               options: {
                 ident: &apos;postcss&apos;,
-                plugins: loader =&gt; {
-                  const cssVariables = flattenObjectToCSSVars(richmediarc);
+                plugins: function(loader){
+                  let data;
+                  if(isVirtual === false){
+                    data = getRichmediaRCSync(filepathRichmediaRC, filePath =&gt; {
+                      loader.addDependency(filePath);
+                    });
+                  } else {
+                    data = richmediarc
+                  }
+
+                  const cssVariables = flattenObjectToCSSVars(data);
                   Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
                     if (isFile(val) &amp;&amp; !isExternalURL(val)) {
@@ -199,9 +214,9 @@ module.exports = function createConfig({
                       browsers: [&apos;defaults&apos;, &apos;ie 11&apos;],
                     }),
                     require(&apos;postcss-nested&apos;)(),
-                    // require(&apos;postcss-media-variables&apos;)(),
                     require(&apos;cssnano&apos;)(),
                   ];
+
                 },
               },
             },
@@ -289,7 +304,9 @@ module.exports = function createConfig({
           use: {
             loader: path.resolve(path.join(__dirname, &apos;../loader/RichmediaRCLoader.js&apos;)),
             options: {
-              config: JSON.stringify(richmediarc)
+              configFilepath: filepathRichmediaRC,
+              config: richmediarc,
+              isVirtual
             }
           },
         },
@@ -385,6 +402,7 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.DEVELOPMENT) {
+    config.watch = true;
     // config.plugins.push(new webpack.HotModuleReplacementPlugin());
   }
 
