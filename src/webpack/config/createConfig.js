@@ -17,6 +17,7 @@ const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 const VirtualModulesPlugin = require("webpack-virtual-modules");
 const loaderUtils = require("loader-utils");
+const HandlebarsPlugin = require("handlebars-webpack-plugin");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -326,6 +327,24 @@ module.exports = function createConfig({
       // }),
       new VirtualModulesPlugin({
         'node_modules/richmediaconfig': `module.exports = "DUDE"`
+      }),
+      new HandlebarsPlugin({
+
+        htmlWebpackPlugin: {
+          enabled: true, // register all partials from html-webpack-plugin, defaults to `false`
+          prefix: "html", // where to look for htmlWebpackPlugin output. default is "html"
+          // HtmlWebpackPlugin // optionally: pass in HtmlWebpackPlugin if it cannot be resolved
+        },
+
+        data: getRichmediaRCSync(filepathRichmediaRC),
+
+        // entry: path.join(process.cwd(), "src", "hbs", "*.hbs"),
+        // output: path.join(process.cwd(), "dist", "[name].html"),
+
+        // partials: [
+        //   path.join(process.cwd(), "html",/* <-- this should match htmlWebpackPlugin.prefix */ "*", "*.hbs"),
+        //   path.join(process.cwd(), "src", "hbs", "*", "*.hbs")
+        // ]
       })
 
       // new CircularDependencyPlugin({
