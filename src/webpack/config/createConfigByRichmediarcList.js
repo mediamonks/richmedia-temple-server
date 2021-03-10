@@ -38,15 +38,10 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
   }
 
   const outputPath = path.resolve(path.join('./build/', getNameFromLocation(richmediaConfigLocation)));
-
-  const filepathHtml = richmediaConfig.settings.entry.html
-  const filepathJs = richmediaConfig.settings.entry.js;
-  const filepathRichmediaRC = path.resolve(richmediaConfigLocation);
+  const richmediarcFilepath = path.resolve(richmediaConfigLocation);
 
   return {
-    filepathHtml,
-    filepathJs,
-    filepathRichmediaRC,
+    richmediarcFilepath,
     outputPath,
   };
 }

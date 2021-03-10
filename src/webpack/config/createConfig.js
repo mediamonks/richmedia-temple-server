@@ -16,34 +16,29 @@ const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 const VirtualModulesPlugin = require("webpack-virtual-modules");
-const loaderUtils = require("loader-utils");
-const HandlebarsPlugin = require("handlebars-webpack-plugin");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
 /**
  *
  * @param {object} options
- * @param {string} options.filepathJs
- * @param {string} options.filepathHtml
- * @param {string} options.filepathRichmediaRC
+ * @param {string} options.richmediarcFilepath
  * @param {string} options.outputPath
  * @param {string} options.mode
  * @param {any} options.richmediarc
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-   filepathJs,
-   filepathHtml,
-   filepathRichmediaRC,
-   outputPath,
-   richmediarc = null,
+                                         richmediarcFilepath,
+                                         outputPath,
+                                         richmediarc,
 
-   options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
-     mode: DevEnum.DEVELOPMENT,
-     stats: false,
-   },
- }) {
+                                         options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
+                                           mode: DevEnum.DEVELOPMENT,
+                                           stats: false,
+                                         },
+                                       }) {
+
   let devtool = false;
   const entry = [];
 
@@ -56,7 +51,7 @@ module.exports = function createConfig({
   }
 
   let isVirtual = true;
-  if(fs.existsSync(filepathRichmediaRC)){
+  if (fs.existsSync(richmediarcFilepath)) {
     isVirtual = false;
   }
 
@@ -76,7 +71,7 @@ module.exports = function createConfig({
 
   // entry.push('@babel/polyfill');
   entry.push('whatwg-fetch');
-  entry.push(filepathJs);
+  entry.push(richmediarc.settings.entry.js);
 
   // check for trailing slash.
   outputPath = outputPath.replace(/\/$/, "");
@@ -148,10 +143,10 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: function(loader){
+                plugins: function (loader) {
                   let data;
-                  if(isVirtual === false){
-                    data = getRichmediaRCSync(filepathRichmediaRC, filePath => {
+                  if (isVirtual === false) {
+                    data = getRichmediaRCSync(richmediarcFilepath, filePath => {
                       loader.addDependency(filePath);
                     });
                   } else {
@@ -269,7 +264,7 @@ module.exports = function createConfig({
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
             options: {
-              configFilepath: filepathRichmediaRC,
+              configFilepath: richmediarcFilepath,
               config: richmediarc,
               isVirtual
             }
@@ -293,6 +288,7 @@ module.exports = function createConfig({
             },
           },
         },
+
         {
           test: /\.html$/,
           exclude: /node_modules/,
@@ -307,45 +303,28 @@ module.exports = function createConfig({
             },
           ],
         },
+        {
+          test: /\.(hbs)$/,
+          loader: "handlebars-loader",
+        },
+
       ],
     },
     plugins: [
       new HtmlWebPackPlugin({
-        template: filepathHtml,
+        template: richmediarc.settings.entry.html,
+        filename: './index.html',
+        templateParameters: richmediarc
       }),
-
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
       }),
-      // new RichmediaRCPlugin({
-      //   config: filepathRichmediaRC
-      // }),
-      // new VirtualModulePlugin({
-      //   moduleName: 'richmedia-config',
-      //   contents: JSON.stringify(richmediarc),
-      // }),
+
       new VirtualModulesPlugin({
         'node_modules/richmediaconfig': `module.exports = "DUDE"`
       }),
-      new HandlebarsPlugin({
 
-        htmlWebpackPlugin: {
-          enabled: true, // register all partials from html-webpack-plugin, defaults to `false`
-          prefix: "html", // where to look for htmlWebpackPlugin output. default is "html"
-          // HtmlWebpackPlugin // optionally: pass in HtmlWebpackPlugin if it cannot be resolved
-        },
-
-        data: getRichmediaRCSync(filepathRichmediaRC),
-
-        // entry: path.join(process.cwd(), "src", "hbs", "*.hbs"),
-        // output: path.join(process.cwd(), "dist", "[name].html"),
-
-        // partials: [
-        //   path.join(process.cwd(), "html",/* <-- this should match htmlWebpackPlugin.prefix */ "*", "*.hbs"),
-        //   path.join(process.cwd(), "src", "hbs", "*", "*.hbs")
-        // ]
-      })
 
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
@@ -369,13 +348,13 @@ module.exports = function createConfig({
   /**
    * When there is a static folder use it in webpack config
    */
-  const staticPath = path.resolve(path.dirname(filepathRichmediaRC), './static');
+  const staticPath = path.resolve(path.dirname(richmediarcFilepath), './static');
 
   if (fs.existsSync(staticPath)) {
 
     config.plugins.push(new CopyWebpackPlugin({
         patterns: [
-          {from:  staticPath, to: ''}]
+          {from: staticPath, to: ''}]
       })
     );
   }
