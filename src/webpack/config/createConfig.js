@@ -314,7 +314,11 @@ module.exports = function createConfig({
       new HtmlWebPackPlugin({
         template: richmediarc.settings.entry.html,
         filename: './index.html',
-        templateParameters: richmediarc
+        templateParameters: {
+          ...richmediarc,
+          DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
+          PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
+        }
       }),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
