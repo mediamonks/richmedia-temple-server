@@ -375,7 +375,8 @@ module.exports = function createConfig({
   if (mode === DevEnum.PRODUCTION) {
 
     // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
-    let bundleName = /[^/]*$/.exec(outputPath)[0];
+    // added .html is there for compatibility with workspace.
+    let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
 
     // check if there is a custom bundleName
     if(config.settings.bundleName){
@@ -385,7 +386,7 @@ module.exports = function createConfig({
     config.plugins.push(
       new ZipPlugin({
         path: path.join(outputPath, '../'),
-        filename: `./${bundleName}.html`,
+        filename: `./${bundleName}`,
 
         fileOptions: {
           mtime: new Date(),
