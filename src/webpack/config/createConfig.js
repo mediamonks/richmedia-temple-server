@@ -83,8 +83,8 @@ module.exports = function createConfig({
   let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
 
   // check if there is a custom bundleName
-  if (richmediarc.settings.bundle){
-    bundleName = placeholders(richmediarc.settings.bundle, richmediarc);
+  if (richmediarc.settings.bundleName){
+    bundleName = placeholders(richmediarc.settings.bundleName, richmediarc);
     bundleName = sanitizeFilename(bundleName);
   }
 
