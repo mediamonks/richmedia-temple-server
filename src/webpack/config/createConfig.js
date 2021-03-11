@@ -323,7 +323,21 @@ module.exports = function createConfig({
         },
         {
           test: /\.(hbs)$/,
-          loader: "handlebars-loader",
+          use: [
+            // { loader: 'raw-loader' },
+            {
+              loader: "handlebars-loader"
+            },
+            { loader: 'extract-loader', options: {}},
+            {
+              loader: 'html-loader',
+              options: {
+                minimize: false,
+
+                attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data'],
+              },
+            },
+          ]
         },
 
       ],
