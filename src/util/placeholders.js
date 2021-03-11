@@ -7,7 +7,7 @@ function getValue(model, path) {
     }
   });
 
-  if (typeof model !== 'string') {
+  if (typeof model !== 'string' && typeof model !== 'number') {
     throw new Error(`defined path is wrong ${path.join('.')}`);
   }
 
@@ -19,14 +19,16 @@ function getValue(model, path) {
  * @param {string} str
  * @param {object} obj
  */
-function placeholder(str, obj){
+function placeholders(str, obj){
   if(r.test(str)){
     str = str.replace(r, function (match, p1) {
       let val = '';
 
       try {
+
         val = getValue(obj, p1.split('.'))
-      } catch (e){}
+      } catch (e){
+      }
 
       return val;
     })
@@ -35,4 +37,5 @@ function placeholder(str, obj){
   return str;
 }
 
-export default placeholder;
+
+module.exports = placeholders;

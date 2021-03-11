@@ -13,9 +13,11 @@ const DevEnum = require('../../data/DevEnum');
 const isFile = require('../../util/isFile');
 const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
+const placeholders = require('../../util/placeholders');
 const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
 const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
 const VirtualModulesPlugin = require("webpack-virtual-modules");
+const sanitizeFilename = require("sanitize-filename");
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -75,6 +77,22 @@ module.exports = function createConfig({
 
   // check for trailing slash.
   outputPath = outputPath.replace(/\/$/, "");
+
+  // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
+  // added .html is there for compatibility with workspace.
+  let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
+
+  // check if there is a custom bundleName
+  if (richmediarc.settings.bundle){
+    bundleName = placeholders(richmediarc.settings.bundle, richmediarc);
+    bundleName = sanitizeFilename(bundleName);
+  }
+
+  if(path.isAbsolute(bundleName)){
+    throw new Error('bundleName in richmediarc can not be a absolute path.')
+  }
+
+  outputPath = path.join(outputPath, '../', bundleName);
 
   const config = {
     mode,
@@ -374,15 +392,6 @@ module.exports = function createConfig({
 
   if (mode === DevEnum.PRODUCTION) {
 
-    // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
-    // added .html is there for compatibility with workspace.
-    let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
-
-    // check if there is a custom bundleName
-    if(config.settings.bundleName){
-      bundleName = placeholder(config.settings.bundleName, config);
-    }
-
     config.plugins.push(
       new ZipPlugin({
         path: path.join(outputPath, '../'),
@@ -478,6 +487,8 @@ module.exports = function createConfig({
   //     format: 'compact',
   //   }),
   // );
+
+  // throw new Error('STOP hammer time')
 
   return config;
 };
