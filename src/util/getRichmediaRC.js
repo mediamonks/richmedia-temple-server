@@ -11,9 +11,6 @@ const isFile = require("./isFile");
 const {readJson} = require("fs-extra");
 
 
-
-
-
 /**
  * getJSONConfig retrieves a jsonConfig config file and will
  * also inherit configs from parent jsonConfig files
