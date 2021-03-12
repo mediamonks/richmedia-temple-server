@@ -1,6 +1,8 @@
 const path = require('path');
 
 module.exports = function getNameFromLocation(location) {
+
+
   let list = location.split('/');
 
   list = list

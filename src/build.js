@@ -150,11 +150,16 @@ module.exports = async function build({
       const template = await getTemplate();
 
       const templateConfig = {
-        banner: configsResult.map(item => {
-          const name = getNameFromLocation(item.location);
-          let width = item.data.settings.size.width;
-          let height = item.data.settings.size.height;
-          let title = name;
+        banner: configsResult.map((richmediarc, index) => {
+
+          const webpackConfig = result[index];
+
+          let bundleName = /[^/]*$/.exec(webpackConfig.output.path)[0]
+          // bundleName = getNameFromLocation(bundleName);
+          // console.log(name);
+
+          let width = richmediarc.data.settings.size.width;
+          let height = richmediarc.data.settings.size.height;
           const isDevelopment = false;
 
           // if (item.data.settings.expandable) {
@@ -164,9 +169,9 @@ module.exports = async function build({
           // }
 
           return {
-            src: `./${name}/`,
-            name,
-            title,
+            src: `./${bundleName}/`,
+            name: bundleName,
+            title: bundleName,
             width,
             height,
             isDevelopment,

@@ -182,6 +182,7 @@ module.exports = function createConfig({
                   });
 
                   return [
+                    // custom properties
                     require('postcss-import')({ root: loader.resourcePath }),
                     require('postcss-css-variables')({
                       variables: cssVariables,
