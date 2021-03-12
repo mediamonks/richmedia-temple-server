@@ -47,9 +47,7 @@ module.exports = function createConfig({
 
   if (mode === DevEnum.PRODUCTION) {
     devtool = false;
-  }
-
-  if (mode === DevEnum.DEVELOPMENT) {
+  } else if (mode === DevEnum.DEVELOPMENT) {
     devtool = 'inline-source-map';
   }
 
