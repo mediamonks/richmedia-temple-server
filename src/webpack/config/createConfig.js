@@ -13,34 +13,35 @@ const DevEnum = require('../../data/DevEnum');
 const isFile = require('../../util/isFile');
 const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
-const placeholders = require('../../util/placeholders');
-const flattenObjectToCSSVars = require("../../util/flattenObjectToCSSVars");
-const RichmediaRCPlugin = require("../plugin/RichmediaRCPlugin");
-const VirtualModulesPlugin = require("webpack-virtual-modules");
-const sanitizeFilename = require("sanitize-filename");
+const parsePlaceholders = require('../../util/parsePlaceholders');
+const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
+const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
+const VirtualModulesPlugin = require('webpack-virtual-modules');
+const sanitizeFilename = require('sanitize-filename');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
 /**
  *
- * @param {object} options
- * @param {string} options.richmediarcFilepath
- * @param {string} options.outputPath
- * @param {string} options.mode
- * @param {any} options.richmediarc
+ * @param {object} data
+ * @param {object} data.richmediarc
+ * @param {string} data.richmediarcFilepath
+ * @param {string} data.outputPath
+ * @param {object} data.options
+ * @param {string} data.options.mode
+ * @param {boolean} data.options.stats
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-                                         richmediarcFilepath,
-                                         outputPath,
-                                         richmediarc,
+  richmediarc,
+  richmediarcFilepath,
+  outputPath,
 
-                                         options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
-                                           mode: DevEnum.DEVELOPMENT,
-                                           stats: false,
-                                         },
-                                       }) {
-
+  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
+    mode: DevEnum.DEVELOPMENT,
+    stats: false,
+  },
+}) {
   let devtool = false;
   const entry = [];
 
@@ -76,20 +77,20 @@ module.exports = function createConfig({
   entry.push(richmediarc.settings.entry.js);
 
   // check for trailing slash.
-  outputPath = outputPath.replace(/\/$/, "");
+  outputPath = outputPath.replace(/\/$/, '');
 
   // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
   // added .html is there for compatibility with workspace.
   let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
 
   // check if there is a custom bundleName
-  if (richmediarc.settings.bundleName){
-    bundleName = placeholders(richmediarc.settings.bundleName, richmediarc);
+  if (richmediarc.settings.bundleName) {
+    bundleName = parsePlaceholders(richmediarc.settings.bundleName, richmediarc);
     bundleName = sanitizeFilename(bundleName);
   }
 
-  if(path.isAbsolute(bundleName)){
-    throw new Error('bundleName in richmediarc can not be a absolute path.')
+  if (path.isAbsolute(bundleName)) {
+    throw new Error('bundleName in richmediarc can not be a absolute path.');
   }
 
   outputPath = path.join(outputPath, '../', bundleName);
@@ -161,28 +162,31 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: function (loader) {
+                plugins: function(loader) {
                   let data;
                   if (isVirtual === false) {
                     data = getRichmediaRCSync(richmediarcFilepath, filePath => {
                       loader.addDependency(filePath);
                     });
                   } else {
-                    data = richmediarc
+                    data = richmediarc;
                   }
 
                   const cssVariables = flattenObjectToCSSVars(data);
-                  Object.keys(cssVariables).forEach(function (name) {
+                  Object.keys(cssVariables).forEach(function(name) {
                     const val = cssVariables[name];
                     if (isFile(val) && !isExternalURL(val)) {
-                      cssVariables[name] = path.relative(path.dirname(loader.resourcePath), cssVariables[name]);
+                      cssVariables[name] = path.relative(
+                        path.dirname(loader.resourcePath),
+                        cssVariables[name],
+                      );
                     }
                   });
 
                   return [
-                    require('postcss-import')({root: loader.resourcePath}),
+                    require('postcss-import')({ root: loader.resourcePath }),
                     require('postcss-css-variables')({
-                      variables: cssVariables
+                      variables: cssVariables,
                     }),
                     require('postcss-preset-env')({
                       stage: 2,
@@ -194,7 +198,6 @@ module.exports = function createConfig({
                     require('postcss-nested')(),
                     require('cssnano')(),
                   ];
-
                 },
               },
             },
@@ -284,8 +287,8 @@ module.exports = function createConfig({
             options: {
               configFilepath: richmediarcFilepath,
               config: richmediarc,
-              isVirtual
-            }
+              isVirtual,
+            },
           },
         },
         {
@@ -294,7 +297,7 @@ module.exports = function createConfig({
           type: 'javascript/dynamic',
           use: {
             loader: path.resolve(path.join(__dirname, '../loader/RichmediaRCLoader.js')),
-            options: {}
+            options: {},
           },
         },
         {
@@ -326,9 +329,9 @@ module.exports = function createConfig({
           use: [
             // { loader: 'raw-loader' },
             {
-              loader: "handlebars-loader"
+              loader: 'handlebars-loader',
             },
-            { loader: 'extract-loader', options: {}},
+            { loader: 'extract-loader', options: {} },
             {
               loader: 'html-loader',
               options: {
@@ -337,9 +340,8 @@ module.exports = function createConfig({
                 attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data'],
               },
             },
-          ]
+          ],
         },
-
       ],
     },
     plugins: [
@@ -350,7 +352,7 @@ module.exports = function createConfig({
           ...richmediarc,
           DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
           PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
-        }
+        },
       }),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
@@ -358,9 +360,8 @@ module.exports = function createConfig({
       }),
 
       new VirtualModulesPlugin({
-        'node_modules/richmediaconfig': `module.exports = "DUDE"`
+        'node_modules/richmediaconfig': `module.exports = "DUDE"`,
       }),
-
 
       // new CircularDependencyPlugin({
       //   // exclude detection of files based on a RegExp
@@ -387,11 +388,10 @@ module.exports = function createConfig({
   const staticPath = path.resolve(path.dirname(richmediarcFilepath), './static');
 
   if (fs.existsSync(staticPath)) {
-
-    config.plugins.push(new CopyWebpackPlugin({
-        patterns: [
-          {from: staticPath, to: ''}]
-      })
+    config.plugins.push(
+      new CopyWebpackPlugin({
+        patterns: [{ from: staticPath, to: '' }],
+      }),
     );
   }
 
@@ -405,7 +405,6 @@ module.exports = function createConfig({
   }
 
   if (mode === DevEnum.PRODUCTION) {
-
     config.plugins.push(
       new ZipPlugin({
         path: path.join(outputPath, '../'),

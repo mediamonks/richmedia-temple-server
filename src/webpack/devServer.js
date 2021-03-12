@@ -16,7 +16,7 @@ const getTemplate = require('../util/getDevTemplate');
 const getNameFromLocation = require('../util/getNameFromLocation');
 
 handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
-	return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+  return arg1 == arg2 ? options.fn(this) : options.inverse(this);
 });
 
 /**
@@ -32,7 +32,7 @@ module.exports = async function devServer(configs, openLocation = true) {
 
   const httpLocation = `http://localhost:${port}`;
 
-  if(openLocation){
+  if (openLocation) {
     // opener
     opener(httpLocation);
   }
@@ -47,20 +47,17 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const hmrPath = '__webpack_hmr';
     const name = getNameFromLocation(settingsList[index].location);
 
-    config.mode =  'development';
+    config.mode = 'development';
     // config.entry.main = [
     //   `webpack-hot-middleware/client?path=/${name}/${hmrPath}&reload=true`,
     //   ...config.entry.main,
     // ];
 
-
     config.output = {
       ...config.output,
-      "hotUpdateChunkFilename": ".hot/.hot-update.js",
-      "hotUpdateMainFilename": ".hot/.hot-update.json"
+      hotUpdateChunkFilename: '.hot/.hot-update.js',
+      hotUpdateMainFilename: '.hot/.hot-update.json',
     };
-
-
 
     const compiler = webpack(config);
 
@@ -75,7 +72,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
 
     app.use(
       webpackHotMiddleware(compiler, {
-        path: `/${name}/${hmrPath}`
+        path: `/${name}/${hmrPath}`,
       }),
     );
     //
@@ -90,25 +87,25 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         const name = getNameFromLocation(value.location);
         let width = value.data.settings.size.width;
         let height = value.data.settings.size.height;
-				let title = name;
-				const isDevelopment = true;
+        let title = name;
+        const isDevelopment = true;
 
-        if(value.data.settings.expandable){
+        if (value.data.settings.expandable) {
           width = value.data.settings.expandable.width;
           height = value.data.settings.expandable.height;
-          title += "_EXP_" + width + "x" + height;
-				}
+          title += `_EXP_${width}x${height}`;
+        }
 
         return {
           src: `./${name}/`,
           name,
           title,
           width,
-					height,
-					isDevelopment,
+          height,
+          isDevelopment,
         };
-			}),
-			query: req.query,
+      }),
+      query: req.query,
     };
 
     res.send(template(templateConfig));
@@ -118,7 +115,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const name = req.params.target;
 
     const folder = path.join(process.cwd(), 'tmpFolder');
-    if (!fs.existsSync(folder)){
+    if (!fs.existsSync(folder)) {
       fs.mkdirSync(folder);
     }
 

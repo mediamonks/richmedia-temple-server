@@ -6,10 +6,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const deepmerge = require('deepmerge');
-const leafs = require("./leafs");
-const isFile = require("./isFile");
-const {readJson} = require("fs-extra");
-
+const leafs = require('./leafs');
+const isFile = require('./isFile');
+const { readJson } = require('fs-extra');
 
 /**
  * getJSONConfig retrieves a jsonConfig config file and will
@@ -18,28 +17,21 @@ const {readJson} = require("fs-extra");
  * @param {string} filepath
  * @return {Promise<void | never>}
  */
-module.exports = async function getRichmediaRC(
-  filepath,
-) {
-
+module.exports = async function getRichmediaRC(filepath) {
   filepath = path.resolve(filepath);
   const dirname = path.dirname(filepath);
 
   let richmediarc = await readJson(filepath);
 
-  leafs(richmediarc, function(value, obj, name){
-
-    if(typeof value === 'string'
-      && !path.isAbsolute(value)
-      && isFile(value))
-    {
+  leafs(richmediarc, function(value, obj, name) {
+    if (typeof value === 'string' && !path.isAbsolute(value) && isFile(value)) {
       obj[name] = path.resolve(dirname, value);
     }
   });
 
-  let {parent} = richmediarc;
-  if(parent){
-    richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc)
+  let { parent } = richmediarc;
+  if (parent) {
+    richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc);
     delete richmediarc.parent;
   }
 

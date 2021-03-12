@@ -1,22 +1,17 @@
-
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
 const devServer = require('./webpack/devServer');
 const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 
-const saveChoicesInPackageJson = require("./util/saveChoicesInPackageJson");
+const saveChoicesInPackageJson = require('./util/saveChoicesInPackageJson');
 const findJSONConfigs = require('./util/findRichmediaRC');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
 module.exports = async function dev({ glob = './**/.richmediarc*', choices = null, stats = null }) {
-
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
-  let configs = await findJSONConfigs(glob, [
-    'settings.entry.js',
-    'settings.entry.html',
-  ]);
+  let configs = await findJSONConfigs(glob, ['settings.entry.js', 'settings.entry.html']);
 
   if (configs.length === 0) {
     throw new Error('could not find a compatible .richmediarc with entry points configured');
@@ -27,7 +22,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
 
   configs = await expandWithSpreadsheetData(configs);
 
-  if(!choices) {
+  if (!choices) {
     let answers = {
       location: 'all',
     };
@@ -42,9 +37,8 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
           name: 'location',
           message: 'Please select config(s) build:',
           choices: [
-            {name: 'all', checked: false},
+            { name: 'all', checked: false },
             ...configs.map(config => {
-
               let name = config.location;
 
               if (config.data.name) {
@@ -53,7 +47,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
 
               return {
                 name,
-                checked: false
+                checked: false,
               };
             }),
           ],
@@ -69,7 +63,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
           name: 'openLocation',
           message: 'Do you want a browser to open to your dev location?',
           default: true,
-        }
+        },
       ]);
     }
 
@@ -87,7 +81,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
   if (choices.location.indexOf('all') > -1) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({location}) => {
+    configsResult = configs.filter(({ location }) => {
       return choices.location.indexOf(location) > -1;
     });
   }
@@ -100,8 +94,8 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
   list = list.map((webpack, index) => {
     return {
       webpack,
-      settings: configsResult[index]
-    }
+      settings: configsResult[index],
+    };
   });
 
   await devServer(list, choices.openLocation);

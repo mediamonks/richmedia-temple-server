@@ -1,8 +1,8 @@
 const loaderUtils = require('loader-utils');
 const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRC = require('../../util/getRichmediaRC');
-const leafs = require("../../util/leafs");
-const isFile = require("../../util/isFile");
+const leafs = require('../../util/leafs');
+const isFile = require('../../util/isFile');
 const fs = require('fs');
 
 /**
@@ -14,16 +14,16 @@ module.exports = function RichmediaRCLoader(data) {
   const options = loaderUtils.getOptions(this);
   const loaderContext = this;
 
-  const {configFilepath, config, isVirtual} = options;
+  const { configFilepath, config, isVirtual } = options;
 
-  let prom = Promise.resolve(config)
+  let prom = Promise.resolve(config);
 
-  if(!isVirtual){
+  if (!isVirtual) {
     prom = prom.then(() => {
       return getRichmediaRC(configFilepath, filepath => {
         this.addDependency(filepath);
-      })
-    })
+      });
+    });
   }
 
   prom.then(data => {
@@ -35,7 +35,7 @@ module.exports = function RichmediaRCLoader(data) {
 
     if (data && data.content) {
       leafs(data.content, (value, obj, name) => {
-        if(isFile(value) && !isExternalURL(value)){
+        if (isFile(value) && !isExternalURL(value)) {
           const id = `uuid_replace_${ruuid.toString(16)}`;
 
           replaceItems.push({
@@ -50,7 +50,6 @@ module.exports = function RichmediaRCLoader(data) {
       });
     }
 
-
     data = JSON.stringify(data)
       .replace(/\u2028/g, '\\u2028')
       .replace(/\u2029/g, '\\u2029');
@@ -60,8 +59,6 @@ module.exports = function RichmediaRCLoader(data) {
       return prev;
     }, data);
 
-    callback(null, `module.exports = ${data};`)
-  })
-
-
+    callback(null, `module.exports = ${data};`);
+  });
 };

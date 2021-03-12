@@ -6,7 +6,7 @@ const draft07 = require('ajv/lib/refs/json-schema-draft-07.json');
 const createConfig = require('./createConfig');
 const isGoogleSpreadsheetUrl = require('../../util/isGoogleSpreadsheetUrl');
 const getNameFromLocation = require('../../util/getNameFromLocation');
-const {GoogleSpreadsheet} = require("google-spreadsheet");
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 const schema = require('../../schema/richmediarc.schema.json');
 
@@ -37,7 +37,9 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
     );
   }
 
-  const outputPath = path.resolve(path.join('./build/', getNameFromLocation(richmediaConfigLocation)));
+  const outputPath = path.resolve(
+    path.join('./build/', getNameFromLocation(richmediaConfigLocation)),
+  );
   const richmediarcFilepath = path.resolve(richmediaConfigLocation);
 
   return {
@@ -53,7 +55,6 @@ function validateSchemaAndCreatePaths(richmediaConfigLocation, richmediaConfig) 
  * @return {Promise<any[]>}
  */
 async function createConfigByRichmediarcList(richmediarcList, { mode, stats }) {
-
   const promiseList = richmediarcList.map(
     ({ location, data }) => {
       /**

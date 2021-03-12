@@ -1,22 +1,16 @@
-
 const { prompt } = require('inquirer');
 const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const base64 = require('./base64');
 
-module.exports = async function saveChoicesInPackageJson(type, {
-  glob,
-  choices,
-  stats,
-}){
-
-  if(!type || (type !== 'dev' && type !== 'build')){
-    throw new Error('type is not set or not of value dev or build.')
+module.exports = async function saveChoicesInPackageJson(type, { glob, choices, stats }) {
+  if (!type || (type !== 'dev' && type !== 'build')) {
+    throw new Error('type is not set or not of value dev or build.');
   }
 
-  if(!glob ){
-    throw new Error('glob is not set.')
+  if (!glob) {
+    throw new Error('glob is not set.');
   }
 
   let result = await prompt({
@@ -27,7 +21,7 @@ module.exports = async function saveChoicesInPackageJson(type, {
   });
 
   if (result.saveSettings) {
-    const packageJsonFilepath = path.resolve(process.cwd(),'./package.json');
+    const packageJsonFilepath = path.resolve(process.cwd(), './package.json');
     let packageJson = require(packageJsonFilepath);
     const { scripts } = packageJson;
 
@@ -36,12 +30,10 @@ module.exports = async function saveChoicesInPackageJson(type, {
       name: 'name',
       message: `please provide a name for your command. You will type something like npm run ${type}:__NAME__
 No special chars, spaces, dashes just a single word.`,
-      validate: function (value) {
-        var pass = value.match(
-          /^[a-zA-Z\d_]+$/g
-        );
+      validate: function(value) {
+        var pass = value.match(/^[a-zA-Z\d_]+$/g);
         if (pass) {
-          if(scripts[`${type}:${value}`]){
+          if (scripts[`${type}:${value}`]) {
             return `"${type}:${value}" is already in use.`;
           }
 
@@ -50,30 +42,36 @@ No special chars, spaces, dashes just a single word.`,
           return 'Please enter a valid command name';
         }
       },
-    },);
+    });
 
     const command = [`rds-${type}`];
     command.push(`--glob ${glob}`);
     command.push(`--choices ${base64.encode(JSON.stringify(choices))}`);
 
-    if(stats){
-      command.push(`--stats`)
+    if (stats) {
+      command.push(`--stats`);
     }
 
-    scripts[`${type}:${result.name}`] = `${command.join(' ')}`
+    scripts[`${type}:${result.name}`] = `${command.join(' ')}`;
 
     packageJson = {
       ...packageJson,
-      scripts
-    }
+      scripts,
+    };
 
     await new Promise((resolve, reject) => {
-      fs.writeFile(packageJsonFilepath, JSON.stringify(packageJson, null, 2), function writeJSON(err) {
+      fs.writeFile(packageJsonFilepath, JSON.stringify(packageJson, null, 2), function writeJSON(
+        err,
+      ) {
         if (err) reject(err);
         resolve(true);
       });
     });
 
-    console.log(`${chalk.blue('i')} saved choice in package.json. Can now repeat choices with ${chalk.blue(`npm run ${type}:${result.name}`)}`);
+    console.log(
+      `${chalk.blue('i')} saved choice in package.json. Can now repeat choices with ${chalk.blue(
+        `npm run ${type}:${result.name}`,
+      )}`,
+    );
   }
-}
+};

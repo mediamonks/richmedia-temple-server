@@ -7,7 +7,7 @@ const md5File = require('md5-file');
 const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRC = require('../../util/getRichmediaRC');
 const isFile = require('../../util/isFile');
-const leafs = require("../../util/leafs");
+const leafs = require('../../util/leafs');
 
 class RichmediaRCPlugin {
   constructor(options) {
@@ -21,21 +21,22 @@ class RichmediaRCPlugin {
       const all = [];
       leafs(json.content, (value, obj, name) => {
         if (isFile(value) && !isExternalURL(value)) {
-          all.push(new Promise(resolve => {
+          all.push(
+            new Promise(resolve => {
+              fs.readFile(value, (err, source) => {
+                const data = path.parse(value);
+                obj[name] = `${md5File.sync(value)}${data.ext}`;
+                compilation.assets[obj[name]] = {
+                  source: () => source,
+                  size() {
+                    return Buffer.byteLength(this.source());
+                  },
+                };
 
-            fs.readFile(value, (err, source) => {
-              const data = path.parse(value);
-              obj[name] = `${md5File.sync(value)}${data.ext}`;
-              compilation.assets[obj[name]] = {
-                source: () => source,
-                size() {
-                  return Buffer.byteLength(this.source());
-                },
-              };
-
-              resolve(compilation);
-            });
-          }));
+                resolve(compilation);
+              });
+            }),
+          );
         }
       });
 

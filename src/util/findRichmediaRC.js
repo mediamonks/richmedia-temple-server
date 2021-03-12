@@ -9,20 +9,19 @@ const doesNestedExist = require('./doesNestedExists');
  * @return {Array<{data: (void|never), location: string}[]>}
  */
 module.exports = async function findRichmediaRC(globQuery = '**/.richmediarc', patterns = []) {
-
-  const files = await glob(globQuery, {ignore: ['./node_modules/**/.richmediarc']});
+  const files = await glob(globQuery, { ignore: ['./node_modules/**/.richmediarc'] });
   let result = await Promise.all(
-    files.map(async function (location) {
+    files.map(async function(location) {
       return {
         location,
-        data: await getRichmediaRC(location)
+        data: await getRichmediaRC(location),
       };
-    })
+    }),
   );
 
   const resolvedPatterns = patterns.map(pattern => pattern.split('.'));
 
-  result = result.filter(({data}) =>
+  result = result.filter(({ data }) =>
     resolvedPatterns.every(pattern => doesNestedExist(data, pattern)),
   );
 

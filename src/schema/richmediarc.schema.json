@@ -2,8 +2,7 @@
   "$id": "https://raw.githubusercontent.com/mediamonks/richmedia-temple-server/master/src/schema/richmediarc.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "definitions": {
-  },
+  "definitions": {},
   "properties": {
     "parent": {
       "description": "Relative path from this config to another config. Like ../../.richmediarc or ../../global.config.js",
@@ -36,10 +35,7 @@
               "format": "uri-reference"
             }
           },
-          "required": [
-            "js",
-            "html"
-          ]
+          "required": ["js", "html"]
         },
         "size": {
           "properties": {
@@ -59,7 +55,5 @@
     }
   },
   "additionalProperties": true,
-  "required": [
-    "settings"
-  ]
+  "required": ["settings"]
 }

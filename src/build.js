@@ -24,20 +24,17 @@ const saveChoicesInPackageJson = require('./util/saveChoicesInPackageJson');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-                                        glob = './**/.richmediarc*',
-                                        stats = false,
-                                        choices = {},
-                                      }) {
+  glob = './**/.richmediarc*',
+  stats = false,
+  choices = {},
+}) {
   const buildTarget = './build';
 
   const spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('/-\\|');
   spinner.start();
 
-  let configs = await findRichmediaRC(glob, [
-    'settings.entry.js',
-    'settings.entry.html',
-  ]);
+  let configs = await findRichmediaRC(glob, ['settings.entry.js', 'settings.entry.html']);
 
   spinner.stop(true);
 
@@ -51,7 +48,7 @@ module.exports = async function build({
 
   const filesBuild = await globPromise(`${buildTarget}/**/*`);
 
-  if(!choices){
+  if (!choices) {
     let options = {};
     if (filesBuild.length > 0) {
       if (typeof options.emptyBuildDir !== 'boolean') {
@@ -72,10 +69,10 @@ module.exports = async function build({
           name: 'build',
           message: 'Please choose the current build to start.',
           choices: [
-            {name: 'all', checked: false},
-            ...configs.map(({location}) => ({name: location, checked: false})),
+            { name: 'all', checked: false },
+            ...configs.map(({ location }) => ({ name: location, checked: false })),
           ],
-          validate: function (answer) {
+          validate: function(answer) {
             if (answer.length < 1) {
               return 'You must choose at least one.';
             }
@@ -100,7 +97,6 @@ module.exports = async function build({
       choices,
       stats,
     });
-
   }
 
   if (choices.emptyBuildDir) {
@@ -115,12 +111,10 @@ module.exports = async function build({
     configsResult = configs.filter(config => choices.build.indexOf(config.location) >= 0);
   }
 
-
   const result = await createConfigByRichmediarcList(configsResult, {
     mode: 'production',
     stats: stats,
   });
-
 
   return new Promise((resolve, reject) => {
     webpack(result).run((err, stats) => {
@@ -152,38 +146,37 @@ module.exports = async function build({
     });
   })
 
-	.then(async () => {
-		const template = await getTemplate();
+    .then(async () => {
+      const template = await getTemplate();
 
-		const templateConfig = {
-			banner: configsResult.map(item => {
-				const name = getNameFromLocation(item.location);
-				let width = item.data.settings.size.width;
-				let height = item.data.settings.size.height;
-				let title = name;
-				const isDevelopment = false;
+      const templateConfig = {
+        banner: configsResult.map(item => {
+          const name = getNameFromLocation(item.location);
+          let width = item.data.settings.size.width;
+          let height = item.data.settings.size.height;
+          let title = name;
+          const isDevelopment = false;
 
-				// if (item.data.settings.expandable) {
-				//   width = item.data.settings.expandable.width;
-				//   height = item.data.settings.expandable.height;
-				//   title += "_EXP_" + width + "x" + height;
-				// }
+          // if (item.data.settings.expandable) {
+          //   width = item.data.settings.expandable.width;
+          //   height = item.data.settings.expandable.height;
+          //   title += "_EXP_" + width + "x" + height;
+          // }
 
-				return {
-					src: `./${name}/`,
-					name,
-					title,
-					width,
-					height,
-					isDevelopment
-,
-				};
-			}),
-		};
+          return {
+            src: `./${name}/`,
+            name,
+            title,
+            width,
+            height,
+            isDevelopment,
+          };
+        }),
+      };
 
-		return fs.outputFile('./build/index.html', template(templateConfig));
-	})
-	.then(() => {
-		return globPromise(`${buildTarget}/**/*`);
-	});
+      return fs.outputFile('./build/index.html', template(templateConfig));
+    })
+    .then(() => {
+      return globPromise(`${buildTarget}/**/*`);
+    });
 };
