@@ -32,4 +32,4 @@ deploy:
     skip_cleanup: true
 
 notifications:
-  slack: mediamonks:j3KLS3O5QJOFt7wP8jAk0HPf
+  slack: mediamonks:$TRAVIS_TOKEN
