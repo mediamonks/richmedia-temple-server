@@ -8,6 +8,7 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 
 module.exports = async function dev({ glob = './**/.richmediarc*', choices = null, stats = null }) {
+  // test adding test
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
 
