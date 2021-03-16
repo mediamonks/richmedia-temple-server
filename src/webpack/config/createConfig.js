@@ -79,7 +79,7 @@ module.exports = function createConfig({
 
   // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
   // added .html is there for compatibility with workspace.
-  let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
+  let bundleName = /[^/\\]*$/.exec(outputPath)[0] + '.html';
 
   // check if there is a custom bundleName
   if (richmediarc.settings.bundleName) {
