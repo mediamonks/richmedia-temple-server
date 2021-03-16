@@ -1,35 +1,19 @@
 language: node_js
-
 cache: npm
-
 node_js:
-  - '12'
-
+- '12'
 sudo: false
-
 notifications:
-  slack: mediamonks:$TRAVIS_TOKEN
-
-#before_install:
-#  - yarn global add codeclimate-test-reporter
-
-#before_deploy:
-#  - npm run build
-#  - cd dist
-
+  slack:
+    secure: ivTlxQLpJz538EItAJYOI0kbXVaT/BLVJQg3xWdU4gYKaW5sL66cu1YwK+cdSN+0F8aKNr/JcfmewaZ8rcJ9NTVN0Y2BsL3kaUfeed2dKEvhV79P5Y+NccEGnopUuvhXzOiRtVAxDKsf5Svoi9NuzTxekCiTMjyCMy4mCuA+WpLgBqcXL3iXf7dfD9wP93CY8C4ixM2+jp1FCUTTXtUpL3qJugxizb2/4qrZzhki0DoO+LD9cPtSGMVQQKGYWAu4KPo7l9Y4ObVE0mPDNEBn7hs8ygJS7UqVe6qXBkx1/iGZuAjjLkQm+ViHusEPO7Tt1gJmPIqD793iUKzcwCGD0A1l8ZyRmMZe/y1bs5ibzXoz1z3akqxPeOAGyVFHpt754vcF0TZLcnNtCK8dRcEsrWWvERs0dTqs4W5PPSMFAnq/94RVWMh/D2b0QQ/K2tDkV4sZ5MS0A7YqtKhELKFyPDPjMmR5EMrpDt5M0HhzBLrAroK9M0mepmmluSDmHvtvsllsE0NFgmAwljylMdHXN+OQUxDlMyVXdfmkk/eKH70B8tM1rl+SpvOQIqEPyWsX5CJNUpGSpmCNSUX+pT76FxHtz+LMDFSzlnOycBQ330w8xEYsW2nDItVFnb1gr32+7D8aSw9+0AcnJOXHW7ABcnoXNClNtaqaGSOOZTnKuk0=
 script:
-  - npm run test
-
+- npm run test
 after_script:
-#  - npm run build # make a dist folder
-#  - codeclimate-test-reporter < coverage/lcov.info
-#  - node_modules/.bin/coveralls < coverage/lcov.info
-
 deploy:
-  - provider: npm
-    email: 'devmonk@mediamonks.com'
-    api_key: $NPM_TOKEN
-    on:
-      tags: true
-      node: '12'
-    skip_cleanup: true
+- provider: npm
+  email: devmonk@mediamonks.com
+  api_key: "$NPM_TOKEN"
+  on:
+    tags: true
+    node: '12'
+  skip_cleanup: true
