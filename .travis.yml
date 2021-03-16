@@ -7,6 +7,9 @@ node_js:
 
 sudo: false
 
+notifications:
+  slack: mediamonks:$TRAVIS_TOKEN
+
 #before_install:
 #  - yarn global add codeclimate-test-reporter
 
@@ -30,6 +33,3 @@ deploy:
       tags: true
       node: '12'
     skip_cleanup: true
-
-notifications:
-  slack: mediamonks:$TRAVIS_TOKEN
