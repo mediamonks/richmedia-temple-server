@@ -3,7 +3,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-const HtmlWebPackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ZipPlugin = require('zip-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -18,6 +18,7 @@ const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
 const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
 const VirtualModulesPlugin = require('webpack-virtual-modules');
 const sanitizeFilename = require('sanitize-filename');
+const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -60,7 +61,8 @@ module.exports = function createConfig({
   let imageNameHashing = namedHashing;
 
   if (richmediarc && richmediarc.settings) {
-    if (richmediarc.settings.useOriginalImageName) {
+    if (richmediarc.settings.useOriginalImageNames
+      || richmediarc.settings.useOriginalImageName) {
       imageNameHashing = '';
     }
 
@@ -68,6 +70,17 @@ module.exports = function createConfig({
       namedHashing = '';
       imageNameHashing = '';
     }
+  }
+
+  let browserSupport = [
+    "ie 11",
+    "last 2 versions",
+    "safari >= 7"
+  ]
+
+  // override browser support
+  if(richmediarc.settings.browserSupport){
+    browserSupport = richmediarc.settings.browserSupport;
   }
 
   // entry.push('@babel/polyfill');
@@ -79,7 +92,7 @@ module.exports = function createConfig({
 
   // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
   // added .html is there for compatibility with workspace.
-  let bundleName = /[^/]*$/.exec(outputPath)[0] + '.html';
+  let bundleName = /[^/\\]*$/.exec(outputPath)[0] + '.html';
 
   // check if there is a custom bundleName
   if (richmediarc.settings.bundleName) {
@@ -184,6 +197,10 @@ module.exports = function createConfig({
                   return [
                     // custom properties
                     require('postcss-import')({ root: loader.resourcePath }),
+                    require('postcss-for')(),
+                    require('postcss-random')({
+                      randomSeed: 123
+                    }),
                     require('postcss-css-variables')({
                       variables: cssVariables,
                     }),
@@ -192,7 +209,7 @@ module.exports = function createConfig({
                       features: {
                         'nesting-rules': true,
                       },
-                      browsers: ['defaults', 'ie 11'],
+                      browsers: browserSupport,
                     }),
                     require('postcss-nested')(),
                     require('cssnano')(),
@@ -266,7 +283,7 @@ module.exports = function createConfig({
                     useBuiltIns: 'usage',
                     corejs: 3,
                     targets: {
-                      browsers: ['ie 11', 'last 2 versions', 'safari >= 7'],
+                      browsers: browserSupport,
                     },
                   },
                 ],
@@ -344,7 +361,7 @@ module.exports = function createConfig({
       ],
     },
     plugins: [
-      new HtmlWebPackPlugin({
+      new HtmlWebpackPlugin({
         template: richmediarc.settings.entry.html,
         filename: './index.html',
         templateParameters: {

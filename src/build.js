@@ -154,7 +154,7 @@ module.exports = async function build({
 
           const webpackConfig = result[index];
 
-          let bundleName = /[^/]*$/.exec(webpackConfig.output.path)[0]
+          let bundleName = /[^/\\]*$/.exec(webpackConfig.output.path)[0]
           // bundleName = getNameFromLocation(bundleName);
           // console.log(name);
 
