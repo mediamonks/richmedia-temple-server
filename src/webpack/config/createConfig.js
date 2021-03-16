@@ -15,10 +15,10 @@ const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const parsePlaceholders = require('../../util/parsePlaceholders');
 const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
-const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
+// const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
 const VirtualModulesPlugin = require('webpack-virtual-modules');
 const sanitizeFilename = require('sanitize-filename');
-const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
+// const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -197,10 +197,10 @@ module.exports = function createConfig({
                   return [
                     // custom properties
                     require('postcss-import')({ root: loader.resourcePath }),
-                    require('postcss-for')(),
-                    require('postcss-random')({
-                      randomSeed: 123
-                    }),
+                    // require('postcss-for')(),
+                    // require('postcss-random')({
+                    //   randomSeed: 123
+                    // }),
                     require('postcss-css-variables')({
                       variables: cssVariables,
                     }),
