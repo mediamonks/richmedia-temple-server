@@ -8,6 +8,8 @@ const ZipPlugin = require('zip-webpack-plugin');
 const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const VirtualModulesPlugin = require('webpack-virtual-modules');
+const sanitizeFilename = require('sanitize-filename');
 
 const DevEnum = require('../../data/DevEnum');
 const isFile = require('../../util/isFile');
@@ -15,9 +17,8 @@ const isExternalURL = require('../../util/isExternalURL');
 const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const parsePlaceholders = require('../../util/parsePlaceholders');
 const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
+const resolveRichmediaRCPathsToWebpackPaths = require('../../util/resolveRichmediaRCPathsToWebpackPaths');
 // const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
-const VirtualModulesPlugin = require('webpack-virtual-modules');
-const sanitizeFilename = require('sanitize-filename');
 // const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
@@ -364,12 +365,24 @@ module.exports = function createConfig({
       new HtmlWebpackPlugin({
         template: richmediarc.settings.entry.html,
         filename: './index.html',
-        templateParameters: {
-          ...richmediarc,
-          DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
-          PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
-        },
-      }),
+        templateParameters: (compilation, assets, assetTags, options) => {
+
+          const data = resolveRichmediaRCPathsToWebpackPaths(compilation, getRichmediaRCSync(richmediarcFilepath));
+
+          return {
+            ...data,
+            DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
+            PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
+
+            compilation,
+            webpackConfig: compilation.options,
+            htmlWebpackPlugin: {
+              tags: assetTags,
+              files: assets,
+              options
+            }
+          };
+        },      }),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
