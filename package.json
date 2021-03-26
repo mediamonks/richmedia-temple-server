@@ -1,6 +1,6 @@
 {
   "name": "@mediamonks/richmedia-temple-server",
-  "version": "6.1.13",
+  "version": "7.0.0",
   "description": "This is the Richmedia Temple, used for creating richmedia units for various vendors.",
   "scripts": {
     "dev": "rds-dev",
