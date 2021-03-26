@@ -366,8 +366,14 @@ module.exports = function createConfig({
         template: richmediarc.settings.entry.html,
         filename: './index.html',
         templateParameters: (compilation, assets, assetTags, options) => {
-
-          const data = resolveRichmediaRCPathsToWebpackPaths(compilation, getRichmediaRCSync(richmediarcFilepath));
+          let data = richmediarc;
+          if(!isVirtual){
+            data = resolveRichmediaRCPathsToWebpackPaths(compilation, getRichmediaRCSync(richmediarcFilepath));
+          } else {
+            data = resolveRichmediaRCPathsToWebpackPaths(compilation,
+              JSON.parse(JSON.stringify(richmediarc))
+            );
+          }
 
           return {
             ...data,
