@@ -2,7 +2,7 @@
 
 Richmedia Temple Server is used as a tool to build and develop richmedia units.
 
-See documentation http://mediamonks.github.io/richmedia-temple-server/
+See documentation https://mediamonks.github.io/display-advertising-docs/devserver
 
 ## Installation
 
