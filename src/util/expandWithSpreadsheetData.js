@@ -20,6 +20,15 @@ module.exports = async function expandWithSpreadsheetData(configs) {
     }
   };
 
+  /**
+   *
+   * @param {string} location
+   * @param {object} contentSource
+   * @param {object} row
+   * @param {number} index
+   * @param {number} offset
+   * @return {string}
+   */
   const getUniqueLocation = (location, contentSource, row, index, offset = 0) => {
     if (contentSource.idField) {
       let name = `${location}.${row[contentSource.idField]}`;
