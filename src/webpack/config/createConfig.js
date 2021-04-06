@@ -290,7 +290,8 @@ module.exports = function createConfig({
                 ],
               ],
               plugins: [
-                `@babel/plugin-proposal-class-properties`,
+                ["@babel/plugin-proposal-decorators", { decoratorsBeforeExport: true }],
+                [`@babel/plugin-proposal-class-properties`, { "loose": true }]
                 `@babel/plugin-syntax-dynamic-import`,
                 `@babel/plugin-transform-async-to-generator`,
               ],
@@ -363,6 +364,7 @@ module.exports = function createConfig({
     },
     plugins: [
       new HtmlWebpackPlugin({
+        chunksSortMode: 'none',
         template: richmediarc.settings.entry.html,
         filename: './index.html',
         templateParameters: (compilation, assets, assetTags, options) => {
