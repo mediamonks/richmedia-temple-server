@@ -28,6 +28,11 @@ function getValue(model, path) {
  * @param {object} model
  */
 function parsePlaceholders(source, model) {
+
+  if(typeof source !== 'string'){
+    return source;
+  }
+
   return source.replace(placeholderRegex, function(match, placeholderPath) {
     let val = '';
 

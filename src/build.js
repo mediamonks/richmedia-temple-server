@@ -8,10 +8,10 @@ const globPromise = require('glob-promise');
 
 const findRichmediaRC = require('./util/findRichmediaRC');
 const createConfigByRichmediarcList = require('./webpack/config/createConfigByRichmediarcList');
-const getNameFromLocation = require('./util/getNameFromLocation');
 const getTemplate = require('./util/getBuildTemplate');
 const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 const saveChoicesInPackageJson = require('./util/saveChoicesInPackageJson');
+const parsePlaceholdersInObject = require('./util/parsePlaceholdersInObject');
 
 /**
  *
@@ -42,7 +42,21 @@ module.exports = async function build({
     throw new Error('could not find a compatible .richmediarc with entry points configured');
   }
 
+  // parse placeholders in content source so it works with spreadsheets
+  configs.forEach(config => {
+    if(config.data.settings.contentSource) {
+      config.data.settings.contentSource = parsePlaceholdersInObject(config.data.settings.contentSource, config.data);
+    }
+  })
+
   configs = await expandWithSpreadsheetData(configs);
+
+  // parse placeholders for everything
+  configs.forEach(config => {
+    if(config.data) {
+      config.data = parsePlaceholdersInObject(config.data, config.data);
+    }
+  });
 
   const questions = [];
 

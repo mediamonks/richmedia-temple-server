@@ -3,6 +3,9 @@ const getGoogleSheetIdFromUrl = require('./getGoogleSheetIdFromUrl');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const chalk = require('chalk');
 
+const cacheSpreadSheets = {};
+const cacheSheets = {};
+
 module.exports = async function expandWithSpreadsheetData(configs) {
   // add support for google sheets.
   // detect if contentSource is available in
@@ -37,6 +40,7 @@ module.exports = async function expandWithSpreadsheetData(configs) {
 
   for (let i = 0; i < configs.length; i++) {
     const { data, location } = configs[i];
+
     if (data && data.settings && data.settings.contentSource) {
       const contentSource = data.settings.contentSource;
 
@@ -48,14 +52,21 @@ module.exports = async function expandWithSpreadsheetData(configs) {
 
       // get data.
       const id = getGoogleSheetIdFromUrl(contentSource.url);
-      const doc = new GoogleSpreadsheet(id);
-      doc.useApiKey(contentSource.apiKey);
-      await doc.loadInfo();
+
+      if(!cacheSpreadSheets[id]){
+        console.log(`gathering google sheets data for ${id}`);
+        cacheSpreadSheets[id] = new GoogleSpreadsheet(id);
+        cacheSpreadSheets[id].useApiKey(contentSource.apiKey);
+        await cacheSpreadSheets[id].loadInfo();
+      }
+
+      const doc = cacheSpreadSheets[id];
 
       let sheet;
 
       if (contentSource.tabName) {
         sheet = doc.sheetsByTitle[contentSource.tabName];
+
         if (!sheet) {
           console.log(
             `${chalk.green(
@@ -83,6 +94,29 @@ module.exports = async function expandWithSpreadsheetData(configs) {
           prev[name] = row[name];
           return prev;
         }, {});
+
+        // filter out everything that is not needed.
+        if(contentSource.filter){
+          const filters = [];
+          if(contentSource.filter instanceof Array){
+            filters.push(...contentSource.filter);
+          } else {
+            filters.push(contentSource.filter);
+          }
+
+          // for loop so i can break or return emmediatly
+          for (let j = 0; j < filters.length; j++) {
+            const filter = filters[j];
+            for (const key in filter) {
+              if (filter.hasOwnProperty(key)
+                && staticRow[key]
+                && staticRow[key] !== filter[key])
+              {
+                return;
+              }
+            }
+          }
+        }
 
         newConfigList.push({
           data: {

@@ -4,6 +4,7 @@ const expandWithSpreadsheetData = require('./util/expandWithSpreadsheetData');
 
 const saveChoicesInPackageJson = require('./util/saveChoicesInPackageJson');
 const findJSONConfigs = require('./util/findRichmediaRC');
+const parsePlaceholdersInObject = require('./util/parsePlaceholdersInObject');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 
@@ -21,7 +22,21 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
   console.log(`${chalk.green('✔')} Found ${configs.length} config(s)`);
   console.log(`${chalk.green('✔')} Taking a look if it has Spreadsheets`);
 
+  // parse placeholders in content source so it works with spreadsheets
+  configs.forEach(config => {
+    if(config.data.settings.contentSource) {
+      config.data.settings.contentSource = parsePlaceholdersInObject(config.data.settings.contentSource, config.data);
+    }
+  })
+
   configs = await expandWithSpreadsheetData(configs);
+
+  // parse placeholders for everything
+  configs.forEach(config => {
+    if(config.data) {
+      config.data = parsePlaceholdersInObject(config.data, config.data);
+    }
+  });
 
   if (!choices) {
     let answers = {
@@ -41,10 +56,6 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
             { name: 'all', checked: false },
             ...configs.map(config => {
               let name = config.location;
-
-              if (config.data.name) {
-                // name += ` (${config.data.name})`
-              }
 
               return {
                 name,
