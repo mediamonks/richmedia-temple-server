@@ -318,13 +318,32 @@ module.exports = function createConfig({
           },
         },
         {
-          test: /\.(ttf|eot|woff|woff2)$/,
-          use: {
-            loader: 'file-loader',
-            options: {
-              name: `[name]${namedHashing}.[ext]`,
+          test: /\.(ttf|eot|woff)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: `[name]${namedHashing}.[ext]`,
+              }
+            }
+          ]
+        },
+        {
+          test: /\.(woff2)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: `[name]${namedHashing}.[ext]`,
+              }
             },
-          },
+            {
+              loader: path.resolve(path.join(__dirname, '../loader/RichmediaFontLoader.js')),
+              options: {
+                config: richmediarc
+              },
+            }
+          ]
         },
 
         {
