@@ -62,7 +62,7 @@ module.exports = async function expandWithSpreadsheetData(configs) {
       // get data.
       const id = getGoogleSheetIdFromUrl(contentSource.url);
 
-      if(!cacheSpreadSheets[id]){
+      if (!cacheSpreadSheets[id]) {
         console.log(`gathering google sheets data for ${id}`);
         cacheSpreadSheets[id] = new GoogleSpreadsheet(id);
         cacheSpreadSheets[id].useApiKey(contentSource.apiKey);
@@ -105,9 +105,9 @@ module.exports = async function expandWithSpreadsheetData(configs) {
         }, {});
 
         // filter out everything that is not needed.
-        if(contentSource.filter){
+        if (contentSource.filter) {
           const filters = [];
-          if(contentSource.filter instanceof Array){
+          if (contentSource.filter instanceof Array) {
             filters.push(...contentSource.filter);
           } else {
             filters.push(contentSource.filter);
@@ -117,10 +117,7 @@ module.exports = async function expandWithSpreadsheetData(configs) {
           for (let j = 0; j < filters.length; j++) {
             const filter = filters[j];
             for (const key in filter) {
-              if (filter.hasOwnProperty(key)
-                && staticRow[key]
-                && staticRow[key] !== filter[key])
-              {
+              if (filter.hasOwnProperty(key) && staticRow[key] && staticRow[key] !== filter[key]) {
                 return;
               }
             }

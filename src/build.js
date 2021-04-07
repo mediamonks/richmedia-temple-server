@@ -44,16 +44,19 @@ module.exports = async function build({
 
   // parse placeholders in content source so it works with spreadsheets
   configs.forEach(config => {
-    if(config.data.settings.contentSource) {
-      config.data.settings.contentSource = parsePlaceholdersInObject(config.data.settings.contentSource, config.data);
+    if (config.data.settings.contentSource) {
+      config.data.settings.contentSource = parsePlaceholdersInObject(
+        config.data.settings.contentSource,
+        config.data,
+      );
     }
-  })
+  });
 
   configs = await expandWithSpreadsheetData(configs);
 
   // parse placeholders for everything
   configs.forEach(config => {
-    if(config.data) {
+    if (config.data) {
       config.data = parsePlaceholdersInObject(config.data, config.data);
     }
   });
@@ -165,10 +168,9 @@ module.exports = async function build({
 
       const templateConfig = {
         banner: configsResult.map((richmediarc, index) => {
-
           const webpackConfig = result[index];
 
-          let bundleName = /[^/\\]*$/.exec(webpackConfig.output.path)[0]
+          let bundleName = /[^/\\]*$/.exec(webpackConfig.output.path)[0];
           // bundleName = getNameFromLocation(bundleName);
           // console.log(name);
 

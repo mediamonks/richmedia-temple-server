@@ -62,8 +62,7 @@ module.exports = function createConfig({
   let imageNameHashing = namedHashing;
 
   if (richmediarc && richmediarc.settings) {
-    if (richmediarc.settings.useOriginalImageNames
-      || richmediarc.settings.useOriginalImageName) {
+    if (richmediarc.settings.useOriginalImageNames || richmediarc.settings.useOriginalImageName) {
       imageNameHashing = '';
     }
 
@@ -73,14 +72,10 @@ module.exports = function createConfig({
     }
   }
 
-  let browserSupport = [
-    "ie 11",
-    "last 2 versions",
-    "safari >= 7"
-  ]
+  let browserSupport = ['ie 11', 'last 2 versions', 'safari >= 7'];
 
   // override browser support
-  if(richmediarc.settings.browserSupport){
+  if (richmediarc.settings.browserSupport) {
     browserSupport = richmediarc.settings.browserSupport;
   }
 
@@ -324,9 +319,9 @@ module.exports = function createConfig({
               loader: 'file-loader',
               options: {
                 name: `[name]${namedHashing}.[ext]`,
-              }
-            }
-          ]
+              },
+            },
+          ],
         },
         {
           test: /\.(woff2)$/,
@@ -335,15 +330,15 @@ module.exports = function createConfig({
               loader: 'file-loader',
               options: {
                 name: `[name]${namedHashing}.[ext]`,
-              }
+              },
             },
             {
               loader: path.resolve(path.join(__dirname, '../loader/RichmediaFontLoader.js')),
               options: {
-                config: richmediarc
+                config: richmediarc,
               },
-            }
-          ]
+            },
+          ],
         },
 
         {
@@ -386,11 +381,15 @@ module.exports = function createConfig({
         filename: './index.html',
         templateParameters: (compilation, assets, assetTags, options) => {
           let data = richmediarc;
-          if(!isVirtual){
-            data = resolveRichmediaRCPathsToWebpackPaths(compilation, getRichmediaRCSync(richmediarcFilepath));
+          if (!isVirtual) {
+            data = resolveRichmediaRCPathsToWebpackPaths(
+              compilation,
+              getRichmediaRCSync(richmediarcFilepath),
+            );
           } else {
-            data = resolveRichmediaRCPathsToWebpackPaths(compilation,
-              JSON.parse(JSON.stringify(richmediarc))
+            data = resolveRichmediaRCPathsToWebpackPaths(
+              compilation,
+              JSON.parse(JSON.stringify(richmediarc)),
             );
           }
 
@@ -404,10 +403,11 @@ module.exports = function createConfig({
             htmlWebpackPlugin: {
               tags: assetTags,
               files: assets,
-              options
-            }
+              options,
+            },
           };
-        },      }),
+        },
+      }),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),

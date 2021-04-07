@@ -1,4 +1,4 @@
-const leafs = require("./leafs");
+const leafs = require('./leafs');
 
 /**
  *
@@ -6,11 +6,13 @@ const leafs = require("./leafs");
  * @param {object} richmediarc
  * @param options
  */
-module.exports = function resolveRichmediaRCPathsToWebpackPaths(compilation, richmediarc, options = {}){
-
+module.exports = function resolveRichmediaRCPathsToWebpackPaths(
+  compilation,
+  richmediarc,
+  options = {},
+) {
   const mapResources = {};
-  for (let module of compilation.modules){
-
+  for (let module of compilation.modules) {
     if (module.buildInfo.assets) {
       for (const assetName of Object.keys(module.buildInfo.assets)) {
         // const fileName = compilation.getPath(assetName);
@@ -26,4 +28,4 @@ module.exports = function resolveRichmediaRCPathsToWebpackPaths(compilation, ric
   });
 
   return richmediarc;
-}
+};
