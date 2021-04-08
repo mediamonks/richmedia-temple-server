@@ -24,10 +24,10 @@ const parsePlaceholdersInObject = require('./util/parsePlaceholdersInObject');
  * @return {Promise<any | never>}
  */
 module.exports = async function build({
-  glob = './**/.richmediarc*',
-  stats = false,
-  choices = {},
-}) {
+                                        glob = './**/.richmediarc*',
+                                        stats = false,
+                                        choices = {},
+                                      }) {
   const buildTarget = './build';
 
   const spinner = new Spinner('processing.. %s');
@@ -44,20 +44,29 @@ module.exports = async function build({
 
   // parse placeholders in content source so it works with spreadsheets
   configs.forEach(config => {
-    if (config.data.settings.contentSource) {
-      config.data.settings.contentSource = parsePlaceholdersInObject(
-        config.data.settings.contentSource,
-        config.data,
-      );
+    if(config.data.settings.contentSource) {
+      config.data.settings.contentSource = parsePlaceholdersInObject(config.data.settings.contentSource, config.data);
     }
-  });
+  })
 
   configs = await expandWithSpreadsheetData(configs);
 
+  const bundleNames = [];
+
   // parse placeholders for everything
   configs.forEach(config => {
-    if (config.data) {
-      config.data = parsePlaceholdersInObject(config.data, config.data);
+    if(config.data) {
+      const configCopy = JSON.parse(JSON.stringify(config.data));
+      config.data = parsePlaceholdersInObject(configCopy, configCopy);
+
+      // checking if duplicate bundleNames exists
+      if(config.data.settings.bundleName){
+        if(bundleNames.indexOf(config.data.settings.bundleName) > -1){
+          console.warn(`bundleName ${config.data.settings.bundleName} already exists. This will cause huge issues.`);
+        } else {
+          bundleNames.push(config.data.settings.bundleName);
+        }
+      }
     }
   });
 
@@ -168,9 +177,10 @@ module.exports = async function build({
 
       const templateConfig = {
         banner: configsResult.map((richmediarc, index) => {
+
           const webpackConfig = result[index];
 
-          let bundleName = /[^/\\]*$/.exec(webpackConfig.output.path)[0];
+          let bundleName = /[^/\\]*$/.exec(webpackConfig.output.path)[0]
           // bundleName = getNameFromLocation(bundleName);
           // console.log(name);
 
