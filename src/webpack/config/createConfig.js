@@ -88,7 +88,7 @@ module.exports = function createConfig({
 
   // get everything after the last slash. trailing slash is removed at the beginning of the code. ^^
   // added .html is there for compatibility with workspace.
-  let bundleName = /[^/\\]*$/.exec(outputPath)[0] + '.html';
+  let bundleName = /[^/\\]*$/.exec(outputPath)[0];
 
   // check if there is a custom bundleName
   if (richmediarc.settings.bundleName) {
@@ -313,7 +313,7 @@ module.exports = function createConfig({
           },
         },
         {
-          test: /\.(ttf|eot|woff)$/,
+          test: /\.(eot)$/,
           use: [
             {
               loader: 'file-loader',
@@ -324,7 +324,7 @@ module.exports = function createConfig({
           ],
         },
         {
-          test: /\.(woff2)$/,
+          test: /\.(ttf|woff|woff2)$/,
           use: [
             {
               loader: 'file-loader',
@@ -335,7 +335,7 @@ module.exports = function createConfig({
             {
               loader: path.resolve(path.join(__dirname, '../loader/RichmediaFontLoader.js')),
               options: {
-                config: richmediarc,
+                configFilepath: richmediarcFilepath
               },
             },
           ],
