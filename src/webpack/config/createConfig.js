@@ -57,7 +57,7 @@ module.exports = function createConfig({
   if (fs.existsSync(richmediarcFilepath)) {
     isVirtual = false;
   }
-
+  
   let namedHashing = '_[sha512:hash:base64:7]';
   let imageNameHashing = namedHashing;
 
@@ -335,7 +335,9 @@ module.exports = function createConfig({
             {
               loader: path.resolve(path.join(__dirname, '../loader/RichmediaFontLoader.js')),
               options: {
-                configFilepath: richmediarcFilepath
+                configFilepath: richmediarcFilepath,
+                config: richmediarc,
+                isVirtual,
               },
             },
           ],
