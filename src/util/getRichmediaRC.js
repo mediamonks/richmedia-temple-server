@@ -8,6 +8,7 @@ const path = require('path');
 const deepmerge = require('deepmerge');
 const leafs = require('./leafs');
 const isFile = require('./isFile');
+const isExternalURL = require("./isExternalURL");
 const { readJson } = require('fs-extra');
 
 /**
@@ -24,7 +25,11 @@ module.exports = async function getRichmediaRC(filepath) {
   let richmediarc = await readJson(filepath);
 
   leafs(richmediarc, function(value, obj, name) {
-    if (typeof value === 'string' && !path.isAbsolute(value) && isFile(value)) {
+    if (typeof value === 'string'
+      && !isExternalURL(value)
+      && !path.isAbsolute(value)
+      && isFile(value))
+    {
       obj[name] = path.resolve(dirname, value);
     }
   });
