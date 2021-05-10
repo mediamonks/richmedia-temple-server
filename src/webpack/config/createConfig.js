@@ -19,7 +19,7 @@ const parsePlaceholders = require('../../util/parsePlaceholders');
 const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
 const resolveRichmediaRCPathsToWebpackPaths = require('../../util/resolveRichmediaRCPathsToWebpackPaths');
 // const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
-// const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
+const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
@@ -57,7 +57,7 @@ module.exports = function createConfig({
   if (fs.existsSync(richmediarcFilepath)) {
     isVirtual = false;
   }
-  
+
   let namedHashing = '_[sha512:hash:base64:7]';
   let imageNameHashing = namedHashing;
 
@@ -279,6 +279,7 @@ module.exports = function createConfig({
                     useBuiltIns: 'usage',
                     corejs: 3,
                     targets: {
+                      "ie": "11",
                       browsers: browserSupport,
                     },
                   },
@@ -352,7 +353,31 @@ module.exports = function createConfig({
               options: {
                 minimize: false,
 
-                attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data'],
+                attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data', ':srcset'],
+                attributes: {
+                  list: [
+                    {
+                      tag: 'img',
+                      attribute: 'src',
+                      type: 'src',
+                    },
+                    {
+                      tag: 'img',
+                      attribute: 'srcset',
+                      type: 'srcset',
+                    },
+                    {
+                      tag: 'img',
+                      attribute: 'data-src',
+                      type: 'src',
+                    },
+                    {
+                      tag: 'img',
+                      attribute: 'data-srcset',
+                      type: 'srcset',
+                    }
+                  ]
+                }
               },
             },
           ],
@@ -360,10 +385,10 @@ module.exports = function createConfig({
         {
           test: /\.(hbs)$/,
           use: [
-            // { loader: 'raw-loader' },
             {
               loader: 'handlebars-loader',
             },
+            // { loader: path.resolve(path.join(__dirname, '../loader/InlineSVGLoader.js')) },
             { loader: 'extract-loader', options: {} },
             {
               loader: 'html-loader',
