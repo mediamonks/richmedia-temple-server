@@ -2,6 +2,8 @@ const loaderUtils = require('loader-utils');
 const subsetFont = require('subset-font');
 const getRichmediaRC = require('../../util/getRichmediaRC');
 const path = require('path');
+const fs = require('fs-extra');
+const chalk = require('chalk');
 
 function getPropertyValue(obj1, dataToRetrieve) {
   return dataToRetrieve
@@ -26,6 +28,8 @@ module.exports = async function(content) {
   if (config.settings.hasOwnProperty('fonts')) {
     for (const collection of config.settings.fonts) {
       for (const font of collection.sources) {
+        if (!fs.existsSync(font)) console.warn(chalk.red("WARNING: " + font + " doesn't exist. Please check the path in .richmediarc"));
+
         if (font === this.resourcePath) {
           const allContent = collection.subset.glyphs.reduce(
             (acc, cur) => acc + getPropertyValue(config, cur),
