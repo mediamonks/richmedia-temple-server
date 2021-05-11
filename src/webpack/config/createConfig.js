@@ -352,13 +352,23 @@ module.exports = function createConfig({
               loader: 'html-loader',
               options: {
                 minimize: false,
-
-                attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data', ':srcset'],
                 attributes: {
                   list: [
                     {
-                      tag: 'img',
+                      tag: 'netflix-video',
+                      attribute: 'source',
+                      type: 'src',
+                    },
+                    {
                       attribute: 'src',
+                      type: 'src',
+                    },
+                    {
+                      attribute: 'href',
+                      type: 'src',
+                    },
+                    {
+                      attribute: 'xlink:href',
                       type: 'src',
                     },
                     {
@@ -385,10 +395,11 @@ module.exports = function createConfig({
         {
           test: /\.(hbs)$/,
           use: [
-            {
-              loader: 'handlebars-loader',
-            },
-            // { loader: path.resolve(path.join(__dirname, '../loader/InlineSVGLoader.js')) },
+
+
+            { loader: 'raw-loader' },
+            { loader: path.resolve(path.join(__dirname, '../loader/ToRawLoader.js')) },
+            { loader: 'handlebars-loader' },
             { loader: 'extract-loader', options: {} },
             {
               loader: 'html-loader',
@@ -397,7 +408,7 @@ module.exports = function createConfig({
 
                 attrs: [':src', ':href', 'netflix-video:source', ':data-src', ':data'],
               },
-            },
+            }
           ],
         },
       ],
@@ -407,7 +418,7 @@ module.exports = function createConfig({
         template: richmediarc.settings.entry.html,
         filename: './index.html',
         templateParameters: (compilation, assets, assetTags, options) => {
-          let data = richmediarc;
+          let data = {};
           if (!isVirtual) {
             data = resolveRichmediaRCPathsToWebpackPaths(
               compilation,
@@ -435,6 +446,7 @@ module.exports = function createConfig({
           };
         },
       }),
+      new HtmlWebpackInlineSVGPlugin(),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),

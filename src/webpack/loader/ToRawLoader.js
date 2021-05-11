@@ -7,20 +7,56 @@ const fs = require('fs');
 const parse5 = require('parse5');
 
 
-module.exports = function InlineSVGLoader(content, sourceMap) {
+module.exports = function ConvertHandlebarsOutputToHtmlLoader(content, sourceMap) {
   const callback = this.async();
-  const options = loaderUtils.getOptions(this);
-  const loaderContext = this;
 
-  console.log(content);
-  // console.log(this..getAssets('yellow_star_1Vc4ioO.svg'));
+  // function searchForProperty(model, name, arrpath = [], maxNesting = 5){
+  //   if (maxNesting < 0) {
+  //     return;
+  //   }
+  //
+  //   for (var i in model) {
+  //     const currPath = [...arrpath];
+  //     if (model.hasOwnProperty(i)) {
+  //
+  //       currPath.push(i);
+  //       if(i == name){
+  //         throw new Error('FOUND ' + currPath.join('.'))
+  //       } else if (typeof model[i] === 'object') {
+  //         console.log(currPath.join('.') + "\n");
+  //         searchForProperty(model[i], name, currPath, currPath, maxNesting - 1);
+  //       }
+  //     }
+  //   }
+  // }
+  //
+  // searchForProperty(this, 'getAsset');
 
-  // const documentFragment = parse5.parseFragment(content, {
+  // console.log(this);
+  // const deps = this.getDependencies();
+  // const res = deps.map(dep => {
+  //   return loaderUtils.interpolateName(loaderContext, dep)
+  // })
+  // console.log(deps);
+  // console.log(res);
+
+  const htmlData = this.exec(content, this.resource)(this);
+
+  // const documentFragment = parse5.parseFragment(htmlData, {
   //   sourceCodeLocationInfo: true,
   // });
-  //
+  // //
   // const inlineImages = getInlineImages(documentFragment);
-  // console.log(documentFragment);
+  // inlineImages.forEach(inlineImage => {
+  //   const src = getImagesSrc(inlineImage);
+  //   console.log(this.fs.readFileSync(src));
+  //   console.log(src);
+  //
+  // })
+
+  // const json = JSON.stringify(htmlData).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  // callback(null, `module.exports = ${json};`);
+  callback(null, htmlData);
 };
 
 
