@@ -63,7 +63,7 @@ module.exports = async function expandWithSpreadsheetData(configs) {
       const id = getGoogleSheetIdFromUrl(contentSource.url);
 
       if (!cacheSpreadSheets[id]) {
-        console.log(`gathering google sheets data for ${id}`);
+        console.log(`${chalk.green('✔')} gathering google sheets data for ${id}`);
         cacheSpreadSheets[id] = new GoogleSpreadsheet(id);
         cacheSpreadSheets[id].useApiKey(contentSource.apiKey);
         await cacheSpreadSheets[id].loadInfo();
