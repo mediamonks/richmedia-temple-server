@@ -7,6 +7,7 @@ module.exports = function FromHandlebarsToRawLoader(content, sourceMap) {
 
   const bla = `
 module.exports = function(){
+
   const config = require("${configLoaderName}");
   const exec = `;
 

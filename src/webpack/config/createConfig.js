@@ -397,9 +397,6 @@ module.exports = function createConfig({
         {
           test: /\.(hbs)$/,
           use: [
-
-
-            // { loader: 'raw-loader' },
             {
               loader: path.resolve(path.join(__dirname, '../loader/FromHandlebarsToRawLoader.js')),
               options: {
@@ -453,7 +450,9 @@ module.exports = function createConfig({
           };
         },
       }),
-      new HtmlWebpackInlineSVGPlugin(),
+      new HtmlWebpackInlineSVGPlugin({
+        runPreEmit: true
+      }),
       new webpack.DefinePlugin({
         DEVELOPMENT: JSON.stringify(mode === DevEnum.DEVELOPMENT),
         PRODUCTION: JSON.stringify(mode === DevEnum.PRODUCTION),
