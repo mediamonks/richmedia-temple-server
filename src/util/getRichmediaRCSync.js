@@ -38,7 +38,7 @@ module.exports = function getRichmediaRCSync(filepath, onDependecy = () => {}) {
 
   let { parent } = richmediarc;
   if (parent) {
-    richmediarc = deepmerge(getRichmediaRCSync(parent), richmediarc);
+    richmediarc = deepmerge(getRichmediaRCSync(path.join(dirname, parent)), richmediarc);
     delete richmediarc.parent;
   }
 

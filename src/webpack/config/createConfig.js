@@ -44,6 +44,8 @@ module.exports = function createConfig({
     stats: false,
   },
 }) {
+
+
   let devtool = false;
   const entry = [];
 
@@ -397,8 +399,13 @@ module.exports = function createConfig({
           use: [
 
 
-            { loader: 'raw-loader' },
-            { loader: path.resolve(path.join(__dirname, '../loader/ToRawLoader.js')) },
+            // { loader: 'raw-loader' },
+            {
+              loader: path.resolve(path.join(__dirname, '../loader/FromHandlebarsToRawLoader.js')),
+              options: {
+                configLoaderName: "richmediaconfig"
+              }
+            },
             { loader: 'handlebars-loader' },
             { loader: 'extract-loader', options: {} },
             {
