@@ -19,7 +19,7 @@ const parsePlaceholders = require('../../util/parsePlaceholders');
 const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
 const resolveRichmediaRCPathsToWebpackPaths = require('../../util/resolveRichmediaRCPathsToWebpackPaths');
 // const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
-const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
+const HtmlWebpackInlineSVGPlugin = require('../plugin/HtmlWebpackInlineSVGPlugin');
 
 const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
 
