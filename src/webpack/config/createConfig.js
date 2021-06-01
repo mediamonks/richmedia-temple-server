@@ -195,7 +195,7 @@ module.exports = function createConfig({
                     }
                   });
 
-                  return [
+                  const plugins = [
                     // custom properties
                     require('postcss-import')({root: loader.resourcePath}),
                     // require('postcss-for')(),
@@ -212,11 +212,15 @@ module.exports = function createConfig({
                       },
                       browsers: browserSupport,
                     }),
-                    require('postcss-nested')(),
-
-                    // so you can disable css compression
-                    optimizations.css ? require('cssnano')() : null,
+                    require('postcss-nested')()
                   ];
+
+                  // so you can disable css compression
+                  if(optimizations.css){
+                    plugins.push(require('cssnano')());
+                  }
+
+                  return plugins;
                 },
               },
             },
