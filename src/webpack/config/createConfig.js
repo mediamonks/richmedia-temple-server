@@ -18,6 +18,7 @@ const getRichmediaRCSync = require('../../util/getRichmediaRCSync');
 const parsePlaceholders = require('../../util/parsePlaceholders');
 const flattenObjectToCSSVars = require('../../util/flattenObjectToCSSVars');
 const resolveRichmediaRCPathsToWebpackPaths = require('../../util/resolveRichmediaRCPathsToWebpackPaths');
+const getOptimisationsFromConfig = require('../../util/options/getOptimisationsFromConfig');
 // const RichmediaRCPlugin = require('../plugin/RichmediaRCPlugin');
 const HtmlWebpackInlineSVGPlugin = require('../plugin/HtmlWebpackInlineSVGPlugin');
 
@@ -35,15 +36,15 @@ const nodeModules = `${path.resolve(__dirname, '../../../node_modules')}/`;
  * @return {{mode: string, entry: *[], output: {path: *, filename: string}, externals: {TweenLite: string, TweenMax: string, TimelineLite: string, TimelineMax: string, Enabler: string, Monet: string}, resolve: {modules: string[], alias: {vendor: string}}, resolveLoader: {modules: string[], symlinks: boolean}, module: {rules: *[]}, plugins: *[], stats: {colors: boolean}, devtool: string}}
  */
 module.exports = function createConfig({
-  richmediarc,
-  richmediarcFilepath,
-  outputPath,
+                                         richmediarc,
+                                         richmediarcFilepath,
+                                         outputPath,
 
-  options: { mode = DevEnum.DEVELOPMENT, stats = false } = {
-    mode: DevEnum.DEVELOPMENT,
-    stats: false,
-  },
-}) {
+                                         options: {mode = DevEnum.DEVELOPMENT, stats = false} = {
+                                           mode: DevEnum.DEVELOPMENT,
+                                           stats: false,
+                                         },
+                                       }) {
 
 
   let devtool = false;
@@ -73,6 +74,8 @@ module.exports = function createConfig({
       imageNameHashing = '';
     }
   }
+
+  let optimizations = getOptimisationsFromConfig(richmediarc);
 
   let browserSupport = ['ie 11', 'last 2 versions', 'safari >= 7'];
 
@@ -171,7 +174,7 @@ module.exports = function createConfig({
               loader: 'postcss-loader',
               options: {
                 ident: 'postcss',
-                plugins: function(loader) {
+                plugins: function (loader) {
                   let data;
                   if (isVirtual === false) {
                     data = getRichmediaRCSync(richmediarcFilepath, filePath => {
@@ -182,7 +185,7 @@ module.exports = function createConfig({
                   }
 
                   const cssVariables = flattenObjectToCSSVars(data);
-                  Object.keys(cssVariables).forEach(function(name) {
+                  Object.keys(cssVariables).forEach(function (name) {
                     const val = cssVariables[name];
                     if (isFile(val) && !isExternalURL(val)) {
                       cssVariables[name] = path.relative(
@@ -194,7 +197,7 @@ module.exports = function createConfig({
 
                   return [
                     // custom properties
-                    require('postcss-import')({ root: loader.resourcePath }),
+                    require('postcss-import')({root: loader.resourcePath}),
                     // require('postcss-for')(),
                     // require('postcss-random')({
                     //   randomSeed: 123
@@ -210,7 +213,9 @@ module.exports = function createConfig({
                       browsers: browserSupport,
                     }),
                     require('postcss-nested')(),
-                    require('cssnano')(),
+
+                    // so you can disable css compression
+                    optimizations.css ? require('cssnano')() : null,
                   ];
                 },
               },
@@ -403,8 +408,8 @@ module.exports = function createConfig({
                 configLoaderName: "richmediaconfig"
               }
             },
-            { loader: 'handlebars-loader' },
-            { loader: 'extract-loader', options: {} },
+            {loader: 'handlebars-loader'},
+            {loader: 'extract-loader', options: {}},
             {
               loader: 'html-loader',
               options: {
@@ -489,7 +494,7 @@ module.exports = function createConfig({
   if (fs.existsSync(staticPath)) {
     config.plugins.push(
       new CopyWebpackPlugin({
-        patterns: [{ from: staticPath, to: '' }],
+        patterns: [{from: staticPath, to: ''}],
       }),
     );
   }
@@ -523,73 +528,80 @@ module.exports = function createConfig({
     );
 
     config.optimization = {
-      splitChunks: {
-        // include all types of chunks
-        chunks: 'async',
-      },
-      minimizer: [
-        // new TerserPlugin()
-        new UglifyJsPlugin({
-          uglifyOptions: {
-            warnings: false,
-            // parse: {},
-            compress: {
-              arguments: true,
-              booleans: true,
-              collapse_vars: !true,
-              comparisons: true,
-              conditionals: true,
-              dead_code: true,
-              directives: true,
-              drop_console: false,
-              drop_debugger: true,
-              evaluate: true,
-              expression: false,
-              global_defs: false,
-              hoist_funs: false,
-              hoist_props: true,
-              hoist_vars: false,
-              ie8: false,
-
-              if_return: true,
-              inline: true,
-              join_vars: true,
-              keep_fargs: 'strict',
-              keep_fnames: false,
-              keep_infinity: false,
-              loops: true,
-              negate_iife: true,
-              passes: 1,
-              properties: true,
-              pure_getters: 'strict',
-              pure_funcs: null,
-              reduce_funcs: true,
-              reduce_vars: true,
-              sequences: true,
-              side_effects: true,
-              switches: true,
-              top_retain: null,
-              toplevel: false,
-              typeofs: true,
-              unsafe: false,
-              unsafe_comps: false,
-              unsafe_Function: false,
-              unsafe_math: false,
-              unsafe_proto: false,
-              unsafe_regexp: false,
-              unsafe_undefined: false,
-              unused: true,
-            },
-            mangle: true, // Note `mangle.properties` is `false` by default.
-            output: null,
-            toplevel: false,
-            nameCache: null,
-            ie8: false,
-            keep_fnames: true,
-          },
-        }),
-      ],
+      minimize: false
     };
+
+    if (optimizations.js) {
+      config.optimization = {
+        splitChunks: {
+          // include all types of chunks
+          chunks: 'async',
+        },
+        minimizer: [
+          // new TerserPlugin()
+          new UglifyJsPlugin({
+            uglifyOptions: {
+              warnings: false,
+              // parse: {},
+              compress: {
+                arguments: true,
+                booleans: true,
+                collapse_vars: !true,
+                comparisons: true,
+                conditionals: true,
+                dead_code: true,
+                directives: true,
+                drop_console: false,
+                drop_debugger: true,
+                evaluate: true,
+                expression: false,
+                global_defs: false,
+                hoist_funs: false,
+                hoist_props: true,
+                hoist_vars: false,
+                ie8: false,
+
+                if_return: true,
+                inline: true,
+                join_vars: true,
+                keep_fargs: 'strict',
+                keep_fnames: false,
+                keep_infinity: false,
+                loops: true,
+                negate_iife: true,
+                passes: 1,
+                properties: true,
+                pure_getters: 'strict',
+                pure_funcs: null,
+                reduce_funcs: true,
+                reduce_vars: true,
+                sequences: true,
+                side_effects: true,
+                switches: true,
+                top_retain: null,
+                toplevel: false,
+                typeofs: true,
+                unsafe: false,
+                unsafe_comps: false,
+                unsafe_Function: false,
+                unsafe_math: false,
+                unsafe_proto: false,
+                unsafe_regexp: false,
+                unsafe_undefined: false,
+                unused: true,
+              },
+              mangle: true, // Note `mangle.properties` is `false` by default.
+              output: null,
+              toplevel: false,
+              nameCache: null,
+              ie8: false,
+              keep_fnames: true,
+            },
+          }),
+        ],
+      };
+    }
+
 
     // delete config.optimization;
   }
