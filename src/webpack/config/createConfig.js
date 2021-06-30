@@ -63,6 +63,7 @@ module.exports = function createConfig({
 
   let namedHashing = '_[sha512:hash:base64:7]';
   let imageNameHashing = namedHashing;
+  let useImageOptimisation = true;
 
   if (richmediarc && richmediarc.settings) {
     if (richmediarc.settings.useOriginalImageNames || richmediarc.settings.useOriginalImageName) {
@@ -72,6 +73,10 @@ module.exports = function createConfig({
     if (richmediarc.settings.useOriginalFileNames) {
       namedHashing = '';
       imageNameHashing = '';
+    }
+
+    if (typeof richmediarc.settings.useImageOptimisation == "boolean") {
+      useImageOptimisation = richmediarc.settings.useImageOptimisation;
     }
   }
 
@@ -254,7 +259,7 @@ module.exports = function createConfig({
                 name: `[name]${imageNameHashing}.[ext]`,
               },
             },
-            {
+            useImageOptimisation ? {
               loader: 'image-webpack-loader',
               options: {
                 optipng: {
@@ -272,7 +277,7 @@ module.exports = function createConfig({
                   interlaced: false,
                 },
               },
-            },
+            } : {},
           ],
         },
 
