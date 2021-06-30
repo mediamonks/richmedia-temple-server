@@ -74,10 +74,6 @@ module.exports = function createConfig({
       namedHashing = '';
       imageNameHashing = '';
     }
-
-    if (typeof richmediarc.settings.useImageOptimisation == "boolean") {
-      useImageOptimisation = richmediarc.settings.useImageOptimisation;
-    }
   }
 
   let optimizations = getOptimisationsFromConfig(richmediarc);
@@ -259,7 +255,7 @@ module.exports = function createConfig({
                 name: `[name]${imageNameHashing}.[ext]`,
               },
             },
-            useImageOptimisation ? {
+            optimizations.image ? {
               loader: 'image-webpack-loader',
               options: {
                 optipng: {
