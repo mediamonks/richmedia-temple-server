@@ -248,14 +248,14 @@ module.exports = function createConfig({
         },
         {
           test: /\.(gif|png|jpe?g)$/i,
-          use: [
+          use: optimizations.image ? [
             {
               loader: 'file-loader',
               options: {
                 name: `[name]${imageNameHashing}.[ext]`,
               },
             },
-            optimizations.image ? {
+            {
               loader: 'image-webpack-loader',
               options: {
                 optipng: {
@@ -273,7 +273,14 @@ module.exports = function createConfig({
                   interlaced: false,
                 },
               },
-            } : {},
+            },
+          ] : [
+            {
+              loader: 'file-loader',
+              options: {
+                name: `[name]${imageNameHashing}.[ext]`,
+              },
+            }
           ],
         },
 
