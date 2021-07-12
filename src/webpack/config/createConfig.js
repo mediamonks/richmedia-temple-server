@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const VirtualModulesPlugin = require('webpack-virtual-modules');
 const sanitizeFilename = require('sanitize-filename');
+var WriteJsonPlugin = require('write-json-webpack-plugin');
 
 const DevEnum = require('../../data/DevEnum');
 const isFile = require('../../util/isFile');
@@ -509,6 +510,33 @@ module.exports = function createConfig({
         patterns: [{from: staticPath, to: ''}],
       }),
     );
+  }
+
+  if (richmediarc.settings.type === "adform") {
+
+    let obj = {
+      "version": "1.0",
+      "title": richmediarc.settings.bundleName || bundleName,
+      "description": "",
+      "width" : richmediarc.settings.size.width,
+      "height": richmediarc.settings.size.height,
+      "events": {
+        "enabled": 1,
+        "list": { }
+      },
+      "clicktags": {
+        "clickTAG": "http://www.adform.com"
+      },
+      "source": "index.html"
+    }
+
+    config.plugins.push(
+      new WriteJsonPlugin({
+        object: obj,
+        filename: 'manifest.json',
+        pretty: true // makes file human-readable (default false)
+      })
+    )
   }
 
   if (stats === true) {

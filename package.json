@@ -157,6 +157,7 @@
     "webpack-virtual-modules": "^0.2.2",
     "webpack-visualizer-plugin": "^0.1.11",
     "whatwg-fetch": "^2.0.4",
+    "write-json-webpack-plugin": "^1.1.0",
     "zip-webpack-plugin": "^3.0.0"
   }
 }
