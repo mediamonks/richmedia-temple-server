@@ -347,11 +347,13 @@ module.exports = function createConfig({
         {
           test: /\.(ttf|woff|woff2)$/,
           use: [
-            {
+            richmediarc.settings.fontsBase64 ? {
+              loader: 'url-loader'
+              } : {
               loader: 'file-loader',
-              options: {
-                name: `[name]${namedHashing}.[ext]`,
-              },
+                options: {
+                  name: `[name]${namedHashing}.[ext]`,
+                }
             },
             {
               loader: path.resolve(path.join(__dirname, '../loader/RichmediaFontLoader.js')),
