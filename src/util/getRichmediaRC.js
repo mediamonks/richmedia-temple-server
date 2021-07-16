@@ -36,6 +36,10 @@ module.exports = async function getRichmediaRC(filepath) {
 
   let { parent } = richmediarc;
   if (parent) {
+    if(parent !== path.resolve(parent)){
+      parent = path.resolve(dirname, parent)
+    }
+
     richmediarc = deepmerge(await getRichmediaRC(parent), richmediarc);
     delete richmediarc.parent;
   }
