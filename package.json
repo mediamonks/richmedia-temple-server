@@ -146,7 +146,7 @@
     "svgo-loader": "^2.2.1",
     "terser-webpack-plugin": "^1.4.5",
     "tunnel-agent": "^0.6.0",
-    "uglify-js": "^3.10.1",
+    "uglify-js": "3.14.1",
     "uglifyjs-webpack-plugin": "2.1.2",
     "url-loader": "^1.1.2",
     "uuidv4": "^3.0.1",
