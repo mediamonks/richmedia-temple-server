@@ -601,7 +601,6 @@ module.exports = function createConfig({
                 hoist_funs: false,
                 hoist_props: true,
                 hoist_vars: false,
-                ie8: false,
 
                 if_return: true,
                 inline: true,
