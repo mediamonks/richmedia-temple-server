@@ -115,7 +115,6 @@
     "html-webpack-plugin": "^4.5.2",
     "image-webpack-loader": "^4.3.1",
     "inquirer": "^6.5.2",
-    "jetty": "^0.2.1",
     "loader-utils": "^1.4.0",
     "lodash": "^4.17.21",
     "md5-file": "^4.0.0",
