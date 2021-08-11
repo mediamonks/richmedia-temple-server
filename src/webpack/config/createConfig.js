@@ -309,6 +309,7 @@ module.exports = function createConfig({
                 `@babel/plugin-proposal-class-properties`,
                 `@babel/plugin-syntax-dynamic-import`,
                 `@babel/plugin-transform-async-to-generator`,
+                [`@babel/plugin-proposal-decorators`, {decoratorsBeforeExport: true}],
               ],
             },
           },
