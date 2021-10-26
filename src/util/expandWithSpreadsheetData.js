@@ -2,6 +2,8 @@ const isGoogleSpreadsheetUrl = require('./isGoogleSpreadsheetUrl');
 const getGoogleSheetIdFromUrl = require('./getGoogleSheetIdFromUrl');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const chalk = require('chalk');
+const extendObject = require('./extendObject');
+const createObjectFromJSONPath = require('./createObjectFromJSONPath');
 
 const cacheSpreadSheets = {};
 const cacheSheets = {};
@@ -104,6 +106,18 @@ module.exports = async function expandWithSpreadsheetData(configs) {
           return prev;
         }, {});
 
+
+        let staticRowObject = {};
+        for (const key in staticRow) {
+          if (staticRow.hasOwnProperty(key)) {
+            let obj = createObjectFromJSONPath(key, staticRow[key]);
+            extendObject(staticRowObject, obj);
+          }
+        }
+
+
+
+
         // filter out everything that is not needed.
         if (contentSource.filter) {
           const filters = [];
@@ -117,20 +131,19 @@ module.exports = async function expandWithSpreadsheetData(configs) {
           for (let j = 0; j < filters.length; j++) {
             const filter = filters[j];
             for (const key in filter) {
-              if (filter.hasOwnProperty(key) && staticRow[key] && staticRow[key] !== filter[key]) {
+              if (filter.hasOwnProperty(key) && staticRowObject[key] && staticRowObject[key] !== filter[key]) {
                 return;
               }
             }
           }
         }
 
+        let content = extendObject({}, (data.content || {}), staticRowObject)
+
         newConfigList.push({
           data: {
             ...data,
-            content: {
-              ...(data.content || {}),
-              ...staticRow,
-            },
+            content,
           },
           location: getUniqueLocation(location, contentSource, row, index),
         });
