@@ -4,6 +4,7 @@ const getRichmediaRC = require('../../util/getRichmediaRC');
 const path = require('path');
 const fs = require('fs-extra');
 const chalk = require('chalk');
+const get = require('lodash.get');
 
 function getPropertyValue(obj1, dataToRetrieve) {
   return dataToRetrieve
@@ -32,13 +33,11 @@ module.exports = async function(content) {
 
         if (font === this.resourcePath) {
           const allContent = collection.subset.glyphs.reduce(
-            (acc, cur) => acc + getPropertyValue(config, cur),
+            (acc, cur) => acc + get(config, cur),
             '',
           ); // basically concatenate all content found in the glyphs node
-          const allContent_arr = allContent.split(''); //create array from it
-
           glyphs = allContent.split('').filter((value, index, self) => {
-            return self.indexOf(value) === index; //return array with only unique values
+            return self.indexOf(value) === index; // return array with only unique values
           });
         }
       }
