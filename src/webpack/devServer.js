@@ -11,6 +11,17 @@ const util = require('util');
 const chalk = require('chalk');
 const opener = require('opener');
 
+const isGoogleSpreadsheetUrl = require('../util/isGoogleSpreadsheetUrl');
+const getGoogleSheetIdFromUrl = require('../util/getGoogleSheetIdFromUrl');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const extendObject = require('../util/extendObject');
+const createObjectFromJSONPath = require('../util/createObjectFromJSONPath');
+const getDataFromGoogleSpreadsheet = require('../util/getDataFromGoogleSpreadsheet');
+
+const cacheSpreadSheets = {};
+const cacheSheets = {};
+
+
 const readFile = util.promisify(fs.readFile);
 const getTemplate = require('../util/getDevTemplate');
 const getNameFromLocation = require('../util/getNameFromLocation');
@@ -106,6 +117,9 @@ ${chalk.grey.bold('-------------------------------------------------------')}
         };
       }),
       query: req.query,
+      settings: {
+        isGoogleSpreadsheetBanner: typeof configs[0].settings.data.settings.contentSource !== 'undefined'
+      },
     };
 
     res.send(template(templateConfig));
@@ -153,16 +167,110 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       });
   });
 
+  app.get("/reload_dynamic_data", async function (req, res) {
+    const contentSource = configs[0].settings.data.settings.contentSource;
+    const spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
+
+    configs.forEach(async config => {
+
+      let row = spreadsheetData.rows[config.settings.row.rowNumber-2]; //for example, row number 2 is array element 0
+      //let content = await getContentFromSpreadsheetRow(row);
+
+      const staticRow = spreadsheetData.headerValues.reduce((prev, name) => {
+        prev[name] = row[name];
+        return prev;
+      }, {});
+
+      let staticRowObject = {};
+      for (const key in staticRow) {
+        if (staticRow.hasOwnProperty(key)) {
+          let obj = createObjectFromJSONPath(key, staticRow[key]);
+          extendObject(staticRowObject, obj);
+        }
+      }
+
+      // filter out everything that is not needed.
+      if (contentSource.filter) {
+        const filters = [];
+        if (contentSource.filter instanceof Array) {
+          filters.push(...contentSource.filter);
+        } else {
+          filters.push(contentSource.filter);
+        }
+
+        // for loop so i can break or return emmediatly
+        for (let j = 0; j < filters.length; j++) {
+          const filter = filters[j];
+          for (const key in filter) {
+            if (filter.hasOwnProperty(key) && staticRowObject[key] && staticRowObject[key] !== filter[key]) {
+              return;
+            }
+          }
+        }
+      }
+
+      // new content object with updated content from sheet
+      let content = extendObject({}, (config.settings.data.content || {}), staticRowObject)
+
+
+      // next 4 lines is reading existing richmediarc from the disk, updating the content object, and then writing the new file to disk again
+      const configFile = fs.readFileSync(config.settings.location, {encoding:'utf8', flag:'r'})
+      const configFileJson = JSON.parse(configFile);
+      configFileJson.content = content;
+      const newConfigFile = fs.writeFileSync(config.settings.location, Buffer.from(JSON.stringify(configFileJson)));
+
+    })
+
+    res.send('ok');
+
+  });
+
+
   app.post('/api/upload', (req, res) => {});
 
-  app.listen(port, () => {});
+  const server = app.listen(port, () => {});
 
   // eslint-disable-next-line
+  process.stdin.resume();//so the program will not close instantly
 
-  process.on('uncaughtException', e => {
-    // eslint-disable-next-line
-    console.log(e);
-    // app.close();
-  });
-  process.on('SIGTERM', () => app.close());
+  const doCleanup = () => {
+    configs.forEach(config => {
+      try {
+        if (config.settings.willBeDeletedAfterServerCloses) {
+          console.log('checking ' + config.settings.location)
+          const fileData = fs.readFileSync(config.settings.location, {encoding: 'utf8'});
+          const fileDataJson = JSON.parse(fileData);
+
+          if (config.settings.uniqueHash === fileDataJson.uniqueHash) {
+            console.log('valid. deleting ' + config.settings.location)
+            fs.unlinkSync(config.settings.location);
+          }
+        }
+
+      } catch (e) {
+        console.log(e);
+        console.log('Could not clean up file(s). Manual cleanup needed');
+      }
+    })
+  }
+
+  function exitHandler(options, exitCode) {
+    if (options.cleanup) doCleanup();
+    if (exitCode || exitCode === 0) console.log(exitCode);
+    if (options.exit) process.exit();
+  }
+
+  //do something when app is closing
+  process.on('exit', exitHandler.bind(null,{cleanup:true}));
+
+  //catches ctrl+c event
+  process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+
+  // catches "kill pid" (for example: nodemon restart)
+  process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
+  process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+
+  //catches uncaught exceptions
+  process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+
 };

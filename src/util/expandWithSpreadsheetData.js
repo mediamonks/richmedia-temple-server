@@ -4,6 +4,9 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const chalk = require('chalk');
 const extendObject = require('./extendObject');
 const createObjectFromJSONPath = require('./createObjectFromJSONPath');
+const fs = require('fs')
+const crypto = require('crypto')
+const getDataFromGoogleSpreadsheet = require("./getDataFromGoogleSpreadsheet");
 
 const cacheSpreadSheets = {};
 const cacheSheets = {};
@@ -54,58 +57,15 @@ module.exports = async function expandWithSpreadsheetData(configs) {
 
     if (data && data.settings && data.settings.contentSource) {
       const contentSource = data.settings.contentSource;
+      const spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
 
-      console.log(`${chalk.green('✔')} Detecting spreadsheet in ${location}`);
+      console.log(`${chalk.green('✔')} adding ${spreadsheetData.rows.length} items for development`);
 
-      if (!isGoogleSpreadsheetUrl(contentSource.url)) {
-        throw new Error('settings.contentSource.url is not a valid google spreadsheet url.');
-      }
-
-      // get data.
-      const id = getGoogleSheetIdFromUrl(contentSource.url);
-
-      if (!cacheSpreadSheets[id]) {
-        console.log(`${chalk.green('✔')} gathering google sheets data for ${id}`);
-        cacheSpreadSheets[id] = new GoogleSpreadsheet(id);
-        cacheSpreadSheets[id].useApiKey(contentSource.apiKey);
-        await cacheSpreadSheets[id].loadInfo();
-      }
-
-      const doc = cacheSpreadSheets[id];
-
-      let sheet;
-
-      if (contentSource.tabName) {
-        sheet = doc.sheetsByTitle[contentSource.tabName];
-
-        if (!sheet) {
-          console.log(
-            `${chalk.green(
-              '✔',
-            )} Selecting first tab from sheet because tabName was incorrectly named (check tabNames in spreadsheet).`,
-          );
-          sheet = doc.sheetsByIndex[0];
-        } else {
-          console.log(`${chalk.green('✔')} Selecting "${contentSource.tabName}" from sheet.`);
-        }
-      } else {
-        console.log(
-          `${chalk.green('✔')} Selecting first tab from sheet because tabName was not defined.`,
-        );
-        sheet = doc.sheetsByIndex[0];
-      }
-
-      const rows = await sheet.getRows();
-      const headerValues = sheet.headerValues;
-
-      console.log(`${chalk.green('✔')} adding ${rows.length} items for development`);
-
-      rows.forEach((row, index) => {
-        const staticRow = headerValues.reduce((prev, name) => {
+      spreadsheetData.rows.forEach((row, index) => {
+        const staticRow = spreadsheetData.headerValues.reduce((prev, name) => {
           prev[name] = row[name];
           return prev;
         }, {});
-
 
         let staticRowObject = {};
         for (const key in staticRow) {
@@ -114,9 +74,6 @@ module.exports = async function expandWithSpreadsheetData(configs) {
             extendObject(staticRowObject, obj);
           }
         }
-
-
-
 
         // filter out everything that is not needed.
         if (contentSource.filter) {
@@ -140,13 +97,22 @@ module.exports = async function expandWithSpreadsheetData(configs) {
 
         let content = extendObject({}, (data.content || {}), staticRowObject)
 
-        newConfigList.push({
+        let uniqueLocation = getUniqueLocation(location, contentSource, row, index);
+        const uniqueHash = crypto.randomBytes(20).toString('hex');
+
+        let newObj = {
           data: {
             ...data,
             content,
+            uniqueHash
           },
-          location: getUniqueLocation(location, contentSource, row, index),
-        });
+          location: uniqueLocation,
+          willBeDeletedAfterServerCloses: true,
+          row,
+          uniqueHash
+        };
+
+        newConfigList.push(newObj);
       });
     } else {
       newConfigList.push({ data, location });

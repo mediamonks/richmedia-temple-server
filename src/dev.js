@@ -7,6 +7,7 @@ const findJSONConfigs = require('./util/findRichmediaRC');
 const parsePlaceholdersInObject = require('./util/parsePlaceholdersInObject');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
+const fs = require('fs');
 
 module.exports = async function dev({ glob = './**/.richmediarc*', choices = null, stats = null }) {
   // test adding test
@@ -100,6 +101,14 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
       return choices.location.indexOf(location) > -1;
     });
   }
+
+  //if the richmediarc location doesn't actually exist, assume its a config derived from google spreadsheets, so we write one to disk
+  configsResult.forEach(config => {
+    if (!fs.existsSync(config.location)) {
+      const data = Buffer.from(JSON.stringify(config.data));
+      fs.writeFileSync(config.location, data);
+    }
+  })
 
   let list = await createConfigByRichmediarcList(configsResult, {
     mode: 'development',

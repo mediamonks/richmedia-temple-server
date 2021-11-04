@@ -7,8 +7,7 @@
 
   <title>Templates</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
-	<script>
+  <script>
 		/*!
 		* GSAP 3.5.1
 		* https://greensock.com
@@ -364,6 +363,16 @@
 			display: block;
 		}
 
+    .reload_btn {
+      position: absolute;
+      top: 10px;
+      left: 17px;
+      width: 38px;
+      height: 31px;
+      background-color: #000;
+      cursor: pointer;
+    }
+
   </style>
 
 <body>
@@ -372,6 +381,16 @@
 <div class="mdl-layout mdl-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
+
+      {{#if settings.isGoogleSpreadsheetBanner}}
+        <button class="reload_btn"></button>
+      {{/if}}
+
+<!--      <a class="reload_btn" href="reload/"></a>-->
+
+
+
+
       <!-- Title -->
       <span class="mdl-layout-title">
         Preview
@@ -477,6 +496,9 @@
 									<i class="material-icons">add_a_photo</i>
 								</a>
 							{{/if}}
+
+
+
 <!-- TODO
 							<a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect action-download" href="{{src}}" download="{{name}}.zip">
                 <i class="material-icons">download</i>
@@ -874,9 +896,20 @@
 		staggerCardAnimation();
 	}
 
+  {{#if settings.isGoogleSpreadsheetBanner}}
+    document.querySelector(".reload_btn").addEventListener('click', function (e) {
+      const xhttp = new XMLHttpRequest();
+      xhttp.open("GET", "reload_dynamic_data", true);
+      xhttp.send();
+
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          console.log('server response is', this.responseText);
+          location.reload();
+        }
+      };
+    })
+  {{/if}}
 </script>
-
-
-
 </body>
 </html>
