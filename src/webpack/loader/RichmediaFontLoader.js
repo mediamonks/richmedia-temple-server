@@ -1,18 +1,11 @@
 const loaderUtils = require('loader-utils');
 const subsetFont = require('subset-font');
 const getRichmediaRC = require('../../util/getRichmediaRC');
+const getObjectByString = require('../../util/getObjectByString');
 const path = require('path');
 const fs = require('fs-extra');
 const chalk = require('chalk');
 const get = require('lodash.get');
-
-function getPropertyValue(obj1, dataToRetrieve) {
-  return dataToRetrieve
-    .split('.') // split string based on `.`
-    .reduce(function(o, k) {
-      return o && o[k]; // get inner property if `o` is defined else get `o` and return
-    }, obj1); // set initial value as object
-}
 
 module.exports = async function(content) {
   const callback = this.async();
@@ -32,12 +25,15 @@ module.exports = async function(content) {
         if (!fs.existsSync(font)) console.warn(chalk.red("WARNING: " + font + " doesn't exist. Please check the path in .richmediarc"));
 
         if (font === this.resourcePath) {
-          const allContent = collection.subset.glyphs.reduce(
-            (acc, cur) => acc + get(config, cur),
-            '',
-          ); // basically concatenate all content found in the glyphs node
+          const allContent = collection.subset.glyphs.reduce(function(acc, cur) {
+              return acc + getObjectByString(config, cur)}
+            ,'');
+
+          // basically concatenate all content found in the glyphs node
+          const allContent_arr = allContent.split(''); //create array from it
+
           glyphs = allContent.split('').filter((value, index, self) => {
-            return self.indexOf(value) === index; // return array with only unique values
+            return self.indexOf(value) === index; //return array with only unique values
           });
         }
       }
