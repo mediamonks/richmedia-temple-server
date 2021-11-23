@@ -137,6 +137,14 @@ module.exports = async function build({
     configsResult = configs.filter(config => choices.build.indexOf(config.location) >= 0);
   }
 
+  //if the richmediarc location doesn't actually exist, assume its a config derived from google spreadsheets, so we write one to disk
+  configsResult.forEach(config => {
+    if (!fs.existsSync(config.location)) {
+      const data = Buffer.from(JSON.stringify(config.data));
+      fs.writeFileSync(config.location, data);
+    }
+  })
+
   const result = await createConfigByRichmediarcList(configsResult, {
     mode: 'production',
     stats: stats,
@@ -174,6 +182,26 @@ module.exports = async function build({
 
     .then(async () => {
       const template = await getTemplate();
+
+      console.log('Removing temp .richmediarc...')
+      configsResult.forEach(config => {
+        try {
+          if (config.willBeDeletedAfterServerCloses) {
+            console.log('checking ' + config.location)
+            const fileData = fs.readFileSync(config.location, {encoding: 'utf8'});
+            const fileDataJson = JSON.parse(fileData);
+
+            if (config.uniqueHash === fileDataJson.uniqueHash) {
+              console.log('valid. deleting ' + config.location)
+              fs.unlinkSync(config.location);
+            }
+          }
+
+        } catch (e) {
+          console.log(e);
+          console.log('Could not clean up file(s). Manual cleanup needed');
+        }
+      })
 
       const templateConfig = {
         banner: configsResult.map((richmediarc, index) => {
