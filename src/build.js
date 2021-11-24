@@ -29,6 +29,7 @@ module.exports = async function build({
                                         choices = {},
                                       }) {
   const buildTarget = './build';
+  const mode = 'production';
 
   const spinner = new Spinner('processing.. %s');
   spinner.setSpinnerString('/-\\|');
@@ -49,7 +50,7 @@ module.exports = async function build({
     }
   })
 
-  configs = await expandWithSpreadsheetData(configs);
+  configs = await expandWithSpreadsheetData(configs, mode);
 
   const bundleNames = [];
 
@@ -137,6 +138,8 @@ module.exports = async function build({
     configsResult = configs.filter(config => choices.build.indexOf(config.location) >= 0);
   }
 
+
+
   //if the richmediarc location doesn't actually exist, assume its a config derived from google spreadsheets, so we write one to disk
   configsResult.forEach(config => {
     if (!fs.existsSync(config.location)) {
@@ -146,7 +149,7 @@ module.exports = async function build({
   })
 
   const result = await createConfigByRichmediarcList(configsResult, {
-    mode: 'production',
+    mode,
     stats: stats,
   });
 
@@ -194,6 +197,8 @@ module.exports = async function build({
             if (config.uniqueHash === fileDataJson.uniqueHash) {
               console.log('valid. deleting ' + config.location)
               fs.unlinkSync(config.location);
+            } else {
+              console.log('not valid.')
             }
           }
 

@@ -11,7 +11,7 @@ const getDataFromGoogleSpreadsheet = require("./getDataFromGoogleSpreadsheet");
 const cacheSpreadSheets = {};
 const cacheSheets = {};
 
-module.exports = async function expandWithSpreadsheetData(configs) {
+module.exports = async function expandWithSpreadsheetData(configs, mode) {
   // add support for google sheets.
   // detect if contentSource is available in
   const newConfigList = [];
@@ -35,6 +35,10 @@ module.exports = async function expandWithSpreadsheetData(configs) {
    * @return {string}
    */
   const getUniqueLocation = (location, contentSource, row, index, offset = 0) => {
+    const locStringPt1 = location.substr(0, location.lastIndexOf('.'));
+    const locStringPt2 = location.substr(location.lastIndexOf('.'), location.length);
+    location = locStringPt1 + 'googlesheet'; // doing this to create a unique location
+
     if (contentSource.idField) {
       let name = `${location}.${row[contentSource.idField]}`;
 
@@ -109,7 +113,8 @@ module.exports = async function expandWithSpreadsheetData(configs) {
           location: uniqueLocation,
           willBeDeletedAfterServerCloses: true,
           row,
-          uniqueHash
+          uniqueHash,
+          mode
         };
 
         newConfigList.push(newObj);

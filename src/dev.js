@@ -9,12 +9,13 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const fs = require('fs');
 
-module.exports = async function dev({ glob = './**/.richmediarc*', choices = null, stats = null }) {
+module.exports = async function dev({glob = './**/.richmediarc*', choices = null, stats = null}) {
 
-    console.log(chalk.red('WARNING: SUPER BUGGY BETA. MAY CRASH YOUR COMPUTER'))
+  console.log(chalk.red('WARNING: SUPER BUGGY BETA. MAY CRASH YOUR COMPUTER'))
   // test adding test
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
+  const mode = 'development';
 
   let configs = await findJSONConfigs(glob, ['settings.entry.js', 'settings.entry.html']);
 
@@ -35,7 +36,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
     }
   });
 
-  configs = await expandWithSpreadsheetData(configs);
+  configs = await expandWithSpreadsheetData(configs, mode);
 
   // parse placeholders for everything
   configs.forEach(config => {
@@ -59,7 +60,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
           name: 'location',
           message: 'Please select config(s) build:',
           choices: [
-            { name: 'all', checked: false },
+            {name: 'all', checked: false},
             ...configs.map(config => {
               let name = config.location;
 
@@ -99,7 +100,7 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
   if (choices.location.indexOf('all') > -1) {
     configsResult = configs;
   } else {
-    configsResult = configs.filter(({ location }) => {
+    configsResult = configs.filter(({location}) => {
       return choices.location.indexOf(location) > -1;
     });
   }
@@ -113,10 +114,10 @@ module.exports = async function dev({ glob = './**/.richmediarc*', choices = nul
   })
 
   let list = await createConfigByRichmediarcList(configsResult, {
-    mode: 'development',
+    mode,
     stats: false,
   });
-
+  
   list = list.map((webpack, index) => {
     return {
       webpack,
