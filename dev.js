@@ -14,8 +14,10 @@ program
   .option('-c, --choices <data>', 'predetermined settings')
   .parse(process.argv);
 
+const options = program.opts();
+
 dev({
-  glob: program.glob,
-  stats: program.stats,
-  choices: program.choices ? JSON.parse(base64.decode(program.choices)) : null,
+  glob: options.glob,
+  stats: options.stats,
+  choices: options.choices ? JSON.parse(base64.decode(options.choices)) : null,
 }).then(r => console.log(`${chalk.green('✔')} done`));
