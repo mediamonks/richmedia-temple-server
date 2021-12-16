@@ -15,6 +15,7 @@ module.exports = async function expandWithSpreadsheetData(configs, mode) {
   // add support for google sheets.
   // detect if contentSource is available in
   const newConfigList = [];
+  let spreadsheetData = {};
 
   const hasSameLocation = location => {
     for (let i = 0; i < newConfigList.length; i++) {
@@ -61,9 +62,18 @@ module.exports = async function expandWithSpreadsheetData(configs, mode) {
 
     if (data && data.settings && data.settings.contentSource) {
       const contentSource = data.settings.contentSource;
-      const spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
 
-      console.log(`${chalk.green('✔')} adding ${spreadsheetData.rows.length} items for development`);
+      //check if spreadsheetData already exists
+      if (!spreadsheetData.hasOwnProperty('contentSource')) {
+        spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
+        spreadsheetData.contentSource = contentSource;
+      } else {
+        if (contentSource.url !== spreadsheetData.contentSource.url || contentSource.tabName !== spreadsheetData.contentSource.tabName) {
+          console.log(`${chalk.green('!')} Next spreadsheet has different URL / tabName. Refreshing data.`);
+          spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
+          spreadsheetData.contentSource = contentSource;
+        }
+      }
 
       spreadsheetData.rows.forEach((row, index) => {
         const staticRow = spreadsheetData.headerValues.reduce((prev, name) => {
@@ -79,7 +89,7 @@ module.exports = async function expandWithSpreadsheetData(configs, mode) {
           }
         }
 
-        // filter out everything that is not needed.
+        // check if the row data passes the filter. return if not
         if (contentSource.filter) {
           const filters = [];
           if (contentSource.filter instanceof Array) {
@@ -88,7 +98,7 @@ module.exports = async function expandWithSpreadsheetData(configs, mode) {
             filters.push(contentSource.filter);
           }
 
-          // for loop so i can break or return emmediatly
+          // for loop so i can break or return immediately
           for (let j = 0; j < filters.length; j++) {
             const filter = filters[j];
             for (const key in filter) {
@@ -123,6 +133,8 @@ module.exports = async function expandWithSpreadsheetData(configs, mode) {
       newConfigList.push({ data, location });
     }
   }
+
+  console.log(`${chalk.green('✔')} adding ${newConfigList.length} items for development`);
 
   return newConfigList;
 };
