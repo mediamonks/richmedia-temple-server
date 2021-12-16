@@ -171,10 +171,8 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     const contentSource = configs[0].settings.data.settings.contentSource;
     const spreadsheetData = await getDataFromGoogleSpreadsheet(contentSource);
 
-    configs.forEach(async config => {
-
+    configs.forEach(config => {
       let row = spreadsheetData.rows[config.settings.row.rowNumber-2]; //for example, row number 2 is array element 0
-      //let content = await getContentFromSpreadsheetRow(row);
 
       const staticRow = spreadsheetData.headerValues.reduce((prev, name) => {
         prev[name] = row[name];
@@ -190,12 +188,12 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       }
 
       // filter out everything that is not needed.
-      if (contentSource.filter) {
+      if (config.settings.data.settings.contentSource.filter) {
         const filters = [];
-        if (contentSource.filter instanceof Array) {
-          filters.push(...contentSource.filter);
+        if (config.settings.data.settings.contentSource.filter instanceof Array) {
+          filters.push(...config.settings.data.settings.contentSource.filter);
         } else {
-          filters.push(contentSource.filter);
+          filters.push(config.settings.data.settings.contentSource.filter);
         }
 
         // for loop so i can break or return emmediatly
@@ -212,17 +210,14 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       // new content object with updated content from sheet
       let content = extendObject({}, (config.settings.data.content || {}), staticRowObject)
 
-
       // next 4 lines is reading existing richmediarc from the disk, updating the content object, and then writing the new file to disk again
       const configFile = fs.readFileSync(config.settings.location, {encoding:'utf8', flag:'r'})
       const configFileJson = JSON.parse(configFile);
       configFileJson.content = content;
-      const newConfigFile = fs.writeFileSync(config.settings.location, Buffer.from(JSON.stringify(configFileJson)));
-
+      fs.writeFileSync(config.settings.location, Buffer.from(JSON.stringify(configFileJson)));
     })
 
     res.send('ok');
-
   });
 
 

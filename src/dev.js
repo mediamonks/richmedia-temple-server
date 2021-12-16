@@ -11,8 +11,6 @@ const fs = require('fs');
 
 module.exports = async function dev({glob = './**/.richmediarc*', choices = null, stats = null}) {
 
-  console.log(chalk.red('WARNING: SUPER BUGGY BETA. MAY CRASH YOUR COMPUTER'))
-  // test adding test
   // start with showing search message
   console.log(`${chalk.blue('i')} Searching for configs`);
   const mode = 'development';
@@ -117,7 +115,7 @@ module.exports = async function dev({glob = './**/.richmediarc*', choices = null
     mode,
     stats: false,
   });
-  
+
   list = list.map((webpack, index) => {
     return {
       webpack,
