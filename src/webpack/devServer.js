@@ -213,8 +213,11 @@ ${chalk.grey.bold('-------------------------------------------------------')}
       // next 4 lines is reading existing richmediarc from the disk, updating the content object, and then writing the new file to disk again
       const configFile = fs.readFileSync(config.settings.location, {encoding:'utf8', flag:'r'})
       const configFileJson = JSON.parse(configFile);
-      configFileJson.content = content;
-      fs.writeFileSync(config.settings.location, Buffer.from(JSON.stringify(configFileJson)));
+
+      if (!util.isDeepStrictEqual(configFileJson.content, content)) { //compare 'new' content with old content. If anything has changed, write a new file
+        configFileJson.content = content;
+        fs.writeFileSync(config.settings.location, Buffer.from(JSON.stringify(configFileJson)));
+      }
     })
 
     res.send('ok');
@@ -232,12 +235,12 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     configs.forEach(config => {
       try {
         if (config.settings.willBeDeletedAfterServerCloses) {
-          console.log('checking ' + config.settings.location)
+          //console.log('checking ' + config.settings.location)
           const fileData = fs.readFileSync(config.settings.location, {encoding: 'utf8'});
           const fileDataJson = JSON.parse(fileData);
 
           if (config.settings.uniqueHash === fileDataJson.uniqueHash) {
-            console.log('valid. deleting ' + config.settings.location)
+            //console.log('valid. deleting ' + config.settings.location)
             fs.unlinkSync(config.settings.location);
           }
         }
