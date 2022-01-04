@@ -517,7 +517,7 @@ module.exports = function createConfig({
   }
 
   if (richmediarc.settings.type === "adform") {
-
+    let clickTags = richmediarc.content.clickTags ? richmediarc.content.clickTags : {"clickTAG": "http://www.adform.com"};
     let obj = {
       "version": "1.0",
       "title": richmediarc.settings.bundleName || bundleName,
@@ -529,7 +529,7 @@ module.exports = function createConfig({
         "list": { }
       },
       "clicktags": {
-        "clickTAG": "http://www.adform.com"
+        ...clickTags
       },
       "source": "index.html"
     }
