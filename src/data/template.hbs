@@ -7,7 +7,27 @@
 
   <title>Templates</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <script>
+
+	<script type="text/javascript">
+		window.onload = function() {
+			const adsBlocked = document.getElementById('ads-blocked');
+			const btDisabled = document.getElementById('bt-disabled');
+
+			btDisabled.addEventListener("click", () => {adsBlocked.classList.add('hidden')}, false);
+
+			let simulateBannerAd = document.createElement("div");
+			simulateBannerAd.className = "textads banner-ads banner_ads ad-unit ad-zone ad-space adsbox"
+			simulateBannerAd.style.height = "1px"
+
+			document.body.appendChild(simulateBannerAd)
+
+			let width = simulateBannerAd.offsetHeight;
+
+			if (!width) adsBlocked.classList.remove('hidden');
+		}
+	</script>
+
+	<script>
 		/*!
 		* GSAP 3.5.1
 		* https://greensock.com
@@ -30,6 +50,108 @@
   </style>
 
   <style>
+	  /* ADBLOCK STYLING */
+	  .center {
+		/* height: 100%; */
+		padding: 0;
+		margin: 0;
+		display: -webkit-box;
+		display: -moz-box;
+		display: -ms-flexbox;
+		display: -webkit-flex;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		}
+		.adblock-wrapper {
+		background: rgba(0, 0, 0, 0.6);
+		width: 100vw;
+		height: 100vh;
+		position: fixed;
+		z-index: 99;
+		}
+		.adblock-content-wrapper {
+		box-shadow: 24px 24px 48px rgba(0, 0, 0, 0.4);
+		border-radius: 10px;
+		max-width: 400px;
+		background: #fff;
+		height: auto;
+		width: 100%;
+		}
+		.adblock-content {
+		padding: 30px 50px;
+		}
+		.adblock-close {
+		position: relative;
+		top: 0px;
+		float: right;
+		margin: -10px;
+		background: #fa3123;
+		color: #fff;
+		font-size: 20px;
+		padding: 2px 7px 2px;
+		border-radius: 50%;
+		font-weight: 700;
+		cursor: pointer;
+		}
+		.image-container {
+		width: 100px;
+		text-align: center;
+		margin-bottom: -20px;
+		}
+		.image-container .image h3 {
+		font-size: 30px;
+		font-weight: 700;
+		background: transparent;
+		border: 4px dotted rgba(250, 49, 35, 1);
+		border-radius: 50%;
+		text-align: center;
+		color: rgba(250, 49, 35, 1);
+		padding: 27px 0px;
+		font-family: inherit;
+		}
+		.image-container .image .fas {
+		float: right;
+		font-size: 20px;
+		margin: 0px 0px 0px -20px;
+		color: rgba(250, 49, 35, 1);
+		background: #fff;
+		border-radius: 50%;
+		padding: 5px 6px 5px 8px;
+		}
+		.adblock-text,
+		.adblock-text h3 {
+		text-align: center;
+		font-family: inherit;
+		font-weight: 700;
+		}
+		.adblock-text h3 {
+		font-size: 30px;
+		}
+		.adblock-text p {
+		margin: 20px auto;
+		font-weight: 500;
+		}
+		.adblock-button .btn {
+		line-height: 1em;
+		border-radius: 30px;
+		border: none;
+		padding: 15px 20px;
+		width: 100%;
+		background: #fa3123;
+		color: #fff;
+		transition: 0.2s;
+		border: 2px solid #fa3123;
+		cursor: pointer;
+		}
+		.adblock-button .btn:hover {
+		background: #fff;
+		color: #fa3123;
+		border: 2px solid #fa3123;
+		}
+		.hidden {
+		display: none;
+		}
 
 		/* GENERAL STYLING */
     body {
@@ -376,6 +498,38 @@
   </style>
 
 <body>
+
+<!-- Alert Adblock -->
+<div class='adblock-wrapper center hidden' id='ads-blocked'>
+<div class='adblock-content-wrapper'>
+	<div class='adblock-content'>
+	<div class='center'>
+		<div class='image-container'>
+		<div class='image'>
+			<i class="fas fa-exclamation-circle"></i>
+			<h3>
+			Ads
+			</h3>
+		</div>
+		</div>
+	</div>
+	<div class='adblock-text'>
+		<h3>
+		Please disable your Ad Blocker!
+		</h3>
+		<p>
+		We know ads are annoying but please bear with us here & disable your ad blocker!
+		</p>
+	</div>
+	<div class='adblock-button'>
+		<button class='btn' id="bt-disabled">
+		I've disabled my Ad Blocker!
+		</button>
+	</div>
+	</div>
+</div>
+</div>
+<!-- Alert Adblock -->
 
 <!-- Always shows a header, even in smaller screens. -->
 <div class="mdl-layout mdl-layout mdl-layout--fixed-header">
