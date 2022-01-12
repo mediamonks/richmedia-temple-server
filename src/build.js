@@ -238,6 +238,16 @@ module.exports = async function build({
         }),
       };
 
+      // move static files to folder
+      await fs.mkdir('./build/static/');
+      const staticPreviewFiles = ['gsap.min.js', 'main.js', 'material-design.css', 'material-design.js', 'style.css'];
+      await staticPreviewFiles.forEach(filename => {
+        fs.copyFile(path.join(__dirname, 'data/static/')+filename, './build/static/'+filename, (err) => {
+          if (err) throw err;
+        });
+      });
+
+      //return built index.html
       return fs.outputFile('./build/index.html', template(templateConfig));
     })
     .then(() => {

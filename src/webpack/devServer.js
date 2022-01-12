@@ -90,6 +90,7 @@ ${chalk.grey.bold('-------------------------------------------------------')}
     // app.use(webpackHotMiddleware(compiler, {
     //   path: `/${getNameFromSettings(settingsList[index])}/__webpack_hmr`
     // }));
+    app.use('/static', express.static(path.join(__dirname, '../data/static')));
   });
 
   app.get('/', (req, res) => {
