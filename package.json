@@ -121,7 +121,7 @@
     "lodash.get": "^4.4.2",
     "md5-file": "^4.0.0",
     "mini-css-extract-plugin": "^0.5.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "opener": "^1.5.1",
     "parse5": "^6.0.1",
     "portfinder": "^1.0.28",
